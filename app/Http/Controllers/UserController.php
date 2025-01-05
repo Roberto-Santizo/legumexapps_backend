@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateUserRequest;
 use App\Models\User;
 use App\Http\Resources\UserCollection;
+use Spatie\Permission\Models\Permission;
 
 class UserController extends Controller
 {
@@ -23,7 +24,12 @@ class UserController extends Controller
             'username' => $data['username'],
             'password' => bcrypt($data['password']),
             'status' => 1
-        ]);
+        ])->assignRole($data['roles']);
+
+        foreach ($data['permissions'] as $permission_id) {
+            $permission = Permission::find($permission_id);
+            $user->givePermissionTo($permission);
+        }
 
         return  response()->json([
             'user' => $user,

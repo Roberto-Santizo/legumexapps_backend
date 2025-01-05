@@ -33,7 +33,9 @@ class CreateUserRequest extends FormRequest
                     ->letters()
                     ->numbers()
                     ->symbols()
-            ]
+            ],
+            "permissions" => ['required'],
+            "roles" => ['required']
         ];
     }
 
@@ -43,6 +45,8 @@ class CreateUserRequest extends FormRequest
             'username.unique' => 'El nombre de usuario ya existe',
             'password' => 'La contraseña no es válida',
             'email.unique' => 'El correo electrónico ya existe',
+            'permissions' => 'Debe de asignar por lo menos un permiso',
+            'roles' => 'Debe de tener por lo menos un rol'
         ];
     }
 }
