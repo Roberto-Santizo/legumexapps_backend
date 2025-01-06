@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateRoleRequest as RequestsCreateRoleRequest;
+use App\Http\Resources\CreateRoleRequest;
 use App\Http\Resources\RoleCollection;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;

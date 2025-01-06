@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreatePermissionRequest;
 use App\Http\Resources\PermissionCollection;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
@@ -17,19 +18,19 @@ class PermissionController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CreatePermissionRequest $request)
     {
-        //
+        $data = $request->validated();
+        
+        $permiso = Permission::create([
+            'name' => $data['name']
+        ]);
+
+        return response()->json([
+            'permiso' => $permiso
+        ]);
     }
 
     /**
