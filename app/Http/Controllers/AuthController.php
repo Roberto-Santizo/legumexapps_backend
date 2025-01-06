@@ -23,6 +23,7 @@ class AuthController extends Controller
 
         $user = Auth::user()->load(['roles:id,name', 'permissions:id,name']); 
 
+        $role = $user->getRoleNames()->first();
         return response()->json([
             'token' => $user->createToken('token')->plainTextToken,
             'user' => [
@@ -31,12 +32,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'username' => $user->username,
                 'status' => $user->status,
-                'roles' => $user->roles->map(function($role){
-                    return [
-                        'id' => $role->id,
-                        'name' => $role->name,
-                    ];
-                }),
+                'roles' => $role,
                 'permissions' => $user->permissions->map(function($permission){
                     return [
                         'id' => $permission->id,
