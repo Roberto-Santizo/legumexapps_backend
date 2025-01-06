@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateUserRequest;
 use App\Models\User;
 use App\Http\Resources\UserCollection;
+use App\Http\Resources\UserResource;
 use Spatie\Permission\Models\Permission;
 
 class UserController extends Controller
@@ -35,5 +36,12 @@ class UserController extends Controller
             'user' => $user,
             'message' => 'Usuario creado correctamente'
         ]);
+    }
+
+    public function user(User $user)
+    {
+        $user->with(['roles', 'permissions']);
+
+        return new UserResource($user);
     }
 }

@@ -14,7 +14,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
     
+    //USUARIO
     Route::apiResource('/users', UserController::class);
+    Route::get('/users/{user}',[UserController::class,'user']);
+
     Route::apiResource('/roles',RoleController::class);
     Route::apiResource('/permissions',PermissionController::class);
 });
