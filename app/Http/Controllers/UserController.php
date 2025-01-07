@@ -40,7 +40,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function user(User $user)
+    public function show(User $user)
     {
         $user->with(['roles', 'permissions']);
 
@@ -53,24 +53,32 @@ class UserController extends Controller
 
         if (!$request->filled('password')) {
             $datos['password'] = $user->password;
-        }else{
+        } else {
             $datos['password'] = bcrypt($datos['password']);
         }
 
-        
-        $user->removeRole($user->roles->first()); 
+
+        $user->removeRole($user->roles->first());
         $user->revokePermissionTo($user->permissions);
-        
+
         $user->update($datos);
         $user->assignRole($datos['roles']);
-        
+
         foreach ($datos['permissions'] as $permission_id) {
             $permission = Permission::find($permission_id);
             $user->givePermissionTo($permission);
         }
-        
+
         $user->with(['roles', 'permissions']);
-        
+
         return new UserResource($user);
+    }
+
+    public function updateStatus(Request $request, User $user)
+    {
+        $user->status = ($user->status === 0) ? 1 : 0;
+        $user->save();
+
+        return new UserCollection(User::with('roles')->with('permissions')->get());
     }
 }

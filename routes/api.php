@@ -16,19 +16,12 @@ Route::middleware('auth:sanctum')->group(function () {
     
     //USUARIO
     Route::apiResource('/users', UserController::class);
-    // Route::put('/users',[UserController::class,'update']);
+    Route::patch('/users/{user}/status', [UserController::class, 'updateStatus']);
 
-    Route::get('/users/{user}',[UserController::class,'user']);
 
     Route::apiResource('/roles',RoleController::class);
     Route::apiResource('/permissions',PermissionController::class);
 });
-
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
-
 
 
 //Autenticación
