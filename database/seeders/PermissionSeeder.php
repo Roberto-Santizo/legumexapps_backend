@@ -12,8 +12,6 @@ class PermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        Permission::create(['name' => 'create ot']);
-        Permission::create(['name' => 'create documentocp']);
-        Permission::create(['name' => 'create documentold']);
+        Permission::create(['name' => 'admin']);
     }
 }

@@ -26,7 +26,8 @@ class RoleController extends Controller
         $data = $request->validated();
 
         $role = Role::create([
-            'name'=> $data['name']
+            'name'=> $data['name'],
+            'guard_name' => 'web'
         ]);
 
         return response()->json([

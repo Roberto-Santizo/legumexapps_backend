@@ -25,7 +25,8 @@ class PermissionController extends Controller
         $data = $request->validated();
         
         $permiso = Permission::create([
-            'name' => $data['name']
+            'name' => $data['name'],
+            'guard_name' => 'web'
         ]);
 
         return response()->json([
