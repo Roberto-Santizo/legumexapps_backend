@@ -16,6 +16,8 @@ Route::middleware('auth:sanctum')->group(function () {
     
     //USUARIO
     Route::apiResource('/users', UserController::class);
+    // Route::put('/users',[UserController::class,'update']);
+
     Route::get('/users/{user}',[UserController::class,'user']);
 
     Route::apiResource('/roles',RoleController::class);
