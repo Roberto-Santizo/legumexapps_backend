@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LoteController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TareaController;
@@ -23,6 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/roles',RoleController::class);
     Route::apiResource('/permissions',PermissionController::class);
     Route::apiResource('/tareas', TareaController::class);
+    Route::apiResource('/lotes', LoteController::class);
 });
 
 
