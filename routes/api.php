@@ -1,8 +1,11 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CDPController;
+use App\Http\Controllers\CropController;
 use App\Http\Controllers\LoteController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TareaController;
 use App\Http\Controllers\UserController;
@@ -24,8 +27,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/roles',RoleController::class);
     Route::apiResource('/permissions',PermissionController::class);
     Route::apiResource('/tareas', TareaController::class);
+    Route::apiResource('cdps',CDPController::class);
+    Route::apiResource('/recipes',RecipeController::class);
+    Route::apiResource('/crops',CropController::class);
     Route::apiResource('/lotes', LoteController::class);
 });
+
 
 
 //Autenticación

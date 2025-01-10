@@ -2,19 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\LoteCollection;
-use App\Http\Resources\LoteResource;
-use App\Models\Lote;
+use App\Http\Resources\RecipeCollection;
+use App\Models\Recipe;
 use Illuminate\Http\Request;
 
-class LoteController extends Controller
+class RecipeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return new LoteCollection(Lote::all());
+        return new RecipeCollection(Recipe::all());
     }
 
     /**

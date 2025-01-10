@@ -2,19 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\LoteCollection;
-use App\Http\Resources\LoteResource;
-use App\Models\Lote;
+use App\Http\Resources\PlantationControlCollection;
+use App\Models\PlantationControl;
 use Illuminate\Http\Request;
 
-class LoteController extends Controller
+class CDPController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return new LoteCollection(Lote::all());
+        return new PlantationControlCollection(PlantationControl::all());
     }
 
     /**

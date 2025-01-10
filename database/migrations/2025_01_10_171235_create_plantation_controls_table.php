@@ -19,7 +19,7 @@ return new class extends Migration
             $table->float('density');
             $table->string('size');
             $table->datetime('start_date');
-            $table->datetime('end_data');
+            $table->datetime('end_date')->nullable();
             $table->timestamps();
         });
     }
