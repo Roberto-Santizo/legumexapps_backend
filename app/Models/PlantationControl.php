@@ -16,6 +16,11 @@ class PlantationControl extends Model
         'end_date'
     ];
 
+    protected $casts = [
+        'start_date' => 'datetime',
+        'end_date' => 'datetime'
+    ];
+
     public function crop()
     {
         return $this->belongsTo(Crop::class);
