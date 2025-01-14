@@ -10,6 +10,7 @@ use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TareaController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WeeklyPlanController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/crops',CropController::class);
     Route::apiResource('/lotes', LoteController::class);
     Route::apiResource('/fincas',FincaController::class);
+    Route::apiResource('/plans',WeeklyPlanController::class);
 });
 
 
