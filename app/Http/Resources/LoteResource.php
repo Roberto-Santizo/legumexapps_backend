@@ -18,7 +18,7 @@ class LoteResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'finca' => $this->finca->name,
-            'cdp' => $this->finca->cdp,
+            'cdp' => $this->cdp->cdp->name,
             'finca' => $this->finca->name
         ];
     }

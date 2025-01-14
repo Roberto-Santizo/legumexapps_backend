@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateLoteRequest;
 use App\Http\Resources\LoteCollection;
-use App\Http\Resources\LoteResource;
 use App\Models\Lote;
+use App\Models\LotePlantationControl;
+use App\Models\PlantationControl;
 use Illuminate\Http\Request;
 
 class LoteController extends Controller
@@ -20,9 +22,25 @@ class LoteController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CreateLoteRequest $request)
     {
-        //
+        $data = $request->validated();
+        
+        $lote = Lote::create([
+            'name' => $data['name'],
+            'finca_id' => $data['finca_id']
+        ]);
+
+        $lote_cdp = LotePlantationControl::create([
+            'lote_id' => $lote->id,
+            'plantation_controls_id' => $data['cdp_id'],
+            'status' => 1
+        ]);
+
+        return response()->json([
+            'lote' => $lote,
+            'lote_cdp' => $lote_cdp
+        ]);
     }
 
     /**

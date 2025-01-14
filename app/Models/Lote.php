@@ -18,6 +18,6 @@ class Lote extends Model
 
     public function cdp()
     {
-        return $this->hasMany(LotePlantationControl::class)->where('status',1);
+        return $this->hasOne(LotePlantationControl::class,'lote_id','id')->where('status',1);
     }
 }
