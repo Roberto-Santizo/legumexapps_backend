@@ -14,16 +14,31 @@ class WeeklyPlanResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-       return [
+
+        //TAREAS
+        $total_budget = $this->tasks->sum('budget');
+        $used_budget = $this->tasks()->whereNot('end_date')->sum('budget');
+
+        //TAREAS EXTRAORDINARIAS
+        $total_budget_ext = $this->tasks()->where('extraordinary', 0)->sum('budget');
+        $used_total_budget_ext = $this->tasks()->where('extraordinary', 0)->whereNot('end_date')->sum('budget');
+
+        //TASKS
+        $total_tasks = $this->tasks->count();
+        $finished_total_tasks = $this->tasks()->whereNot('end_date')->count();
+        return [
             'id' => strval($this->id),
             'year' => $this->year,
             'week' => $this->week,
             'finca' => $this->finca->name,
             'created_at' => $this->created_at->format('d-m-Y'),
-            'budget' => 'Q10/Q100',
-            'budget_ext' => 'Q1/Q10',
-            'tasks' => '1/1',
+            'total_budget' => $total_budget,
+            'used_budget' => $used_budget,
+            'total_budget_ext' => $total_budget_ext,
+            'used_total_budget_ext' => $used_total_budget_ext,
+            'total_tasks' => $total_tasks,
+            'finished_total_tasks' => $finished_total_tasks,
             'tasks_crop' => '0/0',
-       ];
+        ];
     }
 }

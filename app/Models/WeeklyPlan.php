@@ -17,4 +17,9 @@ class WeeklyPlan extends Model
     {
         return $this->belongsTo(Finca::class);
     }
+
+    public function tasks() 
+    {
+        return  $this->hasMany(TaskWeeklyPlan::class);
+    }
 }

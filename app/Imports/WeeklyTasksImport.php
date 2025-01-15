@@ -2,7 +2,11 @@
 
 namespace App\Imports;
 
+use App\Models\Tarea;
+use Illuminate\Support\Carbon;
 use App\Models\Finca;
+use App\Models\Lote;
+use App\Models\TaskWeeklyPlan;
 use App\Models\WeeklyPlan;
 use Exception;
 use Illuminate\Support\Collection;
@@ -11,15 +15,18 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class WeeklyTasksImport implements ToCollection, WithHeadingRow
 {
-    /**
-     * @param Collection $collection
-     */
+    private $tareasMap;
     private $weeklyPlans = [];
     private $fincas;
+    private $tasks;
+    private $tareasCosechas;
 
-    public function __construct()
+    public function __construct(&$tareasMap)
     {
+        $this->tareasMap = &$tareasMap;
         $this->fincas = Finca::all()->keyBy('code');
+        $this->tasks = Tarea::all()->keyBy('code');
+        // $this->tareasCosechas = TareaCosecha::all()->keyBy('code');
     }
 
     public function collection(Collection $rows)
@@ -28,9 +35,48 @@ class WeeklyTasksImport implements ToCollection, WithHeadingRow
             if (empty($row['id'])) {
                 return null;
             }
-            $finca = $this->fincas[$row['finca']] ?? null;
-            $this->getOrCreatePlanSemanal($finca->code, $row['numero_de_semana'], $row['year']);
+            $fechaSemanaActual = Carbon::now();
+            $fechaSemanaImportada = Carbon::now()->setISODate($row['year'], $row['numero_de_semana']);
+            try {
+                $finca = $this->fincas[$row['finca']] ?? null;
+                if (!$finca) {
+                    throw new Exception("Finca con código {$row['finca']} no encontrada.");
+                }
+
+                if ($fechaSemanaImportada->isBefore($fechaSemanaActual)) {
+                    throw new Exception("La semana indicada es anterior a la semana actual.");
+                }
+
+                $lote = Lote::where('name', $row['lote'])->where('finca_id', $finca->id)->first();
+                $task = $this->tasks[$row['tarea']];
+                // ?? $this->tareasCosechas[$row['tarea']]
+                $weeklyplan = $this->getOrCreatePlanSemanal($finca->code, $row['numero_de_semana'], $row['year']);
+                if ($task instanceof Tarea) {
+                   $tareaLote = TaskWeeklyPlan::create([
+                        'weekly_plan_id' => $weeklyplan->id,
+                        'lote_plantation_control_id' => $lote->cdp->id,
+                        'tarea_id' => $task->id,
+                        'workers_quantity' => max(1, floor($row['horas'] / 8)),
+                        'budget' => round($row['presupuesto'], 2),
+                        'hours' => round($row['horas'], 2),
+                        'slots' => max(1, floor($row['horas'] / 8)),
+                        'extraordinary' => false
+                    ]);
+                
+                }else{
+                    // $tareaLote = TareaLoteCosecha::create([
+                    //     'plan_semanal_finca_id' => $planSemanal->id,
+                    //     'lote_id' => $lote->id,
+                    //     'tarea_cosecha_id' => $tarea->id,
+                    // ]);
+                }
+    
+                $this->tareasMap[$row['id']] = $tareaLote->id;
+            } catch (\Throwable $th) {
+                throw new Exception($th->getMessage());
+            }
         }
+
     }
 
     private function getOrCreatePlanSemanal($finca, $numeroSemana, $anio)

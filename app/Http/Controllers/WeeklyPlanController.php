@@ -34,9 +34,9 @@ class WeeklyPlanController extends Controller
             return response()->json([
                 'message' => 'Plan Creado Correctamente'
             ]);
-        } catch (Exception $th) {
+        } catch (\Throwable  $th) {
             return response()->json([
-                'message' => 'Hubo un error al crear el plan semanal'
+                'message' => $th->getMessage()
             ],500);
         }
     }
@@ -46,7 +46,10 @@ class WeeklyPlanController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $plan = WeeklyPlan::find($id);
+        return response()->json([
+            'data' => $plan
+        ]);
     }
 
     /**
