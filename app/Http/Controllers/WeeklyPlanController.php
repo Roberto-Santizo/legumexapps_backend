@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\WeeklyPlanCollection;
+use App\Imports\WeeklyPlanImport;
 use App\Models\WeeklyPlan;
+use Exception;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class WeeklyPlanController extends Controller
 {
@@ -21,7 +24,21 @@ class WeeklyPlanController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv'
+        ]);
+
+        try {
+            Excel::import(new WeeklyPlanImport, $request->file('file'));
+
+            return response()->json([
+                'message' => 'Plan Creado Correctamente'
+            ]);
+        } catch (Exception $th) {
+            return response()->json([
+                'message' => 'Hubo un error al crear el plan semanal'
+            ],500);
+        }
     }
 
     /**
