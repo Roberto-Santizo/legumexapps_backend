@@ -9,6 +9,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TareaController;
+use App\Http\Controllers\TasksLoteController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WeeklyPlanController;
 use Illuminate\Http\Request;
@@ -35,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/lotes', LoteController::class);
     Route::apiResource('/fincas',FincaController::class);
     Route::apiResource('/plans',WeeklyPlanController::class);
+    Route::apiResource('/tasks-lotes',TasksLoteController::class);
 });
 
 

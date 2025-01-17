@@ -17,4 +17,9 @@ class LotePlantationControl extends Model
     {
         return $this->belongsTo(PlantationControl::class,'plantation_controls_id','id');
     }
+
+    public function lote()
+    {
+        return $this->belongsTo(Lote::class);
+    }
 }
