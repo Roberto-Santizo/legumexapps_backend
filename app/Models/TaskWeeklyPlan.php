@@ -39,4 +39,9 @@ class TaskWeeklyPlan extends Model
     {
         return $this->belongsTo(LotePlantationControl::class,'lote_plantation_control_id','id');
     }
+
+    public function closures()
+    {
+        return $this->hasMany(PartialClosure::class,'task_weekly_plan_id','id');
+    }
 }

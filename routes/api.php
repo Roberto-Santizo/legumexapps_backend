@@ -36,7 +36,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/lotes', LoteController::class);
     Route::apiResource('/fincas',FincaController::class);
     Route::apiResource('/plans',WeeklyPlanController::class);
+
+
     Route::apiResource('/tasks-lotes',TasksLoteController::class);
+    Route::patch('/tasks-lotes/partial-close/{id}', [TasksLoteController::class, 'PartialClose']);
 });
 
 
