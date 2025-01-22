@@ -44,15 +44,19 @@ class TasksLoteController extends Controller
      */
     public function show(string $id)
     {
-        $data = TaskWeeklyPlan::where('lote_plantation_control_id', $id)->get();
+        $data = TaskWeeklyPlan::find($id);
 
-        return [
-            'week' => $data->first()->plan->week,
-            'finca' => $data->first()->plan->finca->name,
-            'data' => TaskWeeklyPlanResource::collection($data),
-        ];
-  
+        if (!$data) {
+            return response()->json([
+                'message' => 'TaskWeeklyPlan not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => new TaskWeeklyPlanResource($data)
+        ]);
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -81,6 +85,20 @@ class TasksLoteController extends Controller
 
         return response()->json([
             'data' => $partial
+        ]);
+    }
+
+    public function PartialCloseOpen(string $id)
+    {
+        $task = TaskWeeklyPlan::find($id);
+        
+        $registro = $task->closures->last();
+        $registro->update([
+            'end_date' => Carbon::now(),
+        ]);
+
+        return response()->json([
+            'data' => $registro 
         ]);
     }
 }

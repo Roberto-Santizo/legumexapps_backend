@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CDPController;
 use App\Http\Controllers\CropController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\FincaController;
 use App\Http\Controllers\LoteController;
 use App\Http\Controllers\PermissionController;
@@ -39,7 +40,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::apiResource('/tasks-lotes',TasksLoteController::class);
-    Route::patch('/tasks-lotes/partial-close/{id}', [TasksLoteController::class, 'PartialClose']);
+    Route::patch('/tasks-lotes/partial-close/close/{id}', [TasksLoteController::class, 'PartialClose']);
+    Route::patch('/tasks-lotes/partial-close/open/{id}', [TasksLoteController::class, 'PartialCloseOpen']);
+
+    Route::apiResource('/employees',EmployeeController::class);
 });
 
 
