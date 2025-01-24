@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\EditTaskWeeklyPlanRequest;
 use App\Http\Resources\TaskLoteResource;
 use App\Http\Resources\TaskWeeklyPlanDetailsCollection;
 use App\Http\Resources\TaskWeeklyPlanDetailsResource;
@@ -122,6 +123,35 @@ class TasksLoteController extends Controller
 
         return response()->json([
             'message' => 'Task Deleted'
+        ]);
+    }
+
+    public function update(EditTaskWeeklyPlanRequest $request, string $id){
+        $data = $request->validated();
+        $task = TaskWeeklyPlan::find($id);
+
+        if($task->start_date){
+            $draft_start_date = $data['start_date'] . ' ' . $data['start_time'];
+            $start_date = Carbon::parse($draft_start_date);
+        }
+
+        if($task->end_date){
+            $draft_end_date = $data['end_date'] . ' ' . $data['end_time'];
+            $end_date = Carbon::parse($draft_end_date);
+        }
+       
+      
+
+        $task->budget = $data['budget'];
+        $task->start_date = $start_date ?? null;
+        $task->end_date = $end_date ?? null;
+        $task->hours = $data['hours'];
+        $task->weekly_plan_id = $data['weekly_plan_id'];
+        $task->save();
+  
+        return response()->json([
+            'message' => 'Task Updated Successfully',
+            'data' => $task
         ]);
     }
 
