@@ -20,8 +20,8 @@ class WeeklyPlanResource extends JsonResource
         $used_budget = $this->tasks()->whereNot('end_date')->sum('budget');
 
         //TAREAS EXTRAORDINARIAS
-        $total_budget_ext = $this->tasks()->where('extraordinary', 0)->sum('budget');
-        $used_total_budget_ext = $this->tasks()->where('extraordinary', 0)->whereNot('end_date')->sum('budget');
+        $total_budget_ext = $this->tasks()->where('extraordinary', 1)->sum('budget');
+        $used_total_budget_ext = $this->tasks()->where('extraordinary', 1)->whereNot('end_date')->sum('budget');
 
         //TASKS
         $total_tasks = $this->tasks->count();

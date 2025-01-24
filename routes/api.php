@@ -12,6 +12,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TareaController;
 use App\Http\Controllers\TasksLoteController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UsersController;
 use App\Http\Controllers\WeeklyPlanController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -23,13 +24,21 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
     
-    //USUARIO
-    Route::apiResource('/users', UserController::class);
-    Route::patch('/users/{user}/status', [UserController::class, 'updateStatus']);
+    //USUARIOS
+    Route::apiResource('/users', UsersController::class);
+    Route::patch('/users/{user}/status', [UsersController::class, 'updateStatus']);
 
+    //USER
+    Route::apiResource('/user',UserController::class);
 
-    Route::apiResource('/roles',RoleController::class);
+    //PERMISOS
+    Route::get('/permissions/user',[PermissionController::class,'userPermissions']);
     Route::apiResource('/permissions',PermissionController::class);
+    
+    //ROLES
+    Route::get('/roles/user',[RoleController::class,'userRoles']);
+    Route::apiResource('/roles',RoleController::class);
+
     Route::apiResource('/tareas', TareaController::class);
     Route::apiResource('cdps',CDPController::class);
     Route::apiResource('/recipes',RecipeController::class);
@@ -40,8 +49,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::apiResource('/tasks-lotes',TasksLoteController::class);
+    Route::get('/tasks-lotes/{id}/details',[TasksLoteController::class,'TaskDetail']);
+    Route::post('/tasks-lotes/close-assignment/{id}', [TasksLoteController::class, 'CloseAssigment']);
+    Route::patch('/tasks-lotes/close/{id}',[TasksLoteController::class, 'CloseTask']);
     Route::patch('/tasks-lotes/partial-close/close/{id}', [TasksLoteController::class, 'PartialClose']);
     Route::patch('/tasks-lotes/partial-close/open/{id}', [TasksLoteController::class, 'PartialCloseOpen']);
+    Route::delete('/tasks-lotes/erase/{id}',[TasksLoteController::class, 'EraseAssignationTask']);
 
     Route::apiResource('/employees',EmployeeController::class);
 });

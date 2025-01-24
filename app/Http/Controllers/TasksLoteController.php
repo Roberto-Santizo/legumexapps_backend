@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\TaskLoteResource;
+use App\Http\Resources\TaskWeeklyPlanDetailsCollection;
+use App\Http\Resources\TaskWeeklyPlanDetailsResource;
 use App\Http\Resources\TaskWeeklyPlanResource;
+use App\Models\EmployeeTask;
 use App\Models\PartialClosure;
 use App\Models\TaskWeeklyPlan;
 use Carbon\Carbon;
@@ -31,17 +34,6 @@ class TasksLoteController extends Controller
         
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         $data = TaskWeeklyPlan::find($id);
@@ -55,23 +47,6 @@ class TasksLoteController extends Controller
         return response()->json([
             'data' => new TaskWeeklyPlanResource($data)
         ]);
-    }
-
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 
     public function PartialClose(string $id)
@@ -99,6 +74,66 @@ class TasksLoteController extends Controller
 
         return response()->json([
             'data' => $registro 
+        ]);
+    }
+
+    public function CloseAssigment(Request $request , string $id)
+    {
+        $task = TaskWeeklyPlan::find($id);
+        $task->start_date = Carbon::now();
+        $task->save();
+
+        $data = $request->input('data');
+
+        foreach ($data as $item) {
+            EmployeeTask::create([
+                'task_weekly_plan_id' => $task->id,
+                'employee_id' => $item['emp_id'],
+                'code' => $item['code'],
+                'name' => $item['name'],
+            ]);
+        }
+
+        
+        return response()->json([
+            'message' => 'Assignment closed'
+        ]);
+    }
+
+    public function TaskDetail(string $id){
+        $task = TaskWeeklyPlan::find($id);
+
+       return new TaskWeeklyPlanDetailsResource($task);
+    }
+
+    public function CloseTask(string $id){
+        $task = TaskWeeklyPlan::find($id);
+
+        $task->end_date = Carbon::now();
+        $task->save();
+        return response()->json([
+            'data' => $task
+        ]);
+    }
+
+    public function destroy(string $id){
+        $task = TaskWeeklyPlan::find($id);
+        $task->delete();
+
+        return response()->json([
+            'message' => 'Task Deleted'
+        ]);
+    }
+
+    public function EraseAssignationTask(string $id){
+        $task = TaskWeeklyPlan::find($id);
+        $task->start_date = null;
+        $task->end_date=null;
+        $task->employees()->delete();
+        $task->save();
+
+        return response()->json([
+            'message' => 'Task Cleaned'
         ]);
     }
 }

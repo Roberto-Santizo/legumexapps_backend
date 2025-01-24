@@ -6,6 +6,7 @@ use App\Http\Requests\CreateRoleRequest as RequestsCreateRoleRequest;
 use App\Http\Resources\CreateRoleRequest;
 use App\Http\Resources\RoleCollection;
 use Illuminate\Http\Request;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx\Rels;
 use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
@@ -35,35 +36,12 @@ class RoleController extends Controller
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function userRoles(Request $request)
     {
-        //
-    }
+        $user = $request->user();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json([
+            'name'=> $user->getRoleNames()->first()
+        ]);
     }
 }
