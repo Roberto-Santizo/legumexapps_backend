@@ -6,6 +6,8 @@ use App\Models\Tarea;
 use Illuminate\Support\Carbon;
 use App\Models\Finca;
 use App\Models\Lote;
+use App\Models\TaskCrop;
+use App\Models\TaskCropWeeklyPlan;
 use App\Models\TaskWeeklyPlan;
 use App\Models\WeeklyPlan;
 use Exception;
@@ -19,14 +21,14 @@ class WeeklyTasksImport implements ToCollection, WithHeadingRow
     private $weeklyPlans = [];
     private $fincas;
     private $tasks;
-    private $tareasCosechas;
+    private $tasksCrop;
 
     public function __construct(&$tareasMap)
     {
         $this->tareasMap = &$tareasMap;
         $this->fincas = Finca::all()->keyBy('code');
         $this->tasks = Tarea::all()->keyBy('code');
-        // $this->tareasCosechas = TareaCosecha::all()->keyBy('code');
+        $this->tasksCrop = TaskCrop::all()->keyBy('code');
     }
 
     public function collection(Collection $rows)
@@ -48,11 +50,10 @@ class WeeklyTasksImport implements ToCollection, WithHeadingRow
                 }
 
                 $lote = Lote::where('name', $row['lote'])->where('finca_id', $finca->id)->first();
-                $task = $this->tasks[$row['tarea']];
-                // ?? $this->tareasCosechas[$row['tarea']]
+                $task = $this->tasks[$row['tarea']] ?? $this->tasksCrop[$row['tarea']];
                 $weeklyplan = $this->getOrCreatePlanSemanal($finca->code, $row['numero_de_semana'], $row['year']);
                 if ($task instanceof Tarea) {
-                   $tareaLote = TaskWeeklyPlan::create([
+                   $task = TaskWeeklyPlan::create([
                         'weekly_plan_id' => $weeklyplan->id,
                         'lote_plantation_control_id' => $lote->cdp->id,
                         'tarea_id' => $task->id,
@@ -64,14 +65,15 @@ class WeeklyTasksImport implements ToCollection, WithHeadingRow
                     ]);
                 
                 }else{
-                    // $tareaLote = TareaLoteCosecha::create([
-                    //     'plan_semanal_finca_id' => $planSemanal->id,
-                    //     'lote_id' => $lote->id,
-                    //     'tarea_cosecha_id' => $tarea->id,
-                    // ]);
+                    $task = TaskCropWeeklyPlan::create([
+                        'weekly_plan_id' => $weeklyplan->id,
+                        'lote_id' => $lote->id,
+                        'lote_plantation_control_id' => $lote->cdp->id,
+                        'task_crop_id' => $task->id
+                    ]);
                 }
     
-                $this->tareasMap[$row['id']] = $tareaLote->id;
+                $this->tareasMap[$row['id']] = $task->id;
             } catch (\Throwable $th) {
                 throw new Exception($th->getMessage());
             }

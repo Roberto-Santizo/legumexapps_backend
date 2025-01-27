@@ -10,6 +10,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TareaController;
+use App\Http\Controllers\TasksCropController;
 use App\Http\Controllers\TasksLoteController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UsersController;
@@ -55,6 +56,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/tasks-lotes/partial-close/close/{id}', [TasksLoteController::class, 'PartialClose']);
     Route::patch('/tasks-lotes/partial-close/open/{id}', [TasksLoteController::class, 'PartialCloseOpen']);
     Route::delete('/tasks-lotes/erase/{id}',[TasksLoteController::class, 'EraseAssignationTask']);
+
+    Route::apiResource('/tasks-crops-lotes',TasksCropController::class);
 
     Route::apiResource('/employees',EmployeeController::class);
 });

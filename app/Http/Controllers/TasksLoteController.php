@@ -22,9 +22,10 @@ class TasksLoteController extends Controller
     {
         $data = $request->validate([
             'id' => 'required|string',
+            'weekly_plan_id' => 'required|string'
         ]);
 
-        $tasks = TaskWeeklyPlan::where('lote_plantation_control_id', $data['id'])->get();
+        $tasks = TaskWeeklyPlan::where('lote_plantation_control_id', $data['id'])->where('weekly_plan_id',$data['weekly_plan_id'])->get();
 
         return [
             'week' => $tasks->first()->plan->week,

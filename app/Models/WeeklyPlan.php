@@ -22,4 +22,9 @@ class WeeklyPlan extends Model
     {
         return  $this->hasMany(TaskWeeklyPlan::class);
     }
+
+    public function tasks_crops() 
+    {
+        return  $this->hasMany(TaskCropWeeklyPlan::class);
+    }
 }

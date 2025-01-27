@@ -17,7 +17,7 @@ class WeeklyPlanController extends Controller
      */
     public function index()
     {
-        return new WeeklyPlanCollection(WeeklyPlan::all());
+        return new WeeklyPlanCollection(WeeklyPlan::orderBy('week','DESC')->get());
     }
 
     /**
@@ -54,9 +54,9 @@ class WeeklyPlanController extends Controller
             ],404);
         }
         $tasks_by_lote = $plan->tasks->groupBy('lote_plantation_control_id');
+        $tasks_crop_by_lote = $plan->tasks_crops->groupBy('lote_plantation_control_id');
 
-
-        $data = $tasks_by_lote->map(function ($group, $key) {
+        $summary_tasks = $tasks_by_lote->map(function ($group, $key) {
             return [
                 'lote' => LotePlantationControl::find($key)->lote->name,
                 'lote_plantation_control_id' => strval($key),
@@ -70,14 +70,23 @@ class WeeklyPlanController extends Controller
             ];
         })->values();
 
-
+        $summary_crops = $tasks_crop_by_lote->map(function ($group, $key) {
+            $lote_plantation_control = LotePlantationControl::find($key);
+            return [
+                'id' => strval($key),
+                'lote_plantation_control_id' => strval($lote_plantation_control->id),
+                'lote' => $lote_plantation_control->lote->name,
+            ];
+        })->values();
 
         return response()->json([
             'data' => [
+                'id' => strval($plan->id),
                 'finca' => $plan->finca->name,
                 'week' => $plan->week,
                 'year' => $plan->year,
-                'summary' => $data,
+                'summary_tasks' => $summary_tasks,
+                'summary_crops' => $summary_crops
             ]
         ]);
     }
