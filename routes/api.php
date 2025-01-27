@@ -57,7 +57,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/tasks-lotes/partial-close/open/{id}', [TasksLoteController::class, 'PartialCloseOpen']);
     Route::delete('/tasks-lotes/erase/{id}',[TasksLoteController::class, 'EraseAssignationTask']);
 
+    
     Route::apiResource('/tasks-crops-lotes',TasksCropController::class);
+    Route::post('/tasks-crops-lotes/close-assignment/{id}', [TasksCropController::class, 'CloseAssigment']);
+    Route::get('/tasks-crops-lotes/employees/{id}', [TasksCropController::class, 'EmployeesAssignment']);
 
     Route::apiResource('/employees',EmployeeController::class);
 });

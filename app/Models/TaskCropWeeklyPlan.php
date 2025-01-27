@@ -38,4 +38,9 @@ class TaskCropWeeklyPlan extends Model
     {
         return $this->hasMany(DailyAssignments::class);
     }
+
+    public function employees()
+    {
+        return $this->hasMany(EmployeeTaskCrop::class);
+    }
 }

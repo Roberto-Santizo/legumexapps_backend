@@ -81,11 +81,13 @@ class TasksLoteController extends Controller
 
     public function CloseAssigment(Request $request , string $id)
     {
+        $data = $request->input('data');
+
         $task = TaskWeeklyPlan::find($id);
         $task->start_date = Carbon::now();
+        $task->slots -= count($data);
         $task->save();
 
-        $data = $request->input('data');
 
         foreach ($data as $item) {
             EmployeeTask::create([
@@ -98,7 +100,7 @@ class TasksLoteController extends Controller
 
         
         return response()->json([
-            'message' => 'Assignment closed'
+            'message' => 'Assigment Closed'
         ]);
     }
 

@@ -17,6 +17,7 @@ class TaskCropResource extends JsonResource
         return [
             'id' => strval($this->id),
             'task' => $this->task->name,
+            'finca_id' => strval($this->plan->finca->id),
             'cultivo' => $this->task->crop->name,
             'assigment_today' => ($this->assignment_today) ? true : false,
             'finished_assigment_today' => ($this->assignment_today && $this->assignment_today->end_date) ? true : false
