@@ -40,6 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/roles/user',[RoleController::class,'userRoles']);
     Route::apiResource('/roles',RoleController::class);
 
+
     Route::apiResource('/tareas', TareaController::class);
     Route::apiResource('cdps',CDPController::class);
     Route::apiResource('/recipes',RecipeController::class);
@@ -47,7 +48,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/lotes', LoteController::class);
     Route::apiResource('/fincas',FincaController::class);
     Route::apiResource('/plans',WeeklyPlanController::class);
-
 
     Route::apiResource('/tasks-lotes',TasksLoteController::class);
     Route::get('/tasks-lotes/{id}/details',[TasksLoteController::class,'TaskDetail']);
@@ -59,13 +59,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     
     Route::apiResource('/tasks-crops-lotes',TasksCropController::class);
-    Route::post('/tasks-crops-lotes/close-assignment/{id}', [TasksCropController::class, 'CloseAssigment']);
     Route::get('/tasks-crops-lotes/employees/{id}', [TasksCropController::class, 'EmployeesAssignment']);
+    Route::get('/tasks-crops-lotes/incomplete-assigments/{id}',[TasksCropController::class,'GetIncompleteAssignments']);
+    Route::post('/tasks-crops-lotes/close-assignment/{id}', [TasksCropController::class, 'CloseAssigment']);
+    Route::post('/tasks-crops-lotes/close-daily-assigment/{id}', [TasksCropController::class, 'CloseDailyAssigment']);
+    Route::post('/tasks-crops-lotes/register-daily-assigment',[TasksCropController::class,'RegisterDailyAssigment']);
 
     Route::apiResource('/employees',EmployeeController::class);
 });
-
-
 
 //Autenticación
 Route::apiResource('/login', AuthController::class);

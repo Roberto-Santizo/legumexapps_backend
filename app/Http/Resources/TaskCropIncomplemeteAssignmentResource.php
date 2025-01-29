@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class EmployeeTaskCropResource extends JsonResource
+class TaskCropIncomplemeteAssignmentResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,9 +16,9 @@ class EmployeeTaskCropResource extends JsonResource
     {
         return [
             'id' => strval($this->id),
-            'name' => $this->name,
-            'code' => $this->code,
-            'lbs' => $this->lbs
+            'lbs_finca' => $this->lbs_finca,
+            'lbs_planta' => $this->lbs_planta,
+            'date' =>  $this->start_date
         ];
     }
 }
