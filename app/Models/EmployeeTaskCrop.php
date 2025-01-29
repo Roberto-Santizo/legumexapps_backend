@@ -11,6 +11,12 @@ class EmployeeTaskCrop extends Model
         'code',
         'task_crop_weekly_plan_id',
         'employee_id',
-        'lbs'
+        'lbs',
+        'daily_assignment_id'
     ];
+
+    public function assignment()
+    {
+        return $this->belongsTo(DailyAssignments::class,'daily_assignment_id','id');
+    }
 }

@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class DailyAssignments extends Model
 {
+    protected $casts = [
+        'start_date' => 'datetime',
+        'end_date' => 'datetime'
+    ];
+
     protected $fillable = [
         'task_crop_weekly_plan_id',
         'start_date',

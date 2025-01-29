@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\EmployeeTaskCropResource;
+use App\Http\Resources\EmployeeTaskCropSummaryResource;
 use App\Http\Resources\TaskCropIncomplemeteAssignmentResource;
 use App\Http\Resources\TaskCropResource;
+use App\Http\Resources\TaskCropWeeklyPlanDetails;
+use App\Http\Resources\TaskCropWeeklyPlanDetailsResource;
 use App\Models\DailyAssignments;
 use App\Models\EmployeeTaskCrop;
 use App\Models\TaskCropWeeklyPlan;
@@ -63,7 +66,13 @@ class TasksCropController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $task = TaskCropWeeklyPlan::find($id);
+        $task->status = 0;
+        $task->save();
+
+        return response()->json([
+            'message' => 'Task Closed'
+        ]);
     }
 
     /**
@@ -79,20 +88,22 @@ class TasksCropController extends Controller
         $data = $request->input('data');
         $task = TaskCropWeeklyPlan::find($id);
 
+        $daily_assigment = DailyAssignments::create([
+            'task_crop_weekly_plan_id' => $task->id,
+            'start_date' => Carbon::now(),
+        ]);
+
         foreach ($data as $item) {
             EmployeeTaskCrop::create([
                 'task_crop_weekly_plan_id' => $task->id,
                 'employee_id' => $item['emp_id'],
                 'code' => $item['code'],
                 'name' => $item['name'],
+                'daily_assignment_id' => $daily_assigment->id
             ]);
         }
 
-        DailyAssignments::create([
-            'task_crop_weekly_plan_id' => $task->id,
-            'start_date' => Carbon::now(),
-        ]);
-
+       
         return response()->json([
             'message' => 'Assignment closed'
         ]);
@@ -152,16 +163,30 @@ class TasksCropController extends Controller
         ]);
     }
 
+    public function TaskCropDetail(string $id)
+    {
+        $task = TaskCropWeeklyPlan::find($id);
+        $plan = $task->plan;
+        return response()->json([
+            'finca' => $plan->finca->name,
+            'week' => $plan->week,
+            'lote' => $task->lotePlantationControl->lote->name,
+            'cdp' => $task->lotePlantationControl->cdp->name,
+            'assigments' => new TaskCropWeeklyPlanDetailsResource($task),
+            'employees' => EmployeeTaskCropSummaryResource::collection($task->employees)
+        ]);
+    }
+
     public function EmployeesAssignment(string $id)
     {
         $task = TaskCropWeeklyPlan::find($id);
-
+        
         return response()->json([
             'task' => $task->task->name,
             'week' => $task->plan->week,
             'finca' => $task->plan->finca->name,
             'date_assignment' => $task->assignment_today->start_date,
-            'data' => EmployeeTaskCropResource::collection($task->employees)
+            'data' => EmployeeTaskCropResource::collection($task->employees()->where('daily_assignment_id',$task->assignment_today->id)->get())
         ]);
     }
 }
