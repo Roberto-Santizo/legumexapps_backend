@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('task_crop_weekly_plans', function (Blueprint $table) {
-            $table->boolean('status')->default(1);
+        Schema::table('employee_task_crops', function (Blueprint $table) {
+            $table->foreignId('daily_assignment_id')->nullable()->constrained();
         });
     }
 
@@ -21,8 +21,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('task_crop_weekly_plan', function (Blueprint $table) {
-            $table->dropColumn('status');
+        Schema::table('employee_task_crops', function (Blueprint $table) {
+            $table->dropForeign('employee_task_crops_daily_assignment_id_foreign');
+            $table->dropColumn('daily_assignment_id');
         });
     }
 };
