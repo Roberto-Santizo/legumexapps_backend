@@ -17,7 +17,7 @@ class WeeklyPlanController extends Controller
      */
     public function index()
     {
-        return new WeeklyPlanCollection(WeeklyPlan::orderBy('week','DESC')->get());
+        return new WeeklyPlanCollection(WeeklyPlan::orderBy('week','DESC')->paginate(10));
     }
 
     /**

@@ -48,11 +48,12 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::apiResource('/lotes', LoteController::class);
 
+    Route::apiResource('/plans',WeeklyPlanController::class);
 
+    
     Route::apiResource('/recipes',RecipeController::class);
     Route::apiResource('/crops',CropController::class);
     Route::apiResource('/fincas',FincaController::class);
-    Route::apiResource('/plans',WeeklyPlanController::class);
 
     Route::apiResource('/tasks-lotes',TasksLoteController::class);
     Route::get('/tasks-lotes/{id}/details',[TasksLoteController::class,'TaskDetail']);
