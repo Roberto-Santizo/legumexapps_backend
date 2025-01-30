@@ -16,7 +16,7 @@ class LoteController extends Controller
      */
     public function index()
     {
-        return new LoteCollection(Lote::all());
+        return new LoteCollection(Lote::paginate(10));
     }
 
     /**

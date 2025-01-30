@@ -6,8 +6,11 @@ use App\Http\Requests\CreateTareaRequest;
 use App\Http\Requests\UpdateTareaRequest;
 use App\Http\Resources\TareaCollection;
 use App\Http\Resources\TareaResource;
+use App\Imports\TasksImport;
 use App\Models\Tarea;
+use Exception;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TareaController extends Controller
 {
@@ -16,7 +19,7 @@ class TareaController extends Controller
      */
     public function index()
     {
-        return new TareaCollection(Tarea::all());
+        return new TareaCollection(Tarea::paginate(15));
     }
 
     /**
@@ -61,6 +64,23 @@ class TareaController extends Controller
         
         return response()->json([
             'data' => $tarea
+        ]);
+    }
+
+    public function UploadTasks(Request $request)
+    {
+        $request->validate([
+            'file' => 'required'
+        ]);
+
+        try {
+            Excel::import(new TasksImport, $request->file('file'));
+        } catch (Exception $th) {
+            throw new Exception($th->getMessage());
+        }
+
+        return response()->json([
+            'message' => 'Tasks Created Successfully'
         ]);
     }
 

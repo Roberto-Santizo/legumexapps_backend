@@ -42,10 +42,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::apiResource('/tareas', TareaController::class);
+    Route::post('/tareas/upload', [TareaController::class,'UploadTasks']);
+
     Route::apiResource('cdps',CDPController::class);
+    
+    Route::apiResource('/lotes', LoteController::class);
+
+
     Route::apiResource('/recipes',RecipeController::class);
     Route::apiResource('/crops',CropController::class);
-    Route::apiResource('/lotes', LoteController::class);
     Route::apiResource('/fincas',FincaController::class);
     Route::apiResource('/plans',WeeklyPlanController::class);
 

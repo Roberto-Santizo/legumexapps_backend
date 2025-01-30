@@ -14,7 +14,7 @@ class CDPController extends Controller
      */
     public function index()
     {
-        return new PlantationControlCollection(PlantationControl::all());
+        return new PlantationControlCollection(PlantationControl::paginate(10));
     }
 
     /**
