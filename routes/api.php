@@ -27,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     //USUARIOS
     Route::apiResource('/users', UsersController::class);
+    Route::get('/users-info/{user}/info', [UsersController::class,'UsersInfo']);
     Route::patch('/users/{user}/status', [UsersController::class, 'updateStatus']);
 
     //USER

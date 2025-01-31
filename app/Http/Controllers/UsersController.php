@@ -6,6 +6,7 @@ use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use App\Http\Resources\UserCollection;
+use App\Http\Resources\UserInfoResource;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
@@ -42,7 +43,7 @@ class UsersController extends Controller
 
     public function show(User $user)
     {
-        $user->with(['roles', 'permissions']);
+        $user->with(['roles']);
 
         return new UserResource($user);
     }
@@ -80,5 +81,13 @@ class UsersController extends Controller
         $user->save();
 
         return new UserCollection(User::with('roles')->with('permissions')->get());
+    }
+
+    public function UsersInfo(string $id)
+    {
+        $user = User::find($id);
+        return response()->json([
+            'data' => new UserInfoResource($user)
+        ]);
     }
 }
