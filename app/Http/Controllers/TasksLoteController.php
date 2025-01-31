@@ -163,6 +163,7 @@ class TasksLoteController extends Controller
         $task->start_date = null;
         $task->end_date=null;
         $task->employees()->delete();
+        $task->slots = $task->workers_quantity;
         $task->save();
 
         return response()->json([

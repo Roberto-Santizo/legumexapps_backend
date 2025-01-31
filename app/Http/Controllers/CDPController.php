@@ -17,6 +17,11 @@ class CDPController extends Controller
         return new PlantationControlCollection(PlantationControl::paginate(10));
     }
 
+    public function GetAllCDPS()
+    {
+        return new PlantationControlCollection(PlantationControl::all());
+    }
+
     /**
      * Store a newly created resource in storage.
      */

@@ -20,6 +20,11 @@ class WeeklyPlanController extends Controller
         return new WeeklyPlanCollection(WeeklyPlan::orderBy('week','DESC')->paginate(10));
     }
 
+    public function GetAllPlans()
+    {
+        return new WeeklyPlanCollection(WeeklyPlan::all());
+    } 
+
     /**
      * Store a newly created resource in storage.
      */

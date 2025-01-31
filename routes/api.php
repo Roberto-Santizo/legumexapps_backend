@@ -44,12 +44,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/tareas', TareaController::class);
     Route::post('/tareas/upload', [TareaController::class,'UploadTasks']);
 
-    Route::apiResource('cdps',CDPController::class);
-    
+    Route::apiResource('/cdps',CDPController::class);
+    Route::get('/cdps-list/all',[CDPController::class,'GetAllCDPS']);
+
     Route::apiResource('/lotes', LoteController::class);
 
     Route::apiResource('/plans',WeeklyPlanController::class);
-
+    Route::get('/plans-list/all',[WeeklyPlanController::class,'GetAllPlans']);
     
     Route::apiResource('/recipes',RecipeController::class);
     Route::apiResource('/crops',CropController::class);
