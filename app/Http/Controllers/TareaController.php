@@ -70,7 +70,7 @@ class TareaController extends Controller
     public function UploadTasks(Request $request)
     {
         $request->validate([
-            'file' => 'required'
+            'file' => 'required|mimes:xls,xlsx'
         ]);
 
         try {

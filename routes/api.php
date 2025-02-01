@@ -78,6 +78,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/employees',EmployeeController::class);
 
     Route::apiResource('/insumos',InsumosController::class);
+    Route::post('/insumos/upload', [InsumosController::class,'UploadInsumos']);
+
 });
 
 //Autenticación

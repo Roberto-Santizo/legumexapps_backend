@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateInsumoRequest;
 use App\Http\Resources\InsumoCollection;
+use App\Imports\InsumosImport;
 use App\Models\Insumo;
+use Exception;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class InsumosController extends Controller
 {
@@ -24,7 +27,7 @@ class InsumosController extends Controller
     {
         $data = $request->validated();
 
-        $insumo = Insumo::created([
+        $insumo = Insumo::create([
             'name' => $data['name'],
             'code' => $data['code'],
             'measure' => $data['measure']
@@ -57,5 +60,22 @@ class InsumosController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function UploadInsumos(Request $request)
+    {
+        $request->validate([
+            'file' => 'required'
+        ]);
+
+        try {
+            Excel::import(new InsumosImport, $request->file('file'));
+        } catch (Exception $th) {
+            throw new Exception($th->getMessage());
+        }
+
+        return response()->json([
+            'message' => 'Insumos Created Successfully'
+        ]);
     }
 }
