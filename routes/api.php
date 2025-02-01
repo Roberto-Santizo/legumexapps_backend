@@ -5,6 +5,7 @@ use App\Http\Controllers\CDPController;
 use App\Http\Controllers\CropController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\FincaController;
+use App\Http\Controllers\InsumosController;
 use App\Http\Controllers\LoteController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RecipeController;
@@ -75,6 +76,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tasks-crops-lotes/register-daily-assigment',[TasksCropController::class,'RegisterDailyAssigment']);
 
     Route::apiResource('/employees',EmployeeController::class);
+
+    Route::apiResource('/insumos',InsumosController::class);
 });
 
 //Autenticación
