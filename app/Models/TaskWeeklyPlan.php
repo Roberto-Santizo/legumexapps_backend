@@ -49,4 +49,8 @@ class TaskWeeklyPlan extends Model
     {
         return $this->hasMany(EmployeeTask::class,'task_weekly_plan_id','id');
     }
+    public function insumos()
+    {
+        return $this->hasMany(TaskInsumos::class);
+    }
 }

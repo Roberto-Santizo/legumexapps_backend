@@ -32,6 +32,7 @@ class TaskWeeklyPlanResource extends JsonResource
             "end_time" => $this->end_date ? $this->end_date->format('H:i') : null,
             'slots' => $this->slots,
             'active_closure' => $this->closures()->where('start_date','!=',null)->where('end_date',null)->count() > 0 ? true : false,
+            'insumos' => TaskInsumosResource::collection($this->insumos)
         ];
     }
 }
