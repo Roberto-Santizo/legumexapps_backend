@@ -22,6 +22,11 @@ class TareaController extends Controller
         return new TareaCollection(Tarea::paginate(15));
     }
 
+    public function GetAllTareas()
+    {
+        return new TareaCollection(Tarea::all());
+    }
+
     /**
      * Store a newly created resource in storage.
      */

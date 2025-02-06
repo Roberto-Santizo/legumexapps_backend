@@ -18,7 +18,8 @@ class TaskInsumosResource extends JsonResource
             'id' => strval($this->id),
             'name' => $this->insumo->name,
             'assigned_quantity' => $this->assigned_quantity,
-            'measure' => $this->insumo->measure
+            'measure' => $this->insumo->measure,
+            'used_quantity' => $this->used_quantity
         ];
     }
 }

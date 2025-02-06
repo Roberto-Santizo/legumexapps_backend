@@ -22,4 +22,9 @@ class LotePlantationControl extends Model
     {
         return $this->belongsTo(Lote::class);
     }
+
+    public function tasks()
+    {
+        return $this->hasMany(TaskWeeklyPlan::class,'lote_plantation_control_id','id');
+    }
 }

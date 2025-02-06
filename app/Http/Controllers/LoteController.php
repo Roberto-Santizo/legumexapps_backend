@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateLoteRequest;
+use App\Http\Resources\FincaLotesResource;
 use App\Http\Resources\LoteCollection;
+use App\Imports\UpdateLotesImport;
 use App\Models\Lote;
 use App\Models\LotePlantationControl;
-use App\Models\PlantationControl;
+use Exception;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LoteController extends Controller
 {
@@ -17,6 +20,10 @@ class LoteController extends Controller
     public function index()
     {
         return new LoteCollection(Lote::paginate(10));
+    }
+    public function GetAllLotes()
+    {
+        return new LoteCollection(Lote::all());
     }
 
     /**
@@ -48,22 +55,29 @@ class LoteController extends Controller
      */
     public function show(string $id)
     {
-        //
+
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
+
+    public function GetLotesByFincaId(string $id){
+        $lotes = Lote::where('finca_id',$id)->get();
+        return new LoteCollection($lotes);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+    public function UpdateLotes(Request $request)
+    {   
+        $request->validate([
+            'file' => 'required|mimes:xls,xlsx'
+        ]);
+
+        try {
+            Excel::import(new UpdateLotesImport, $request->file('file'));
+        } catch (Exception $th) {
+            throw new Exception($th->getMessage());
+        }
+
+        return response()->json([
+            'message' => 'Lotes Updated Successfully'
+        ]);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateTaskCropWeeklyPlanRequest;
+use App\Http\Resources\CreateTaskCropWeeklyPlanResource;
 use App\Http\Resources\EmployeeTaskCropResource;
 use App\Http\Resources\EmployeeTaskCropSummaryResource;
 use App\Http\Resources\TaskCropIncomplemeteAssignmentResource;
@@ -10,7 +12,9 @@ use App\Http\Resources\TaskCropWeeklyPlanDetails;
 use App\Http\Resources\TaskCropWeeklyPlanDetailsResource;
 use App\Models\DailyAssignments;
 use App\Models\EmployeeTaskCrop;
+use App\Models\Lote;
 use App\Models\TaskCropWeeklyPlan;
+use App\Models\WeeklyPlan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -38,9 +42,38 @@ class TasksCropController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CreateTaskCropWeeklyPlanRequest $request)
     {
-        //
+        $data = $request->validated();
+        $lote = Lote::find($data['lote_id']);
+        $weekly_plan = WeeklyPlan::find($data['weekly_plan_id']);
+        if (!$lote || !$weekly_plan) {
+            return response()->json([
+                'msg' => "Data not found"
+            ], 404);
+        }
+        if ($lote->finca_id !== $weekly_plan->finca->id) {
+            return response()->json([
+                'msg' => "Not valid data"
+            ], 500);
+        }
+
+
+        try {
+            TaskCropWeeklyPlan::create([
+                'weekly_plan_id' => $weekly_plan->id,
+                'lote_plantation_control_id' => $lote->cdp->id,
+                'task_crop_id' => $data['task_crop_id']
+            ]);
+
+            return response()->json([
+                'msg' => 'Task Crop Weekly Plan Created Successfully'
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -103,7 +136,7 @@ class TasksCropController extends Controller
             ]);
         }
 
-       
+
         return response()->json([
             'message' => 'Assignment closed'
         ]);
@@ -180,13 +213,13 @@ class TasksCropController extends Controller
     public function EmployeesAssignment(string $id)
     {
         $task = TaskCropWeeklyPlan::find($id);
-        
+
         return response()->json([
             'task' => $task->task->name,
             'week' => $task->plan->week,
             'finca' => $task->plan->finca->name,
             'date_assignment' => $task->assignment_today->start_date,
-            'data' => EmployeeTaskCropResource::collection($task->employees()->where('daily_assignment_id',$task->assignment_today->id)->get())
+            'data' => EmployeeTaskCropResource::collection($task->employees()->where('daily_assignment_id', $task->assignment_today->id)->get())
         ]);
     }
 }

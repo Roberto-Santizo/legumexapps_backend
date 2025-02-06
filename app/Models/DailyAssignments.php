@@ -16,4 +16,9 @@ class DailyAssignments extends Model
         'start_date',
         'end_date'
     ];
+
+    public function employees()
+    {
+        return $this->hasMany(EmployeeTaskCrop::class,'daily_assignment_id','id');
+    }
 }

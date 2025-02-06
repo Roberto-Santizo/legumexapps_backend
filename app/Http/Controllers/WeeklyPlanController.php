@@ -9,21 +9,34 @@ use App\Imports\WeeklyPlanImport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Resources\WeeklyPlanCollection;
 use App\Models\LotePlantationControl;
+use Carbon\Carbon;
 
 class WeeklyPlanController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return new WeeklyPlanCollection(WeeklyPlan::orderBy('week','DESC')->paginate(10));
+        if ($request->has('permission') && !in_array($request->input('permission'), ['admin', 'adminagricola'])) {
+            $weekly_plans = WeeklyPlan::whereHas('finca', function ($query) use ($request) {
+                $current_week = Carbon::now()->weekOfYear;
+                $current_year = Carbon::now()->year;
+                $query->where('name', 'LIKE', '%' . $request->input('permission') . '%')->where('week',$current_week)->OrWhere('week',$current_week-1)->where('year',$current_year);
+            })->orderByRaw('year DESC')
+                ->orderBy('week', 'DESC')->paginate(10);
+        } else {
+            $weekly_plans = WeeklyPlan::orderBy('week', 'ASC') ->orderByRaw('year DESC')->orderBy('week', 'DESC')->paginate(10);
+        }
+
+        return new WeeklyPlanCollection($weekly_plans);
     }
+
 
     public function GetAllPlans()
     {
         return new WeeklyPlanCollection(WeeklyPlan::all());
-    } 
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -56,7 +69,7 @@ class WeeklyPlanController extends Controller
         if (!$plan) {
             return response()->json([
                 'errors' => ['El plan no existe']
-            ],404);
+            ], 404);
         }
         $tasks_by_lote = $plan->tasks->groupBy('lote_plantation_control_id');
         $tasks_crop_by_lote = $plan->tasks_crops->groupBy('lote_plantation_control_id');

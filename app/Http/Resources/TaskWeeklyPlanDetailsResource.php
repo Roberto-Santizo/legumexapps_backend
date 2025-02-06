@@ -54,7 +54,8 @@ class TaskWeeklyPlanDetailsResource extends JsonResource
                     'start_date' => $closure->start_date ? $closure->start_date->format('d-m-Y h:i:s A') : null,
                     'end_date' => $closure->end_date ?  $closure->end_date->format('d-m-Y h:i:s A') : null
                 ];
-            })
+            }),
+            'insumos' => $this->insumos ? TaskInsumosResource::collection($this->insumos) : []
         ];
     }
 }

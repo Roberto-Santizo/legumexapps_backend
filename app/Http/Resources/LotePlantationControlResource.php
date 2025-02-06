@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class LoteResource extends JsonResource
+class LotePlantationControlResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,10 +16,7 @@ class LoteResource extends JsonResource
     {
         return [
             'id' => strval($this->id),
-            'name' => $this->name,
-            'finca' => $this->finca->name,
-            'cdp' => $this->cdp->cdp->name,
-            'finca' => $this->finca->name
+            'cdp' => $this->cdp->name
         ];
     }
 }

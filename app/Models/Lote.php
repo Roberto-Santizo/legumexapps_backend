@@ -20,4 +20,9 @@ class Lote extends Model
     {
         return $this->hasOne(LotePlantationControl::class,'lote_id','id')->where('status',1);
     }
+
+    public function lote_cdps()
+    {
+        return $this->hasMany(LotePlantationControl::class,'lote_id','id');
+    }
 }

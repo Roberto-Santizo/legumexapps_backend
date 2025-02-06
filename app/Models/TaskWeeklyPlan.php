@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Console\View\Components\Task;
 use Illuminate\Database\Eloquent\Model;
 
 class TaskWeeklyPlan extends Model
