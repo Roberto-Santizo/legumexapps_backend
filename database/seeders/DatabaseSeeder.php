@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
         $this->call(CropSeeder::class);
         $this->call(RecipeSeeder::class);
         $this->call(FincaSeeder::class);
+        $this->call(LoteSeeder::class);
 
     }
 }
