@@ -34,20 +34,21 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
 
             $weekly_plan->tasks->each(function ($task) use ($rows) {
                 if ($task->start_date && $task->end_date) {
-                    if ($task->closures->count() > 0) {
-                        $this->employeesDistribution($task, $rows);
+                    if (!$task->use_dron) {
+                        if ($task->closures->count() > 0) {
+                            $this->employeesDistribution($task, $rows);
+                        } else {
+                            $this->processTask($task, $rows);
+                        }
                     } else {
-                        $this->processTask($task, $rows);
+                        $this->processTaskDron($task, $rows);
                     }
                 }
-                // else {
-                //     $this->transformTaskDro($tarea, $rows);
-                // }
             });
 
-            // $weekly_plan->tasks_crops->each(function ($task_crop) use ($rows) {
-            //     $this->transformTaskCosecha($task_crop, $rows);
-            // });
+            $weekly_plan->tasks_crops->each(function ($task_crop) use ($rows) {
+                $this->processTaskCrop($task_crop, $rows);
+            });
         }
 
 
@@ -57,18 +58,17 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
     public function employeesDistribution($task, &$rows)
     {
         $dates = [];
-        $diff_hours = 0;
         foreach ($task->closures as $index => $closure) {
             $dates[$index][] = $closure->start_date;
             $dates[$index][] = $closure->end_date;
         }
-       
+
         $all_dates = array_merge(...$dates);
         array_unshift($all_dates, $task->start_date);
         array_push($all_dates, $task->end_date);
 
         $groupedByDay = array_reduce($all_dates, function ($carry, $datetime) {
-            $date = $datetime->format('d-m-Y'); 
+            $date = $datetime->format('Y-m-d');
             $carry[$date][] = $datetime->toDateTimeString();
             return $carry;
         }, []);
@@ -80,26 +80,95 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
             $groupedByDay[$key] = $total_hours;
         }
 
-        dd($groupedByDay);
-        // $groupedByDay->map(function($dates){
-        //     dd($dates);
-        // });
-        // $total_hours = ($task->start_date->diffInHours($task->end_date)) - $diff_hours;
+        $task->employees->map(function ($employeeAssignment) use ($groupedByDay) {
+            $employeeAssignment->total_hours = 0;
+            $employeeAssignment->dates = [];
+            $dates = [];
+            foreach ($groupedByDay as $day => $hours) {
+                $flag = count($this->getEmployeeRegistration($employeeAssignment->employee_id, $day)) > 1;
+                if ($flag) {
+                    $dates[$day][] = $hours;
+                    $employeeAssignment->dates = $dates;
+                    $employeeAssignment->total_hours += $hours;
+                }
+            }
+
+            return $employeeAssignment;
+        });
 
 
+        $task->employees->map(function ($employeeAssignment) use ($groupedByDay, $rows, $task) {
+            foreach ($employeeAssignment->dates as $day => $hours) {
+                $total_hours = $task->employees->reduce(function ($carry, $task) {
+                    return $carry + array_sum(array_merge(...array_values($task->dates ?? [])));
+                }, 0);
 
-        // $rows->push([
-        //     'CODIGO' => $employeeAssignment->code,
-        //     'EMPLEADO' => $employeeAssignment->name,
-        //     'LOTE' => $task->lotePlantationControl->lote->name,
-        //     'TAREA REALIZADA' => $task->task->name,
-        //     'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
-        //     'MONTO' => $task->end_date ? ($task->budget / $task->employees->count()) : 0,
-        //     'HORAS TOTALES' => $task->end_date ? ($task->hours / $task->employees->count()) : 0,
-        //     'ENTRADA' => $registrations['entrance'],
-        //     'SALIDA' => $registrations['exit'],
-        //     'DIA' => $day
-        // ]);
+                $percentage = $hours[0] / $total_hours;
+                $day_carbon = Carbon::parse($day);
+                $registrations = $this->getEmployeeRegistration($employeeAssignment->employee_id, $day_carbon);
+                $rows->push([
+                    'CODIGO' => $employeeAssignment->code,
+                    'EMPLEADO' => $employeeAssignment->name,
+                    'LOTE' => $task->lotePlantationControl->lote->name,
+                    'TAREA REALIZADA' => $task->task->name,
+                    'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
+                    'MONTO' => $percentage * $task->budget,
+                    'HORAS TOTALES' => $percentage * $total_hours,
+                    'ENTRADA' => $registrations['entrance'],
+                    'SALIDA' => $registrations['exit'],
+                    'DIA' => $day_carbon->isoFormat('dddd')
+                ]);
+            }
+        });
+    }
+
+    public function processTaskCrop($task, &$rows)
+    {
+        foreach ($task->assigments as $assignment) {
+            if ($assignment->end_date) {
+                foreach ($assignment->employees as $employeeAssignment) {
+                    $day = $assignment->start_date->IsoFormat('dddd');
+                    $percentage = $employeeAssignment->lbs / $assignment->lbs_finca;
+                    $weight = round(($assignment->lbs_planta / $assignment->plants), 2);
+                    $total_crops = ($percentage * $assignment->lbs_planta) / $weight;
+                    $tperformance =  round(($weight * 960), 2);
+                    $budget = round(((($assignment->lbs_planta / $tperformance) * 8) * 11.98), 2);
+                    $hours = $total_crops / 120;
+                    $registrations = $this->getEmployeeRegistration($employeeAssignment->employee_id, $assignment->start_date);
+
+                    $rows->push([
+                        'CODIGO' => $employeeAssignment->code,
+                        'EMPLEADO' => $employeeAssignment->name,
+                        'LOTE' => $task->lotePlantationControl->lote->name,
+                        'TAREA REALIZADA' => $task->task->name,
+                        'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
+                        'MONTO' => round($percentage * $budget, 4),
+                        'HORAS TOTALES' => $hours,
+                        'ENTRADA' => $registrations['entrance'],
+                        'SALIDA' => $registrations['exit'],
+                        'DIA' => $day
+                    ]);
+                }
+            }
+        }
+
+        return $rows;
+    }
+
+    public function processTaskDron($task, &$rows)
+    {
+        $rows->push([
+            'CODIGO' => '',
+            'EMPLEADO' => 'DRON',
+            'LOTE' => $task->lotePlantationControl->lote->name,
+            'TAREA REALIZADA' => $task->task->name,
+            'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
+            'MONTO' => '',
+            'HORAS TOTALES' => $task->start_date->diffInHours($task->end_date),
+            'ENTRADA' => '',
+            'SALIDA' => '',
+            'DIA' => $task->start_date->IsoFormat('dddd')
+        ]);
     }
 
     public function processTask($task, &$rows)
@@ -123,18 +192,20 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
         }
     }
 
-
     public function getEmployeeRegistration($emp_id, $date)
     {
         $entrance_date = Employee::whereDate('punch_time', $date)->where('emp_id', $emp_id)->orderBy('punch_time', 'ASC')->first();
         $exit_date = Employee::whereDate('punch_time', $date)->where('emp_id', $emp_id)->orderBy('punch_time', 'DESC')->first();
 
+        if (!$entrance_date && !$exit_date) {
+            return [];
+        }
+
         return [
-            'entrance' => $entrance_date->punch_time->format('d-m-Y h:i:s A'),
-            'exit' => $exit_date->punch_time->format('d-m-Y h:i:s A')
+            'entrance' => $entrance_date ? $entrance_date->punch_time->format('d-m-Y h:i:s A') : null,
+            'exit' => $exit_date ? $exit_date->punch_time->format('d-m-Y h:i:s A') : null
         ];
     }
-
 
     public function headings(): array
     {

@@ -17,6 +17,10 @@ class DailyAssignments extends Model
         'end_date'
     ];
 
+    public function TaskCropWeeklyPlan()
+    {
+        return $this->belongsTo(TaskCropWeeklyPlan::class);
+    }
     public function employees()
     {
         return $this->hasMany(EmployeeTaskCrop::class,'daily_assignment_id','id');

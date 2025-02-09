@@ -12,4 +12,10 @@ class EmployeeTask extends Model
         'task_weekly_plan_id',
         'employee_id',
     ];
+
+    public function task_weekly_plan()
+    {
+        return $this->belongsTo(TaskWeeklyPlan::class);
+    }
+
 }

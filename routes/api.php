@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CDPController;
 use App\Http\Controllers\CropController;
+use App\Http\Controllers\DashboardAgricolaController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\FincaController;
 use App\Http\Controllers\InsumosController;
@@ -91,6 +92,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('/insumos',InsumosController::class);
     Route::post('/insumos/upload', [InsumosController::class,'UploadInsumos']);
+
+    Route::get('/dron-hours',[DashboardAgricolaController::class,'GetDronHours']);
+    Route::get('/summary-hours-employees',[DashboardAgricolaController::class,'GetSummaryHoursEmployees']);
+    Route::get('/tasks-in-progress',[DashboardAgricolaController::class,'GetTasksInProgress']);
+    Route::get('/tasks-crops-in-progress',[DashboardAgricolaController::class,'GetTasksCropInProgress']);
+    Route::get('/finished-tasks',[DashboardAgricolaController::class,'GetFinishedTasks']);
+    Route::get('/finished-tasks-crop',[DashboardAgricolaController::class,'GetFinishedTasksCrop']);
 
 });
 

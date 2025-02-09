@@ -44,16 +44,16 @@ class TasksLoteController extends Controller
         $data = $request->validated();
         $lote = Lote::find($data['lote_id']);
         $weekly_plan = WeeklyPlan::find($data['weekly_plan_id']);
-        if(!$lote || !$weekly_plan){
+        if (!$lote || !$weekly_plan) {
             return response()->json([
                 'msg' => "Data not found"
-            ],404);
+            ], 404);
         }
 
-        if($lote->finca_id !== $weekly_plan->finca->id){
+        if ($lote->finca_id !== $weekly_plan->finca->id) {
             return response()->json([
                 'msg' => "Not valid data"
-            ],500);
+            ], 500);
         }
 
         try {
@@ -74,7 +74,7 @@ class TasksLoteController extends Controller
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
-            ],500);
+            ], 500);
         }
     }
 
@@ -125,20 +125,28 @@ class TasksLoteController extends Controller
     {
         $data = $request->input('data');
 
-        $task = TaskWeeklyPlan::find($id);
-        $task->start_date = Carbon::now();
-        $task->slots -= count($data);
-        $task->save();
+        if ($data) {
+            $task = TaskWeeklyPlan::find($id);
+            $task->start_date = Carbon::now();
+            $task->slots -= count($data);
+            $task->save();
 
 
-        foreach ($data as $item) {
-            EmployeeTask::create([
-                'task_weekly_plan_id' => $task->id,
-                'employee_id' => $item['emp_id'],
-                'code' => $item['code'],
-                'name' => $item['name'],
-            ]);
+            foreach ($data as $item) {
+                EmployeeTask::create([
+                    'task_weekly_plan_id' => $task->id,
+                    'employee_id' => $item['emp_id'],
+                    'code' => $item['code'],
+                    'name' => $item['name'],
+                ]);
+            }
+        }else{
+            $task = TaskWeeklyPlan::find($id);
+            $task->start_date = Carbon::now();
+            $task->use_dron = true;
+            $task->save();
         }
+
 
 
         return response()->json([
@@ -196,6 +204,7 @@ class TasksLoteController extends Controller
         $task->end_date = $end_date ?? null;
         $task->hours = $data['hours'];
         $task->weekly_plan_id = $data['weekly_plan_id'];
+        $task->slots = $data['slots'];
         $task->save();
 
         return response()->json([

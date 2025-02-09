@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class TaskWeeklyPlanInProgressResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        $assigned_employees = $this->employees->count();
+        return [
+            'id' => strval($this->id),
+            'task' => $this->task->name,
+            'finca' => $this->plan->finca->name,
+            'lote' => $this->lotePlantationControl->lote->name,
+            'week' => $this->plan->week,
+            'assigned_employees' => $assigned_employees,
+            'total_employees' => $this->workers_quantity,
+        ];
+    }
+}

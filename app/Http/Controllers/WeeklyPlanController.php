@@ -18,11 +18,12 @@ class WeeklyPlanController extends Controller
      */
     public function index(Request $request)
     {
+        $week = $request->input('week') ?? Carbon::now()->weekOfYear;
+        $year = $request->input('year') ?? Carbon::now()->year;
+
         if ($request->has('permission') && !in_array($request->input('permission'), ['admin', 'adminagricola'])) {
-            $weekly_plans = WeeklyPlan::whereHas('finca', function ($query) use ($request) {
-                $current_week = Carbon::now()->weekOfYear;
-                $current_year = Carbon::now()->year;
-                $query->where('name', 'LIKE', '%' . $request->input('permission') . '%')->where('week',$current_week)->OrWhere('week',$current_week-1)->where('year',$current_year);
+            $weekly_plans = WeeklyPlan::whereHas('finca', function ($query) use ($request,$week,$year) {
+                $query->where('name', 'LIKE', '%' . $request->input('permission') . '%')->where('week',$week)->OrWhere('week',$week-1)->where('year',$year);
             })->orderByRaw('year DESC')
                 ->orderBy('week', 'DESC')->paginate(10);
         } else {

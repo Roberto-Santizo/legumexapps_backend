@@ -46,6 +46,7 @@ class WeeklyPlanExport implements FromCollection, WithHeadings, WithTitle, WithS
                         $end_date = $task->end_date;
                         $performace = $start_date->diffInHours($end_date) - $diff_hours;
                     }
+
                     $rows->push([
                         'FINCA' => $weekly_plan->finca->name,
                         'SEMANA CALENDARIO' => $weekly_plan->week,
@@ -71,7 +72,7 @@ class WeeklyPlanExport implements FromCollection, WithHeadings, WithTitle, WithS
                             $reported_hours = $assignment->start_date->diffInHours($assignment->end_date);
                             $rendimiento_teorico = ($reported_hours * $emplooyes);
                             $rendimiento_real = $assignment->plants / 120;
-
+                            
                             $rows->push([
                                 'FINCA' => $weekly_plan->finca->name,
                                 'SEMANA CALENDARIO' => $weekly_plan->week,
