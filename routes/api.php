@@ -99,6 +99,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/tasks-crops-in-progress',[DashboardAgricolaController::class,'GetTasksCropInProgress']);
     Route::get('/finished-tasks',[DashboardAgricolaController::class,'GetFinishedTasks']);
     Route::get('/finished-tasks-crop',[DashboardAgricolaController::class,'GetFinishedTasksCrop']);
+    Route::get('/finished-total-tasks-finca',[DashboardAgricolaController::class,'GetFinishedTasksByFinca']);
 
 });
 

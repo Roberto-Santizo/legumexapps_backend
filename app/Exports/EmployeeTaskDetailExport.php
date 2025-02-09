@@ -125,7 +125,7 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
     public function processTaskCrop($task, &$rows)
     {
         foreach ($task->assigments as $assignment) {
-            if ($assignment->end_date) {
+            if ($assignment->end_date && $assignment->lbs_planta) {
                 foreach ($assignment->employees as $employeeAssignment) {
                     $day = $assignment->start_date->IsoFormat('dddd');
                     $percentage = $employeeAssignment->lbs / $assignment->lbs_finca;
