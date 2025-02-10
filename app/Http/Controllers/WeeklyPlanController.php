@@ -79,9 +79,9 @@ class WeeklyPlanController extends Controller
             return [
                 'lote' => LotePlantationControl::find($key)->lote->name,
                 'lote_plantation_control_id' => strval($key),
-                'total_budget' => $group->sum('budget'),
+                'total_budget' => round($group->sum('budget'),2),
                 'total_workers' => $group->sum('workers_quantity'),
-                'total_hours' => $group->sum('hours'),
+                'total_hours' => round($group->sum('hours'),2),
                 'total_tasks' => $group->count(),
                 'finished_tasks' => $group->filter(function ($task) {
                     return !is_null($task->end_date);

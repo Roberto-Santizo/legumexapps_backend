@@ -76,7 +76,7 @@ class DashboardAgricolaController extends Controller
                     }
                 }
             }
-            $employee->weekly_hours = $weekly_hours;
+            $employee->weekly_hours = round($weekly_hours,2);
             $employee->assigned = $flag;
             return $employee;
         });
