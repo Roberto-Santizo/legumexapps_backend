@@ -8,6 +8,7 @@ use App\Http\Resources\TaskLoteResource;
 use App\Http\Resources\TaskWeeklyPlanDetailsCollection;
 use App\Http\Resources\TaskWeeklyPlanDetailsResource;
 use App\Http\Resources\TaskWeeklyPlanResource;
+use App\Models\BinnacleTaskWeeklyPlan;
 use App\Models\EmployeeTask;
 use App\Models\Lote;
 use App\Models\PartialClosure;
@@ -15,6 +16,7 @@ use App\Models\TaskInsumos;
 use App\Models\TaskWeeklyPlan;
 use App\Models\WeeklyPlan;
 use Carbon\Carbon;
+use Error;
 use Illuminate\Http\Request;
 
 class TasksLoteController extends Controller
@@ -140,7 +142,7 @@ class TasksLoteController extends Controller
                     'name' => $item['name'],
                 ]);
             }
-        }else{
+        } else {
             $task = TaskWeeklyPlan::find($id);
             $task->start_date = Carbon::now();
             $task->use_dron = true;
@@ -198,14 +200,31 @@ class TasksLoteController extends Controller
         }
 
 
-
-        $task->budget = $data['budget'];
-        $task->start_date = $start_date ?? null;
-        $task->end_date = $end_date ?? null;
-        $task->hours = $data['hours'];
-        $task->weekly_plan_id = $data['weekly_plan_id'];
-        $task->slots = $data['slots'];
-        $task->save();
+        try {
+            $task->budget = $data['budget'];
+            $task->start_date = $start_date ?? null;
+            $task->end_date = $end_date ?? null;
+            $task->hours = $data['hours'];
+            $task->slots = $data['slots'];
+    
+            if ($task->weekly_plan_id != $data['weekly_plan_id']) {
+                $dest = WeeklyPlan::find($data['weekly_plan_id']);
+    
+                if ($dest->finca->id != $task->plan->finca->id) {
+                    throw new Error("Información no válida");
+                }
+                BinnacleTaskWeeklyPlan::create([
+                    'task_weekly_plan_id' => $task->id,
+                    'from_plan' => $task->plan->id,
+                    'to_plan' => $dest->id
+                ]);
+                $task->weekly_plan_id = $data['weekly_plan_id'];
+            }
+    
+            $task->save();
+        } catch (\Throwable $th) {
+            throw $th;
+        }
 
         return response()->json([
             'message' => 'Task Updated Successfully',

@@ -15,6 +15,7 @@ class RecipeSeeder extends Seeder
     {
         $data = [
             ['id' => 1, 'name' => 'CALOR'],
+            ['id' => 2, 'name' => 'FRIO'],
         ];
 
         Recipe::insert($data);

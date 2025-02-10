@@ -60,8 +60,8 @@ class WeeklyPlanExport implements FromCollection, WithHeadings, WithTitle, WithS
                         'HORA RENDIMIENTO TEORICO' => $task->hours,
                         'HORA RENDIMIENTO REAL' => ($task->end_date) ? $performace : '',
                         'RENDIMIENTO' => ($task->end_date) ? (($task->hours / $performace) * 100) : '',
-                        // 'ATRASADA' => ($tarea->movimientos->count() > 0) ? 'ATRASADA' : 'PLANIFICADA',
-                        // 'SEMANA ORIGEN' => ($tarea->movimientos->count() > 0) ? $tarea->movimientos()->orderBy('id', 'DESC')->first()->plan_origen->semana : 'PLANIFICADA',
+                        'ATRASADA' => ($task->weeklyPlanChanges->count() > 0) ? 'ATRASADA' : 'PLANIFICADA',
+                        'SEMANA ORIGEN' => ($task->weeklyPlanChanges->count() > 0) ? $task->weeklyPlanChanges->last()->WeeklyPlanOrigin->week : 'PLANIFICADA',
                     ]);
                 }
 

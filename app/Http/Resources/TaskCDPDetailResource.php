@@ -18,8 +18,8 @@ class TaskCDPDetailResource extends JsonResource
     {
         $diff_hours = 0;
         $date_week = Carbon::now()->setISODate($this->plan->year, $this->plan->week)->startOfWeek();
-        $current_week = Carbon::now();
-        $aplication_week = (int)abs($date_week->diffInWeeks($current_week));
+        $date = $this->lotePlantationControl->cdp->start_date;
+        $aplication_week = (int)abs($date->diffInWeeks($date_week));
         
         $real_hours = $this->end_date ? round(($this->start_date->diffInHours($this->end_date) - $diff_hours), 2) : 0;
         return [

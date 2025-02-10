@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\EmployeeCollection;
 use App\Models\Employee;
 use App\Models\EmployeeTask;
+use App\Models\EmployeeTaskCrop;
 use App\Models\Finca;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -28,8 +29,15 @@ class EmployeeController extends Controller
         }
         
         $filter_employees = $employees->filter(function($employee){
-            $assignment = EmployeeTask::where('employee_id',$employee->emp_id)->whereDate('created_at',Carbon::now())->first();
-            if(!$assignment){
+            $assignment = EmployeeTask::where('employee_id',$employee->emp_id)->whereDate('created_at',Carbon::now())->whereHas('task_weekly_plan',function($query){
+                $query->where('end_date',null);
+            })->first();
+
+            $assignmentCrop = EmployeeTaskCrop::where('employee_id',$employee->emp_id)->whereDate('created_at',Carbon::now())->whereHas('assignment',function($query){
+                $query->where('end_date',null);
+            })->first();
+
+            if(!$assignment && !$assignmentCrop){
                 return $employee;
             }
         });

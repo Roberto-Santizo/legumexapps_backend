@@ -17,6 +17,6 @@ class EmployeeTaskCrop extends Model
 
     public function assignment()
     {
-        return $this->belongsTo(DailyAssignments::class,'id','daily_assignment_id');
+        return $this->belongsTo(DailyAssignments::class,'daily_assignment_id','id');
     }
 }

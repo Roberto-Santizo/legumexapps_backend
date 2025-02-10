@@ -222,4 +222,17 @@ class TasksCropController extends Controller
             'data' => EmployeeTaskCropResource::collection($task->employees()->where('daily_assignment_id', $task->assignment_today->id)->get())
         ]);
     }
+
+    public function GetAssignedEmployees(string $id)
+    {
+        $assigment = DailyAssignments::find($id);
+
+        return response()->json([
+            'task' => $assigment->TaskCropWeeklyPlan->task->name,
+            'week' => $assigment->TaskCropWeeklyPlan->plan->week,
+            'finca' => $assigment->TaskCropWeeklyPlan->plan->finca->name,
+            'date_assignment' => $assigment->start_date,
+            'data' => EmployeeTaskCropResource::collection($assigment->employees)
+        ]);
+    }
 }

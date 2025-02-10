@@ -52,4 +52,9 @@ class TaskWeeklyPlan extends Model
     {
         return $this->hasMany(TaskInsumos::class);
     }
+
+    public function weeklyPlanChanges() 
+    {
+        return $this->hasMany(BinnacleTaskWeeklyPlan::class);
+    }
 }

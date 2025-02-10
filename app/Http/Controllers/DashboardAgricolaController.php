@@ -10,6 +10,7 @@ use App\Http\Resources\TasksCropWeeklyPlanInProgressResource;
 use App\Http\Resources\TaskWeeklyPlanInProgressResource;
 use App\Models\DailyAssignments;
 use App\Models\EmployeeTask;
+use App\Models\EmployeeTaskCrop;
 use App\Models\PersonnelEmployee;
 use App\Models\TaskCropWeeklyPlan;
 use App\Models\TaskWeeklyPlan;
@@ -55,16 +56,24 @@ class DashboardAgricolaController extends Controller
         $format_employees = $employees->map(function ($employee) use ($week, $year) {
             $flag = false;
             $assignments = EmployeeTask::where('code', $employee->last_name)->whereHas('task_weekly_plan.plan', function ($query) use ($week, $year) {
-                $query->where('week', $week);
-                $query->where('year', $year);
+                $query->where('week', $week)->where('year',$year);
             })->get();
+            $assignmentsCrops = EmployeeTaskCrop::where('code', $employee->last_name)->whereHas('assignment.TaskCropWeeklyPlan.plan', function ($query) use ($week, $year) {
+                $query->where('week', $week)->where('year',$year);
+            })->get();
+
             $weekly_hours = 0;
-            if ($assignments->count()) {
+            if ($assignments->count() || $assignmentsCrops->count()) {
                 foreach ($assignments as $assignment) {
                     if (!$assignment->task_weekly_plan->end_date) {
                         $flag = true;
                     }
                     $weekly_hours += ($assignment->task_weekly_plan->hours / $assignment->task_weekly_plan->employees->count());
+                }
+                foreach($assignmentsCrops as $assigmentCrop){
+                    if(!$assigmentCrop->assignment->end_date){
+                        $flag = true;
+                    }
                 }
             }
             $employee->weekly_hours = $weekly_hours;
@@ -157,7 +166,7 @@ class DashboardAgricolaController extends Controller
             })->get();
     
         }else{
-            $tasks = DailyAssignments::whereNot('end_date', null)->whereDate('start_date', Carbon::today())->whereHas('TaskCropWeeklyPlan.plan', function ($query) use ($week, $year) {
+            $tasks = DailyAssignments::whereNot('end_date', null)->whereHas('TaskCropWeeklyPlan.plan', function ($query) use ($week, $year) {
                 $query->where('week',$week)->OrWhere('week',$week)->where('year',$year);
             })->get();
     
