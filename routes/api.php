@@ -9,6 +9,7 @@ use App\Http\Controllers\FincaController;
 use App\Http\Controllers\InsumosController;
 use App\Http\Controllers\LoteController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
@@ -102,6 +103,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/finished-tasks',[DashboardAgricolaController::class,'GetFinishedTasks']);
     Route::get('/finished-tasks-crop',[DashboardAgricolaController::class,'GetFinishedTasksCrop']);
     Route::get('/finished-total-tasks-finca',[DashboardAgricolaController::class,'GetFinishedTasksByFinca']);
+
+    //CALIDAD
+    Route::apiResource('/products',ProductController::class);
 
 });
 

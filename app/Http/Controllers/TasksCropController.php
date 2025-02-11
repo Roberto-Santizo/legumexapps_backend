@@ -8,7 +8,6 @@ use App\Http\Resources\EmployeeTaskCropResource;
 use App\Http\Resources\EmployeeTaskCropSummaryResource;
 use App\Http\Resources\TaskCropIncomplemeteAssignmentResource;
 use App\Http\Resources\TaskCropResource;
-use App\Http\Resources\TaskCropWeeklyPlanDetails;
 use App\Http\Resources\TaskCropWeeklyPlanDetailsResource;
 use App\Models\DailyAssignments;
 use App\Models\EmployeeTaskCrop;
