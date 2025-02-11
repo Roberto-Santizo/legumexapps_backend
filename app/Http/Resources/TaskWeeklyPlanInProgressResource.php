@@ -24,7 +24,7 @@ class TaskWeeklyPlanInProgressResource extends JsonResource
             'week' => $this->plan->week,
             'assigned_employees' => $assigned_employees,
             'total_employees' => $this->workers_quantity,
-            'paused' => !$paused->end_date ? true : false
+            'paused' => ($paused && !$paused->end_date) ? true : false
         ];
     }
 }
