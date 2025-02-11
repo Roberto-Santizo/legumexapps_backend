@@ -98,11 +98,11 @@ class DashboardAgricolaController extends Controller
                 $query->where('name', 'LIKE', '%' . $request->input('permission') . '%');
             })->whereHas('plan',function($query) use($week,$year){
                 $query->where('week',$week)->OrWhere('week',$week)->where('year',$year);
-            })->whereDate('start_date', Carbon::today())->where('end_date', null)->get();
+            })->whereNot('start_date', null)->where('end_date', null)->get();
         }else{
             $tasks = TaskWeeklyPlan::whereHas('plan', function ($query) use ($week, $year) {
                 $query->where('week',$week)->OrWhere('week',$week)->where('year',$year);
-            })->whereDate('start_date', Carbon::today())->where('end_date', null)->get();
+            })->whereNot('start_date', null)->where('end_date', null)->get();
         }
         
 

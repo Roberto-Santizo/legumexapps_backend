@@ -15,6 +15,7 @@ class TaskWeeklyPlanInProgressResource extends JsonResource
     public function toArray(Request $request): array
     {
         $assigned_employees = $this->employees->count();
+        $paused = $this->closures->last();
         return [
             'id' => strval($this->id),
             'task' => $this->task->name,
@@ -23,6 +24,7 @@ class TaskWeeklyPlanInProgressResource extends JsonResource
             'week' => $this->plan->week,
             'assigned_employees' => $assigned_employees,
             'total_employees' => $this->workers_quantity,
+            'paused' => !$paused->end_date ? true : false
         ];
     }
 }
