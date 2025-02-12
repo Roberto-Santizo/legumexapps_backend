@@ -140,12 +140,12 @@ class DashboardAgricolaController extends Controller
             $tasks = DailyAssignments::where('end_date', null)->whereDate('start_date', Carbon::today())->whereHas('TaskCropWeeklyPlan.plan.finca', function ($query) use ($request) {
                 $query->where('name', 'LIKE', '%' . $request->input('permission') . '%');
             })->whereHas('TaskCropWeeklyPlan.plan',function($query) use($week,$year){
-                $query->where('week',$week)->OrWhere('week',$week)->where('year',$year);
+                $query->where('week',$week)->where('year',$year);
             })->get();
     
         }else{
             $tasks = DailyAssignments::where('end_date', null)->whereDate('start_date', Carbon::today())->whereHas('TaskCropWeeklyPlan.plan', function ($query) use ($week, $year) {
-                $query->where('week',$week)->OrWhere('week',$week)->where('year',$year);
+                $query->where('week',$week)->where('year',$year);
             })->get();
     
         }

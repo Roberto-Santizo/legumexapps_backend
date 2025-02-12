@@ -206,6 +206,7 @@ class TasksLoteController extends Controller
             $task->end_date = $end_date ?? null;
             $task->hours = $data['hours'];
             $task->slots = $data['slots'];
+            $task->workers_quantity = $data['slots'];
     
             if ($task->weekly_plan_id != $data['weekly_plan_id']) {
                 $dest = WeeklyPlan::find($data['weekly_plan_id']);
