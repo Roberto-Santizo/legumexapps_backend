@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BasketController;
+use App\Http\Controllers\BoletaRMPController;
 use App\Http\Controllers\CDPController;
 use App\Http\Controllers\CropController;
 use App\Http\Controllers\DashboardAgricolaController;
@@ -12,6 +14,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RmReceptionsController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TareaController;
 use App\Http\Controllers\TaskCropController;
@@ -104,8 +107,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/finished-tasks-crop',[DashboardAgricolaController::class,'GetFinishedTasksCrop']);
     Route::get('/finished-total-tasks-finca',[DashboardAgricolaController::class,'GetFinishedTasksByFinca']);
 
+    //BASKETS
+    Route::apiResource('/baskets',BasketController::class);
+    Route::get('/baskets-all',[BasketController::class,'getAllBaskets']);
+
     //CALIDAD
     Route::apiResource('/products',ProductController::class);
+    
+    //BOLETAS RECEPCIÓN MATERIA PRIMA
+    Route::apiResource('/boleta-rmp',RmReceptionsController::class);
 
 });
 
