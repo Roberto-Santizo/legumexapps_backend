@@ -12,6 +12,7 @@ use App\Http\Controllers\InsumosController;
 use App\Http\Controllers\LoteController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\QualityVarietyController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RmReceptionsController;
@@ -111,11 +112,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/baskets',BasketController::class);
     Route::get('/baskets-all',[BasketController::class,'getAllBaskets']);
 
+    //VARIEDADES
+    Route::apiResource('/quality-variety',QualityVarietyController::class);
+    Route::get('/quality-variety-all',[QualityVarietyController::class,'GetAllVarieties']);
+
     //CALIDAD
     Route::apiResource('/products',ProductController::class);
     
     //BOLETAS RECEPCIÓN MATERIA PRIMA
     Route::apiResource('/boleta-rmp',RmReceptionsController::class);
+    Route::post('/boleta-rmp/prod/{id}',[RmReceptionsController::class,'updateProd']);
 
 });
 
