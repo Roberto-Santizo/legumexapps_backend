@@ -6,11 +6,14 @@ use App\Http\Controllers\BoletaRMPController;
 use App\Http\Controllers\CDPController;
 use App\Http\Controllers\CropController;
 use App\Http\Controllers\DashboardAgricolaController;
+use App\Http\Controllers\DefectController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\FincaController;
+use App\Http\Controllers\InspectorController;
 use App\Http\Controllers\InsumosController;
 use App\Http\Controllers\LoteController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\ProducersController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\QualityVarietyController;
 use App\Http\Controllers\RecipeController;
@@ -108,17 +111,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/finished-tasks-crop',[DashboardAgricolaController::class,'GetFinishedTasksCrop']);
     Route::get('/finished-total-tasks-finca',[DashboardAgricolaController::class,'GetFinishedTasksByFinca']);
 
-    //BASKETS
     Route::apiResource('/baskets',BasketController::class);
     Route::get('/baskets-all',[BasketController::class,'getAllBaskets']);
 
-    //VARIEDADES
     Route::apiResource('/quality-variety',QualityVarietyController::class);
     Route::get('/quality-variety-all',[QualityVarietyController::class,'GetAllVarieties']);
 
-    //CALIDAD
+    Route::apiResource('/defects',DefectController::class);
+    Route::GET('/defects-by-variety/{quality_variety_id}',[DefectController::class,'GetDefectsByVarietyId']);
+
     Route::apiResource('/products',ProductController::class);
     
+    Route::apiResource('/producers',ProducersController::class);
+    Route::get('/producers-all',[ProducersController::class,'GetAllProducers']);
+
+    Route::apiResource('/inspectors',InspectorController::class);
+
     //BOLETAS RECEPCIÓN MATERIA PRIMA
     Route::apiResource('/boleta-rmp',RmReceptionsController::class);
     Route::post('/boleta-rmp/prod/{id}',[RmReceptionsController::class,'updateProd']);
