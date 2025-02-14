@@ -23,7 +23,9 @@ class EmployeeController extends Controller
 
         $finca = Finca::find($data['id']);
         if($finca->id === 2){
-            $employees = Employee::where('terminal_id',1008)->orWhere('terminal_id',1009)->whereDate('punch_time',Carbon::now())->get();
+            $employees = Employee::where(function ($query) {$query->where('terminal_id', 1008)->orWhere('terminal_id', 1009);})
+            ->whereDate('punch_time', Carbon::now())
+            ->get();
         }else{
             $employees = Employee::where('terminal_id',$finca->terminal_id)->whereDate('punch_time',Carbon::now())->get();
         }
