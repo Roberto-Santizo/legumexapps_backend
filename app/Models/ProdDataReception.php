@@ -12,6 +12,6 @@ class ProdDataReception extends Model
         'weight_baskets',
         'gross_weight',
         'net_weight',
-        'inspector_signature'
+        'receptor_signature'
     ];
 }

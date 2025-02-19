@@ -9,12 +9,13 @@ class Defect extends Model
     protected $fillable = [
         'name',
         'tolerance_percentage',
-        'quality_variety_id'
+        'product_id',
+        'status'
     ];
 
-    public function quality_variety()
+    public function product()
     {
-        return $this->belongsTo(QualityVariety::class);
+        return $this->belongsTo(Product::class);
     }
     
 }

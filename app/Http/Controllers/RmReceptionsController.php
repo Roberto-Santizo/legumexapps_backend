@@ -6,9 +6,12 @@ use App\Http\Requests\CreateBoletaRMPRequest;
 use App\Http\Resources\RmReceptionDetailResource;
 use App\Http\Resources\RmReceptionsResource;
 use App\Models\Basket;
+use App\Models\Defect;
 use App\Models\FieldDataReception;
 use App\Models\ProdDataReception;
 use App\Models\Product;
+use App\Models\QualityControlDefect;
+use App\Models\QualityControlDoc;
 use App\Models\RmReception;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -112,10 +115,10 @@ class RmReceptionsController extends Controller
             $basket = Basket::find($data['basket_id']);
             $rm_reception = RmReception::find($id);
 
-            if(!$rm_reception){
+            if (!$rm_reception) {
                 return response()->json([
                     'message' => 'Doc Not Found'
-                ],404);
+                ], 404);
             }
             $tara =  $data['total_baskets'] * $basket->weight;
 
@@ -125,30 +128,124 @@ class RmReceptionsController extends Controller
                 "weight_baskets" => $tara,
                 "gross_weight" => $data['gross_weight'],
                 "net_weight" => $data['gross_weight'] - $tara,
-                "inspector_signature" => $filename1
+                "receptor_signature" => $filename1
             ]);
 
             $rm_reception->status = 2;
             $rm_reception->save();
-            
+
             return response()->json([
                 'message' => 'Data Updated Successfully'
             ]);
         } catch (\Throwable $th) {
-            //throw $th;
+            return response()->json([
+                'message' => $th->getMessage()
+            ],500);
         }
     }
 
     public function updateCalidad(Request $request, string $id)
     {
-        //
+        $data = $request->validate([
+            'data' => 'required',
+            'results' => 'required',
+        ]);
+
+        $rm_reception = RmReception::find($id);
+
+        if (!$rm_reception) {
+            return response()->json([
+                'msg' => 'Doc Not Found'
+            ], 404);
+        }
+
+        $signature1 = $data['data']['inspector_signature'];
+
+        try {
+            if($data['data']['isMinimunRequire']){
+                $rm_reception->status = 3;
+            }else{
+                $rm_reception->status = 4;
+            }
+            $rm_reception->save();
+            list(, $signature1) = explode(',', $signature1);
+            $signature1 = base64_decode($signature1);
+            $filename1 = 'signatures/' . uniqid() . '.png';
+
+            Storage::disk('public')->put($filename1, $signature1);
+            $doc = QualityControlDoc::create([
+                'rm_reception_id' => $rm_reception->id,
+                'producer_id' => $data['data']['producer_id'],
+                'net_weight' => $data['data']['net_weight'],
+                'no_doc_cosechero' => $data['data']['no_doc_cosechero'],
+                'sample_units' => $data['data']['sample_units'],
+                'total_baskets' => $data['data']['total_baskets'],
+                'ph' => $data['data']['ph'],
+                'brix' => $data['data']['brix'],
+                'percentage' => $data['data']['percentage'],
+                'valid_pounds' => $data['data']['valid_pounds'],
+                'user_id' => $request->user()->id,
+                'doc_date' => Carbon::now(),
+                'observations' => $data['data']['observations'],
+                'inspector_signature' => $filename1
+            ]);
+
+            foreach ($data['results'] as $result) {
+                $defect = Defect::find($result['id']);
+
+                if(!$defect){
+                    return response()->json([
+                        'message' => 'Defect Not Found'
+                    ], 404);
+                }
+
+                QualityControlDefect::create([
+                    'quality_control_doc_id' => $doc->id,
+                    'defect_id' => $defect->id,
+                    'input' => $result['input'],
+                    'result' => $result['result'],
+                    'tolerance_percentage' => $result['tolerance_percentage']
+                ]);
+                
+            }
+
+            return response()->json([
+                'message' => 'Data Updated Successfully'
+            ]); 
+        } catch (\Throwable $th) {
+           return response()->json([
+               'message' => $th->getMessage()
+           ], 500);
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function GenerateGRN(Request $request, string $id)
     {
-        //
+        $data = $request->validate([
+            'grn' => 'required',
+        ]);
+
+        $rm_reception = RmReception::find($id);
+
+        if (!$rm_reception) {
+            return response()->json([
+                'msg' => 'Doc Not Found'
+            ], 404);
+        }
+
+        try {
+            $rm_reception->grn = $data['grn'];
+            $rm_reception->status = 5;
+            $rm_reception->save();
+
+            return response()->json([
+                'message' => 'Data Updated Successfully'
+            ]);
+        } catch (\Throwable $th) {
+           return response()->json([
+               'message' => $th->getMessage()
+           ], 500);
+        }
+
     }
 }

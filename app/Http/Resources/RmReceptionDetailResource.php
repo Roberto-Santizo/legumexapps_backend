@@ -17,6 +17,7 @@ class RmReceptionDetailResource extends JsonResource
         $net_weight = $this->field_data->weight -  $this->field_data->weight_baskets;
         return [
             'id' => strval($this->id),
+            'product_id' => strval($this->field_data->product->id),
             'plate' => $this->field_data->transport_plate,
             'product' => $this->field_data->product->name,
             'variety' => $this->field_data->product->variety->name,
@@ -29,7 +30,8 @@ class RmReceptionDetailResource extends JsonResource
             'net_weight' =>  $net_weight,
             'percentage_field' => $this->field_data->quality_percentage,
             'valid_pounds' => (($this->field_data->quality_percentage/100)*$net_weight),
-            'status' => $this->status   
+            'status' => $this->status,
+            'minimun_percentage' => $this->field_data->quality_percentage
 
         ];
     }

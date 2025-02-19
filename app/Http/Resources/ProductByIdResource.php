@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class DefectResource extends JsonResource
+class ProductByIdResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,8 +17,9 @@ class DefectResource extends JsonResource
         return [
             'id' => strval($this->id),
             'name' => $this->name,
-            'tolerance_percentage' => $this->tolerance_percentage,
-            'status' => $this->status ? true : false,
+            'variety_product_id' => strval($this->variety_product_id),
+            'accepted_percentage' => $this->accepted_percentage,
+            'defects' => DefectResource::collection($this->defects)
         ];
     }
 }

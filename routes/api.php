@@ -26,7 +26,9 @@ use App\Http\Controllers\TasksCropController;
 use App\Http\Controllers\TasksLoteController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UsersController;
+use App\Http\Controllers\VarietyProductsController;
 use App\Http\Controllers\WeeklyPlanController;
+use App\Models\VarietyProduct;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -114,13 +116,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/baskets',BasketController::class);
     Route::get('/baskets-all',[BasketController::class,'getAllBaskets']);
 
-    Route::apiResource('/quality-variety',QualityVarietyController::class);
-    Route::get('/quality-variety-all',[QualityVarietyController::class,'GetAllVarieties']);
-
     Route::apiResource('/defects',DefectController::class);
-    Route::GET('/defects-by-variety/{quality_variety_id}',[DefectController::class,'GetDefectsByVarietyId']);
-
+    Route::get('/defects-by-product/{product_id}',[DefectController::class,'GetDefectsByProduct']);
+    
     Route::apiResource('/products',ProductController::class);
+    Route::get('/products-all',[ProductController::class,'GetAllProducts']);
+
+    Route::apiResource('/variety-products',VarietyProductsController::class);
+    Route::get('/variety-products-all',[VarietyProductsController::class,'GetAllVarieties']);
     
     Route::apiResource('/producers',ProducersController::class);
     Route::get('/producers-all',[ProducersController::class,'GetAllProducers']);
@@ -130,6 +133,8 @@ Route::middleware('auth:sanctum')->group(function () {
     //BOLETAS RECEPCIÓN MATERIA PRIMA
     Route::apiResource('/boleta-rmp',RmReceptionsController::class);
     Route::post('/boleta-rmp/prod/{id}',[RmReceptionsController::class,'updateProd']);
+    Route::post('/boleta-rmp/calidad/{id}',[RmReceptionsController::class,'updateCalidad']);
+    Route::post('/boleta-rmp/generate-grn/{id}',[RmReceptionsController::class,'GenerateGRN']);
 
 });
 

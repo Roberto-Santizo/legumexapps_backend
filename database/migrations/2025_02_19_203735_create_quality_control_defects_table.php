@@ -11,9 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('quality_varieties', function (Blueprint $table) {
+        Schema::create('quality_control_defects', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->foreignId('quality_control_doc_id')->constrained();
+            $table->foreignId('defect_id')->constrained();
+            $table->float('input');
+            $table->float('result');
+            $table->float('tolerance_percentage');
             $table->timestamps();
         });
     }
@@ -23,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('quality_varieties');
+        Schema::dropIfExists('quality_control_defects');
     }
 };
