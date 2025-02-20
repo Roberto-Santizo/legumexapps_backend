@@ -23,7 +23,6 @@ class CreateBoletaRMPRequest extends FormRequest
     {
         return [
             'cdp' => 'required',
-            'coordinator_name' => 'required',
             'inspector_name' => 'required',
             'pilot_name' => 'required',
             'product_id' => 'required',

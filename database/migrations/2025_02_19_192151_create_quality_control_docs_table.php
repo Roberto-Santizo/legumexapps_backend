@@ -17,8 +17,8 @@ return new class extends Migration
             $table->foreignId('rm_reception_id')->constrained();
             $table->foreignId('producer_id')->constrained();
             $table->float('net_weight');
-            $table->string('no_doc_cosechero');
-            $table->float('sample_units');
+            $table->string('no_doc_cosechero')->nullable();
+            $table->string('sample_units');
             $table->integer('total_baskets');
             $table->float('ph');
             $table->float('brix');

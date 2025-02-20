@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class FieldDataReception extends Model
 {
     protected $fillable = [
-        'coordinator_name',
+        'producer_id',
         'rm_reception_id',
         'product_id',
         'transport',
@@ -27,6 +27,16 @@ class FieldDataReception extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function basket()
+    {
+        return $this->belongsTo(Basket::class);
+    }
+
+    public function producer()
+    {
+        return $this->belongsTo(Producer::class);
     }
     
 }

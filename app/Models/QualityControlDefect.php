@@ -14,4 +14,9 @@ class QualityControlDefect extends Model
         'tolerance_percentage'
     ];
 
+    public function defect()
+    {
+        return $this->belongsTo(Defect::class, 'defect_id','id');
+    }
+
 }

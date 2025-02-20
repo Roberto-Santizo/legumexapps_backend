@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateBoletaRMPRequest;
 use App\Http\Resources\RmReceptionDetailResource;
+use App\Http\Resources\RmReceptionProdDataResource;
+use App\Http\Resources\RmReceptionQualityDocDataResource;
 use App\Http\Resources\RmReceptionsResource;
 use App\Models\Basket;
 use App\Models\Defect;
 use App\Models\FieldDataReception;
 use App\Models\ProdDataReception;
+use App\Models\Producer;
 use App\Models\Product;
 use App\Models\QualityControlDefect;
 use App\Models\QualityControlDoc;
@@ -56,8 +59,16 @@ class RmReceptionsController extends Controller
                 'doc_date' => Carbon::now()
             ]);
 
+            $producer = Producer::find($data['producer_id']);
+
+            if(!$producer){
+                return response()->json([
+                    'message' => 'Producer Not Found'
+                ], 404);
+            }
+
             FieldDataReception::create([
-                'coordinator_name' => $data['coordinator_name'],
+                'producer_id' => $producer->id,
                 'rm_reception_id' => $rm_reception->id,
                 'product_id' => $product->id,
                 'transport' => $data['transport'],
@@ -175,9 +186,9 @@ class RmReceptionsController extends Controller
             Storage::disk('public')->put($filename1, $signature1);
             $doc = QualityControlDoc::create([
                 'rm_reception_id' => $rm_reception->id,
-                'producer_id' => $data['data']['producer_id'],
+                'producer_id' => $rm_reception->field_data->producer->id,
                 'net_weight' => $data['data']['net_weight'],
-                'no_doc_cosechero' => $data['data']['no_doc_cosechero'],
+                'no_doc_cosechero' => $data['data']['no_doc_cosechero'] ?? null,
                 'sample_units' => $data['data']['sample_units'],
                 'total_baskets' => $data['data']['total_baskets'],
                 'ph' => $data['data']['ph'],
@@ -247,5 +258,26 @@ class RmReceptionsController extends Controller
            ], 500);
         }
 
+    }
+
+    public function GetInfoDoc(string $id)
+    {
+        $rm_reception = RmReception::find($id);
+
+        if (!$rm_reception) {
+            return response()->json([
+                'msg' => 'Doc Not Found'
+            ], 404);
+        }
+
+        $field_data = new RmReceptionDetailResource($rm_reception->load('field_data'));
+        $prod_data = new RmReceptionProdDataResource($rm_reception->load('prod_data'));
+        $quality_doc_data = new RmReceptionQualityDocDataResource($rm_reception->load('quality_control_doc_data'));
+
+        return response()->json([
+            'field_data' => $field_data,
+            'prod_data' => $prod_data,
+            'quality_doc_data' => $quality_doc_data
+        ]);
     }
 }

@@ -16,4 +16,14 @@ class RmReception extends Model
     {
         return $this->hasOne(FieldDataReception::class);
     }
+
+    public function prod_data()
+    {
+        return $this->hasOne(ProdDataReception::class);
+    }
+
+    public function quality_control_doc_data()
+    {
+        return $this->hasOne(QualityControlDoc::class);
+    }
 }

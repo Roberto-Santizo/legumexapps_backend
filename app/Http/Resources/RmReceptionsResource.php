@@ -19,7 +19,7 @@ class RmReceptionsResource extends JsonResource
             'plate' => $this->field_data->transport_plate,
             'product' => $this->field_data->product->name,
             'variety' => $this->field_data->product->variety->name,
-            'coordinator' => $this->field_data->coordinator_name,
+            'coordinator' => $this->field_data->producer->name,
             'cdp' => $this->field_data->cdp,
             'transport' => $this->field_data->transport,
             'status' => $this->status
