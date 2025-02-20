@@ -276,6 +276,7 @@ class RmReceptionsController extends Controller
 
         return response()->json([
             'status' => $rm_reception->status,
+            'grn' => $rm_reception->grn,
             'field_data' => $field_data,
             'prod_data' => $prod_data,
             'quality_doc_data' => $quality_doc_data

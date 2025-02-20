@@ -18,7 +18,7 @@ return new class extends Migration
             $table->float('weight_baskets');
             $table->float('gross_weight');
             $table->float('net_weight');
-            $table->string('inspector_signature');
+            $table->string('receptor_signature');
             $table->timestamps();
         });
     }
