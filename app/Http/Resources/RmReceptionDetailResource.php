@@ -16,7 +16,7 @@ class RmReceptionDetailResource extends JsonResource
     {
         $net_weight = $this->field_data->weight -  $this->field_data->weight_baskets;
         return [
-            'id' => strval($this->field_data->id),
+            'id' => strval($this->id),
             'producer_id' => strval($this->field_data->producer->id),
             'producer_code' => $this->field_data->producer->code,
             'product_id' => strval($this->field_data->product->id),

@@ -275,6 +275,7 @@ class RmReceptionsController extends Controller
         $quality_doc_data = new RmReceptionQualityDocDataResource($rm_reception->load('quality_control_doc_data'));
 
         return response()->json([
+            'status' => $rm_reception->status,
             'field_data' => $field_data,
             'prod_data' => $prod_data,
             'quality_doc_data' => $quality_doc_data
