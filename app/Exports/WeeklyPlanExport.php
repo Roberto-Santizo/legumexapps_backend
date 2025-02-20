@@ -51,6 +51,7 @@ class WeeklyPlanExport implements FromCollection, WithHeadings, WithTitle, WithS
                         'FINCA' => $weekly_plan->finca->name,
                         'SEMANA CALENDARIO' => $weekly_plan->week,
                         'LOTE' => $task->lotePlantationControl->lote->name,
+                        'CDP' => $task->lotePlantationControl->cdp->name,
                         'CODIGO TAREA' => $task->task->code,
                         'TAREA' => $task->task->name,
                         'EXTRAORDINARIA' => ($task->extraordinary) ?  'EXTRAORDINARIA' : 'PLANIFICADA',
@@ -77,6 +78,7 @@ class WeeklyPlanExport implements FromCollection, WithHeadings, WithTitle, WithS
                                 'FINCA' => $weekly_plan->finca->name,
                                 'SEMANA CALENDARIO' => $weekly_plan->week,
                                 'LOTE' => $task_crop->lotePlantationControl->lote->name,
+                                'CDP' => $task_crop->lotePlantationControl->cdp->name,
                                 'CODIGO TAREA' => $task_crop->task->code,
                                 'TAREA' => $task_crop->task->name,
                                 'EXTRAORDINARIA' => '',
@@ -102,7 +104,7 @@ class WeeklyPlanExport implements FromCollection, WithHeadings, WithTitle, WithS
 
     public function headings(): array
     {
-        return ['FINCA', 'SEMANA CALENDARIO', 'LOTE', 'CODIGO TAREA', 'TAREA', 'PLAN', 'ESTADO', 'FECHA DE INICIO', 'FECHA DE CIERRE', 'HORAS RENDIMIENTO TEORICO', 'HORAS RENDIMIENTO REAL', 'RENDIMIENTO', 'ATRASADA', 'SEMANA ORIGEN'];
+        return ['FINCA', 'SEMANA CALENDARIO', 'LOTE','CDP', 'CODIGO TAREA', 'TAREA', 'PLAN', 'ESTADO', 'FECHA DE INICIO', 'FECHA DE CIERRE', 'HORAS RENDIMIENTO TEORICO', 'HORAS RENDIMIENTO REAL', 'RENDIMIENTO', 'ATRASADA', 'SEMANA ORIGEN'];
     }
 
     public function styles(Worksheet $sheet)
