@@ -129,11 +129,9 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                 foreach ($assignment->employees as $employeeAssignment) {
                     $day = $assignment->start_date->IsoFormat('dddd');
                     $percentage = $employeeAssignment->lbs / $assignment->lbs_finca;
-                    $weight = round(($assignment->lbs_planta / $assignment->plants), 2);
-                    $total_crops = ($percentage * $assignment->lbs_planta) / $weight;
-                    $tperformance =  round(($weight * 960), 2);
-                    $budget = round(((($assignment->lbs_planta / $tperformance) * 8) * 11.98), 2);
-                    $hours = $total_crops / 120;
+                    $total_hours = $assignment->plants/150;
+                    $hours = $percentage*$total_hours;
+                    $budget = $hours*12.728;
                     $registrations = $this->getEmployeeRegistration($employeeAssignment->employee_id, $assignment->start_date);
 
                     $rows->push([
@@ -142,7 +140,7 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                         'LOTE' => $task->lotePlantationControl->lote->name,
                         'TAREA REALIZADA' => $task->task->name,
                         'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
-                        'MONTO' => round($percentage * $budget, 4),
+                        'MONTO' => $budget,
                         'HORAS TOTALES' => $hours,
                         'ENTRADA' => $registrations['entrance'],
                         'SALIDA' => $registrations['exit'],

@@ -165,7 +165,7 @@ class DashboardAgricolaController extends Controller
 
         if ($role[0] != 'admin' && $role[0] != 'adminagricola') {
             $permission = $request->user()->permissions()->first();
-            $tasks = DailyAssignments::whereNot('end_date', null)->whereDate('start_date', Carbon::today())->whereHas('TaskCropWeeklyPlan.plan.finca', function ($query) use ($permission) {
+            $tasks = DailyAssignments::whereNot('end_date', null)->whereHas('TaskCropWeeklyPlan.plan.finca', function ($query) use ($permission) {
                 $query->where('name', 'LIKE', '%' . $permission->name . '%');
             })->whereHas('TaskCropWeeklyPlan.plan', function ($query) use ($week, $year) {
                 $query->where('week', $week)->OrWhere('week', $week)->where('year', $year);

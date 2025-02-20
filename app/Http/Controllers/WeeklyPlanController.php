@@ -22,12 +22,11 @@ class WeeklyPlanController extends Controller
         $year = $request->input('year') ?? Carbon::now()->year;
 
         if ($request->has('permission') && !in_array($request->input('permission'), ['admin', 'adminagricola'])) {
-            $weekly_plans = WeeklyPlan::whereHas('finca', function ($query) use ($request,$week,$year) {
-                $query->where('name', 'LIKE', '%' . $request->input('permission') . '%')->where('week',$week)->OrWhere('week',$week-1)->where('year',$year);
-            })->orderByRaw('year DESC')
-                ->orderBy('week', 'DESC')->paginate(10);
+            $weekly_plans = WeeklyPlan::whereHas('finca', function ($query) use ($request, $week, $year) {
+                $query->where('name', 'LIKE', '%' . $request->input('permission') . '%')->where('week', $week)->OrWhere('week', $week - 1)->where('year', $year);
+            })->orderBy('created_at', 'DESC')->paginate(10);
         } else {
-            $weekly_plans = WeeklyPlan::orderBy('week', 'ASC') ->orderByRaw('year DESC')->orderBy('week', 'DESC')->paginate(10);
+            $weekly_plans = WeeklyPlan::orderBy('created_at', 'DESC')->paginate(10);
         }
 
         return new WeeklyPlanCollection($weekly_plans);
@@ -79,9 +78,9 @@ class WeeklyPlanController extends Controller
             return [
                 'lote' => LotePlantationControl::find($key)->lote->name,
                 'lote_plantation_control_id' => strval($key),
-                'total_budget' => round($group->sum('budget'),2),
+                'total_budget' => round($group->sum('budget'), 2),
                 'total_workers' => $group->sum('workers_quantity'),
-                'total_hours' => round($group->sum('hours'),2),
+                'total_hours' => round($group->sum('hours'), 2),
                 'total_tasks' => $group->count(),
                 'finished_tasks' => $group->filter(function ($task) {
                     return !is_null($task->end_date);
@@ -109,5 +108,4 @@ class WeeklyPlanController extends Controller
             ]
         ]);
     }
-
 }
