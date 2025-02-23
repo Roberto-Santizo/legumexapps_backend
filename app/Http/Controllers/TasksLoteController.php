@@ -189,12 +189,15 @@ class TasksLoteController extends Controller
         $data = $request->validated();
         $task = TaskWeeklyPlan::find($id);
 
-        if ($task->start_date) {
+        $start_date = $task->start_date;
+        $end_date = $task->end_date;
+
+        if ($task->start_date && $data['start_date']) {
             $draft_start_date = $data['start_date'] . ' ' . $data['start_time'];
             $start_date = Carbon::parse($draft_start_date);
         }
 
-        if ($task->end_date) {
+        if ($task->end_date && $data['end_date']) {
             $draft_end_date = $data['end_date'] . ' ' . $data['end_time'];
             $end_date = Carbon::parse($draft_end_date);
         }
@@ -206,7 +209,9 @@ class TasksLoteController extends Controller
             $task->end_date = $end_date ?? null;
             $task->hours = $data['hours'];
             $task->slots = $data['slots'];
+            $task->workers_quantity = $data['slots'];
     
+            
             if ($task->weekly_plan_id != $data['weekly_plan_id']) {
                 $dest = WeeklyPlan::find($data['weekly_plan_id']);
     

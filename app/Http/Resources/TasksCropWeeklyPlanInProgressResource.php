@@ -21,7 +21,8 @@ class TasksCropWeeklyPlanInProgressResource extends JsonResource
             'finca' => $this->TaskCropWeeklyPlan->plan->finca->name,
             'week' => $this->TaskCropWeeklyPlan->plan->week,
             'assigned_employees' => $this->employees->count(),
-            'total_employees' => null
+            'total_employees' => null,
+            'paused' => false
         ];
     }
 }

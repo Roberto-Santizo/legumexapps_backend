@@ -17,6 +17,7 @@ class TaskWeeklyPlanDetailsResource extends JsonResource
     {
         $aplication_week = 0;
         $diff_hours = 0;
+        $passed_hours = (!$this->end_date && $this->start_date) ? $this->start_date->diffInHours(Carbon::now()) : null;
 
         if($this->lotePlantationControl->cdp->end_date)
         {
@@ -56,7 +57,8 @@ class TaskWeeklyPlanDetailsResource extends JsonResource
                 ];
             }),
             'insumos' => $this->insumos ? TaskInsumosResource::collection($this->insumos) : [],
-            'use_dron' => $this->use_dron ? true : false
+            'use_dron' => $this->use_dron ? true : false,
+            'passed_hours' => $passed_hours ? round(($passed_hours  - $diff_hours),2) : null
         ];
     }
 }
