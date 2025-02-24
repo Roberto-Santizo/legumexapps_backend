@@ -16,6 +16,7 @@ class RmReceptionsResource extends JsonResource
     {
         return [
             'id' => strval($this->id),
+            'finca' => $this->finca->name,
             'plate' => $this->field_data->transport_plate,
             'product' => $this->field_data->product->name,
             'variety' => $this->field_data->product->variety->name,

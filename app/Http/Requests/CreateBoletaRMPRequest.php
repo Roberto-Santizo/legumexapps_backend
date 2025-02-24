@@ -24,6 +24,7 @@ class CreateBoletaRMPRequest extends FormRequest
         return [
             'cdp' => 'required',
             'producer_id' => 'required',
+            'finca_id'=> 'required',
             'inspector_name' => 'required',
             'pilot_name' => 'required',
             'product_id' => 'required',
@@ -32,9 +33,8 @@ class CreateBoletaRMPRequest extends FormRequest
             'transport' => 'required',
             'transport_plate' => 'required',
             'weight' => 'required',
-            'inspector_signature' => 'required',
-            'prod_signature' => 'required',
-            'basket_id' => 'required'
+            'basket_id' => 'required',
+            'calidad_signature' => 'required'
         ];
     }
 }

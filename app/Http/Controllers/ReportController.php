@@ -15,7 +15,7 @@ class ReportController extends Controller
         ]);
 
 
-        $fileName = 'Rerporte Plan Semanal.xlsx';
+        $fileName = 'Reporte Plan Semanal.xlsx';
         try {
             $file = Excel::raw(new WeeklyPlanExport($data['data']), \Maatwebsite\Excel\Excel::XLSX);
             return response()->json([

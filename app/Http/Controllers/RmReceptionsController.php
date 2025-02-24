@@ -10,6 +10,7 @@ use App\Http\Resources\RmReceptionsResource;
 use App\Models\Basket;
 use App\Models\Defect;
 use App\Models\FieldDataReception;
+use App\Models\Finca;
 use App\Models\ProdDataReception;
 use App\Models\Producer;
 use App\Models\Product;
@@ -36,27 +37,29 @@ class RmReceptionsController extends Controller
     public function store(CreateBoletaRMPRequest $request)
     {
         $data = $request->validated();
-        $signature1 = $data['inspector_signature'];
-        $signature2 = $data['prod_signature'];
+        $signature1 = $data['calidad_signature'];
+        // $signature2 = $data['prod_signature'];
 
         try {
             list(, $signature1) = explode(',', $signature1);
-            list(, $signature2) = explode(',', $signature2);
+            // list(, $signature2) = explode(',', $signature2);
 
             $signature1 = base64_decode($signature1);
-            $signature2 = base64_decode($signature2);
+            // $signature2 = base64_decode($signature2);
 
             $filename1 = 'signatures/' . uniqid() . '.png';
-            $filename2 = 'signatures/' . uniqid() . '.png';
+            // $filename2 = 'signatures/' . uniqid() . '.png';
 
             Storage::disk('public')->put($filename1, $signature1);
-            Storage::disk('public')->put($filename2, $signature2);
+            // Storage::disk('public')->put($filename2, $signature2);
 
             $product = Product::find($data['product_id']);
             $basket = Basket::find($data['basket_id']);
+            $finca = Finca::find($data['finca_id']);
 
             $rm_reception = RmReception::create([
-                'doc_date' => Carbon::now()
+                'doc_date' => Carbon::now(),
+                'finca_id' => $finca->id,
             ]);
 
             $producer = Producer::find($data['producer_id']);
@@ -81,8 +84,7 @@ class RmReceptionsController extends Controller
                 'weight_baskets' => round(($basket->weight * $data['total_baskets']), 2),
                 'quality_percentage' => $data['quality_percentage'],
                 'basket_id' => $basket->id,
-                'inspector_signature' => $filename1,
-                'prod_signature' => $filename2,
+                'calidad_signature' => $filename1,
             ]);
         } catch (\Throwable $th) {
             throw $th;

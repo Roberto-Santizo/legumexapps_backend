@@ -21,16 +21,23 @@ class WeeklyPlanController extends Controller
         $week = $request->input('week') ?? Carbon::now()->weekOfYear;
         $year = $request->input('year') ?? Carbon::now()->year;
 
-        if ($request->has('permission') && !in_array($request->input('permission'), ['admin', 'adminagricola'])) {
-            $weekly_plans = WeeklyPlan::whereHas('finca', function ($query) use ($request, $week, $year) {
-                $query->where('name', 'LIKE', '%' . $request->input('permission') . '%')->where('week', $week)->OrWhere('week', $week - 1)->where('year', $year);
-            })->orderBy('created_at', 'DESC')->paginate(10);
+        $role = $request->user()->getRoleNames();
+
+        if ($role[0] != 'admin' && $role[0] != 'adminagricola') {
+            $permission = $request->user()->permissions()->first();
+
+            $weekly_plans = WeeklyPlan::whereHas('finca', function ($query) use ($permission) {
+                $query->where('name', 'LIKE', '%' . $permission->name . '%');
+            })->where(function ($query) use ($week) {
+                $query->where('week', $week)->orWhere('week', $week - 1);
+            })->where('year', $year)->orderBy('created_at', 'DESC')->paginate(10);
         } else {
             $weekly_plans = WeeklyPlan::orderBy('created_at', 'DESC')->paginate(10);
         }
 
         return new WeeklyPlanCollection($weekly_plans);
     }
+
 
 
     public function GetAllPlans()

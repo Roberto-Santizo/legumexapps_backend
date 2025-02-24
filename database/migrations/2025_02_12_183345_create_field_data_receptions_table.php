@@ -26,8 +26,8 @@ return new class extends Migration
             $table->integer('total_baskets');
             $table->float('weight_baskets');
             $table->float('quality_percentage');
-            $table->string('inspector_signature');
-            $table->string('prod_signature');
+            $table->string('inspector_signature')->nullable();
+            $table->string('prod_signature')->nullable();
             $table->timestamps();
         });
     }

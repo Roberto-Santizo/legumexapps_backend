@@ -8,7 +8,8 @@ class RmReception extends Model
 {
     protected $fillable = [
         'grn',
-        'doc_date'
+        'doc_date',
+        'finca_id'
     ];
 
 
@@ -25,5 +26,10 @@ class RmReception extends Model
     public function quality_control_doc_data()
     {
         return $this->hasOne(QualityControlDoc::class);
+    }
+
+    public function finca()
+    {
+        return $this->belongsTo(Finca::class);
     }
 }

@@ -22,6 +22,7 @@ class FieldDataReception extends Model
         'quality_percentage',
         'inspector_signature',
         'prod_signature',
+        'calidad_signature'
     ];
 
     public function product()
