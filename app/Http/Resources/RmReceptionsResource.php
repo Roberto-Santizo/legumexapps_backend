@@ -23,7 +23,8 @@ class RmReceptionsResource extends JsonResource
             'coordinator' => $this->field_data->producer->name,
             'cdp' => $this->field_data->cdp,
             'transport' => $this->field_data->transport,
-            'status' => $this->status
+            'status' => $this->status,
+            'date' => $this->created_at->format('d-m-Y')
             
         ];
     }

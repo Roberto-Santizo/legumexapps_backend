@@ -26,9 +26,37 @@ class RmReceptionsController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return RmReceptionsResource::collection(RmReception::paginate(10));
+        $query = RmReception::query();
+
+        if($request->has('finca_id')){
+            $query->where('finca_id',$request->finca_id);
+        }
+
+        if($request->has('date')){
+            $query->whereDate('created_at',$request->date);
+        }
+
+        if($request->has('plate')){
+            $query->whereHas('field_data',function($query) use ($request){
+                $query->where('transport_plate','LIKE','%'.$request->plate.'%');
+            });
+        }
+
+        if($request->has('producer_id')){
+            $query->whereHas('field_data',function($query) use ($request){
+                $query->where('producer_id',$request->producer_id);
+            });
+        }
+
+        if($request->has('product_id')){
+            $query->whereHas('field_data',function($query) use ($request){
+                $query->where('product_id',$request->product_id);
+            });
+        }
+
+        return RmReceptionsResource::collection($query->paginate(10));
     }
 
     /**
