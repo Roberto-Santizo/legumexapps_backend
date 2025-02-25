@@ -301,11 +301,12 @@ class RmReceptionsController extends Controller
         }
 
         $field_data = new RmReceptionDetailResource($rm_reception->load('field_data'));
-        $prod_data = new RmReceptionProdDataResource($rm_reception->load('prod_data'));
-        $quality_doc_data = new RmReceptionQualityDocDataResource($rm_reception->load('quality_control_doc_data'));
+        $prod_data = $rm_reception->prod_data ? new RmReceptionProdDataResource($rm_reception->load('prod_data')) : null;
+        $quality_doc_data = $rm_reception->quality_control_doc_data ? new RmReceptionQualityDocDataResource($rm_reception->load('quality_control_doc_data')) : null;
 
         return response()->json([
             'status' => $rm_reception->status,
+            'finca' => $rm_reception->finca->name,
             'grn' => $rm_reception->grn,
             'field_data' => $field_data,
             'prod_data' => $prod_data,

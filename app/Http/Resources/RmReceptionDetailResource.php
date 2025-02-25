@@ -39,8 +39,9 @@ class RmReceptionDetailResource extends JsonResource
             'status' => $this->status,
             'minimun_percentage' => $this->field_data->quality_percentage,
             'total_baskets' => $this->field_data->total_baskets,
-            'inspector_agricola_signature' => $this->field_data->inspector_signature,
-            'producer_signature' => $this->field_data->prod_signature,
+            'calidad_signature' => $this->field_data->calidad_signature,
+            // 'inspector_agricola_signature' => $this->field_data->inspector_signature,
+            // 'producer_signature' => $this->field_data->prod_signature,
 
         ];
     }
