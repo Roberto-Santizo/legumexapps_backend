@@ -37,7 +37,7 @@ class RmReceptionDetailResource extends JsonResource
             'percentage_field' => $this->field_data->quality_percentage,
             'valid_pounds' => (($this->field_data->quality_percentage/100)*$net_weight),
             'status' => $this->status,
-            'minimun_percentage' => $this->field_data->quality_percentage,
+            'minimun_percentage' => $this->field_data->product->accepted_percentage,
             'total_baskets' => $this->field_data->total_baskets,
             'calidad_signature' => $this->field_data->calidad_signature,
             // 'inspector_agricola_signature' => $this->field_data->inspector_signature,

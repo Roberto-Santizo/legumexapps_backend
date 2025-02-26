@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('task_crop_weekly_plans', function (Blueprint $table) {
-            $table->boolean('status')->default(1);
+        Schema::table('rm_receptions', function (Blueprint $table) {
+            $table->boolean('consignacion');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('task_crop_weekly_plans', function (Blueprint $table) {
-            $table->dropColumn('status');
+        Schema::table('rm_receptions', function (Blueprint $table) {
+            $table->dropColumn('consignacion');
         });
     }
 };

@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('task_weekly_plan', function (Blueprint $table) {
+        Schema::table('task_weekly_plans', function (Blueprint $table) {
             $table->dropColumn('use_dron');
         });
     }

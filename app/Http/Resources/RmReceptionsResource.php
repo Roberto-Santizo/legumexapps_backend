@@ -24,7 +24,8 @@ class RmReceptionsResource extends JsonResource
             'cdp' => $this->field_data->cdp,
             'transport' => $this->field_data->transport,
             'status' => $this->status,
-            'date' => $this->created_at->format('d-m-Y')
+            'date' => $this->created_at->format('d-m-Y'),
+            'consignacion' => $this->consignacion ? true : false
             
         ];
     }

@@ -199,15 +199,14 @@ class RmReceptionsController extends Controller
                 'msg' => 'Doc Not Found'
             ], 404);
         }
-
+        
         $signature1 = $data['data']['inspector_signature'];
 
         try {
-            if($data['data']['isMinimunRequire']){
-                $rm_reception->status = 3;
-            }else{
-                $rm_reception->status = 4;
+            if(!$data['data']['isMinimunRequire']){
+                $rm_reception->consignacion = 1;
             }
+            $rm_reception->status = 3;
             $rm_reception->save();
             list(, $signature1) = explode(',', $signature1);
             $signature1 = base64_decode($signature1);
@@ -307,6 +306,7 @@ class RmReceptionsController extends Controller
         return response()->json([
             'status' => $rm_reception->status,
             'finca' => $rm_reception->finca->name,
+            'consignacion' => $rm_reception->consignacion ? true : false,
             'grn' => $rm_reception->grn,
             'field_data' => $field_data,
             'prod_data' => $prod_data,
