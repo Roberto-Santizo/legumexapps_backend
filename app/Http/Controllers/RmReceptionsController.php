@@ -7,6 +7,7 @@ use App\Http\Resources\RmReceptionDetailResource;
 use App\Http\Resources\RmReceptionProdDataResource;
 use App\Http\Resources\RmReceptionQualityDocDataResource;
 use App\Http\Resources\RmReceptionsResource;
+use App\Http\Resources\RmReceptionTransportDataResource;
 use App\Models\Basket;
 use App\Models\Defect;
 use App\Models\FieldDataReception;
@@ -59,6 +60,12 @@ class RmReceptionsController extends Controller
         return RmReceptionsResource::collection($query->paginate(10));
     }
 
+    public function GetAllBoletas()
+    {
+        $boletas = RmReception::where('status',1)->get();
+        return RmReceptionsResource::collection($boletas); 
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -88,6 +95,7 @@ class RmReceptionsController extends Controller
             $rm_reception = RmReception::create([
                 'doc_date' => Carbon::now(),
                 'finca_id' => $finca->id,
+                'consignacion' => 0
             ]);
 
             $producer = Producer::find($data['producer_id']);
@@ -302,7 +310,7 @@ class RmReceptionsController extends Controller
         $field_data = new RmReceptionDetailResource($rm_reception->load('field_data'));
         $prod_data = $rm_reception->prod_data ? new RmReceptionProdDataResource($rm_reception->load('prod_data')) : null;
         $quality_doc_data = $rm_reception->quality_control_doc_data ? new RmReceptionQualityDocDataResource($rm_reception->load('quality_control_doc_data')) : null;
-
+        $transport_data = $rm_reception->transport_doc_data ? new RmReceptionTransportDataResource($rm_reception->load('transport_doc_data')) : null;
         return response()->json([
             'status' => $rm_reception->status,
             'finca' => $rm_reception->finca->name,
@@ -310,7 +318,8 @@ class RmReceptionsController extends Controller
             'grn' => $rm_reception->grn,
             'field_data' => $field_data,
             'prod_data' => $prod_data,
-            'quality_doc_data' => $quality_doc_data
+            'quality_doc_data' => $quality_doc_data,
+            'transport_data' => $transport_data
         ]);
     }
 }

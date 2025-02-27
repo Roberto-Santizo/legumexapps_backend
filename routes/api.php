@@ -13,6 +13,7 @@ use App\Http\Controllers\InspectorController;
 use App\Http\Controllers\InsumosController;
 use App\Http\Controllers\LoteController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\PlantasController;
 use App\Http\Controllers\ProducersController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\QualityVarietyController;
@@ -24,6 +25,8 @@ use App\Http\Controllers\TareaController;
 use App\Http\Controllers\TaskCropController;
 use App\Http\Controllers\TasksCropController;
 use App\Http\Controllers\TasksLoteController;
+use App\Http\Controllers\TransportConditionController;
+use App\Http\Controllers\TransportInspectionsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\VarietyProductsController;
@@ -130,13 +133,23 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('/inspectors',InspectorController::class);
 
+    //PLANTAS
+    Route::apiResource('/plantas',PlantasController::class);
+
     //BOLETAS RECEPCIÓN MATERIA PRIMA
     Route::apiResource('/boleta-rmp',RmReceptionsController::class);
+    Route::get('/boleta-rmp-all',[RmReceptionsController::class,'GetAllBoletas']);
     Route::get('/boleta-rmp-info-doc/{id}',[RmReceptionsController::class,'GetInfoDoc']);
     Route::post('/boleta-rmp/prod/{id}',[RmReceptionsController::class,'updateProd']);
     Route::post('/boleta-rmp/calidad/{id}',[RmReceptionsController::class,'updateCalidad']);
     Route::post('/boleta-rmp/generate-grn/{id}',[RmReceptionsController::class,'GenerateGRN']);
 
+    //BOLETAS DE CAMIONES   
+    Route::apiResource('/transport-inspection',TransportInspectionsController::class);
+
+    //CONDICIONES TRANPOSRTES
+    Route::apiResource('/transport-conditions',TransportConditionController::class);
+    Route::get('/transport-conditions-all',[TransportConditionController::class,'getAllConditions']);
 });
 
 //Autenticación
