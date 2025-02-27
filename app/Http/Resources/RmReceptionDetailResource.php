@@ -34,6 +34,7 @@ class RmReceptionDetailResource extends JsonResource
             'gross_weight' => $this->field_data->weight,
             'weight_baskets' => $this->field_data->weight_baskets,
             'net_weight' =>  $net_weight,
+            'prod_net_weight' => $this->prod_data->net_weight,
             'percentage_field' => $this->field_data->quality_percentage,
             'valid_pounds' => (($this->field_data->quality_percentage/100)*$net_weight),
             'status' => $this->status,

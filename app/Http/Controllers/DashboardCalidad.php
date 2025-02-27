@@ -11,7 +11,7 @@ class DashboardCalidad extends Controller
 {
     public function ReceptionPedingQuality()
     {
-        $rm_receptions = RmReception::where('status', 3)->get();
+        $rm_receptions = RmReception::where('status', 2)->get();
 
         return response()->json([
             'total_docs' => $rm_receptions->count()

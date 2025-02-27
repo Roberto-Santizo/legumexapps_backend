@@ -26,7 +26,7 @@ return new class extends Migration
             $table->float('valid_pounds');
             $table->foreignId('user_id')->constrained();
             $table->datetime('doc_date');
-            $table->string('observations');
+            $table->string('observations')->nullable();
             $table->string('inspector_signature');
             $table->timestamps();
         });
