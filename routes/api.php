@@ -6,6 +6,7 @@ use App\Http\Controllers\BoletaRMPController;
 use App\Http\Controllers\CDPController;
 use App\Http\Controllers\CropController;
 use App\Http\Controllers\DashboardAgricolaController;
+use App\Http\Controllers\DashboardCalidad;
 use App\Http\Controllers\DefectController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\FincaController;
@@ -150,6 +151,10 @@ Route::middleware('auth:sanctum')->group(function () {
     //CONDICIONES TRANPOSRTES
     Route::apiResource('/transport-conditions',TransportConditionController::class);
     Route::get('/transport-conditions-all',[TransportConditionController::class,'getAllConditions']);
+
+    //DASHBOARD CALIDAD
+    Route::get('/rm-receptions-pending/quality-test',[DashboardCalidad::class,'ReceptionPedingQuality']);
+    Route::get('/rm-receptions/by-percentage-diference',[DashboardCalidad::class,'ReceptionByPercentageDiference']);
 });
 
 //Autenticación

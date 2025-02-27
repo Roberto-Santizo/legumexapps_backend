@@ -62,7 +62,7 @@ class RmReceptionsController extends Controller
 
     public function GetAllBoletas()
     {
-        $boletas = RmReception::where('status',1)->get();
+        $boletas = RmReception::whereDoesntHave('transport_doc_data')->get();
         return RmReceptionsResource::collection($boletas); 
     }
 
@@ -311,6 +311,7 @@ class RmReceptionsController extends Controller
         $prod_data = $rm_reception->prod_data ? new RmReceptionProdDataResource($rm_reception->load('prod_data')) : null;
         $quality_doc_data = $rm_reception->quality_control_doc_data ? new RmReceptionQualityDocDataResource($rm_reception->load('quality_control_doc_data')) : null;
         $transport_data = $rm_reception->transport_doc_data ? new RmReceptionTransportDataResource($rm_reception->load('transport_doc_data')) : null;
+        
         return response()->json([
             'status' => $rm_reception->status,
             'finca' => $rm_reception->finca->name,

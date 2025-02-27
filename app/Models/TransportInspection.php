@@ -17,7 +17,10 @@ class TransportInspection extends Model
         'truck_type',
         'plate',
         'date',
-        'observations'
+        'observations',
+        'verify_by_signature',
+        'quality_manager_signature',
+        'user_id'
     ];
 
     public function rm_reception()
@@ -38,5 +41,10 @@ class TransportInspection extends Model
     public function conditions()
     {
         return $this->hasMany(TransportInspectionCondition::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }
