@@ -2,12 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\WeeklyPlanProductionResource;
 use App\Imports\WeeklyProductionPlanImport;
+use App\Models\WeeklyProductionPlan;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
 class WeeklyProductionPlanController extends Controller
 {
+    public function index()
+    {
+        $plans_production = WeeklyProductionPlan::paginate(10);
+        return WeeklyPlanProductionResource::collection($plans_production);
+    }
+    
     public function store(Request $request)
     {
         $request->validate([
