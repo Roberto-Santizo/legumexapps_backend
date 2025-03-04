@@ -24,7 +24,7 @@ class CreateUserRequest extends FormRequest
     {
         return [
             "name" => ['required','string'],
-            "email" => ['unique:users,email'],
+            "email" => ['nullable'],
             "username" => ['required','string','unique:users,username'],
             "password" => [
                 'required',
@@ -44,7 +44,6 @@ class CreateUserRequest extends FormRequest
         return [
             'username.unique' => 'El nombre de usuario ya existe',
             'password' => 'La contraseña no es válida',
-            'email.unique' => 'El correo electrónico ya existe',
             'permissions' => 'Debe de asignar por lo menos un permiso',
             'roles' => 'Debe de tener por lo menos un rol'
         ];

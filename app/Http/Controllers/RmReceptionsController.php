@@ -35,6 +35,10 @@ class RmReceptionsController extends Controller
             $query->where('finca_id',$request->finca_id);
         }
 
+        if($request->has('grn')){
+            $query->where('grn',$request->grn);
+        }
+
         if($request->has('date')){
             $query->whereDate('created_at',$request->date);
         }
@@ -228,8 +232,8 @@ class RmReceptionsController extends Controller
                 'no_doc_cosechero' => $data['data']['no_doc_cosechero'] ?? null,
                 'sample_units' => $data['data']['sample_units'],
                 'total_baskets' => $data['data']['total_baskets'],
-                'ph' => $data['data']['ph'],
-                'brix' => $data['data']['brix'],
+                'ph' => $data['data']['ph'] ?? null,
+                'brix' => $data['data']['brix'] ?? null,
                 'percentage' => $data['data']['percentage'],
                 'valid_pounds' => $data['data']['valid_pounds'],
                 'user_id' => $request->user()->id,
