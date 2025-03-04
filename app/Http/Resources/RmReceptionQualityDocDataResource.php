@@ -14,11 +14,13 @@ class RmReceptionQualityDocDataResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $inspector_planta_signature = base64_encode(file_get_contents(storage_path("app/public/{$this->quality_control_doc_data->inspector_signature}")));
         return [
             'id' => $this->quality_control_doc_data->id,
             'percentage' => $this->quality_control_doc_data->percentage,
             'valid_pounds' => $this->quality_control_doc_data->valid_pounds,
-            'inspector_planta_signaure' => $this->quality_control_doc_data->inspector_signature,
+            'inspector_planta_signature' => $this->quality_control_doc_data->inspector_signature,
+            'inspector_pdf_planta_signature' => $inspector_planta_signature,
             'date' => $this->quality_control_doc_data->doc_date->format('d-m-Y'),
             'day' => $this->quality_control_doc_data->doc_date->format('d'),
             'month' =>$this->quality_control_doc_data->doc_date->format('m'),
