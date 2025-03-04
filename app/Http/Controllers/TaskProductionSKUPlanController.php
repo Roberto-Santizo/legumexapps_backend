@@ -74,47 +74,6 @@ class TaskProductionSKUPlanController extends Controller
         }
     }
 
-    public function PartialOpen(string $id)
-    {
-        $task_sku = TaskProductionStockKeepingUnit::find($id);
-
-        try {
-            PartialProductionClosure::create([
-                'task_p_sku_id' => $task_sku->id,
-                'start_date' => Carbon::now()
-            ]);
-
-            return response()->json([
-                'msg' => 'Partial Closure Created Successfully'
-            ]);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'msg' => $th->getMessage()
-            ]);
-        }
-    }
-
-    public function PartialClose(string $id)
-    {
-        $task_sku = TaskProductionStockKeepingUnit::find($id);
-
-        $closure = $task_sku->closures->last();
-
-        try {
-            $closure->update([
-                'end_date' => Carbon::now(),
-            ]);
-
-            return response()->json([
-                'msg' => 'Partial Closeure Closed Successfully'
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'msg' => $th->getMessage()
-            ], 500);
-        }
-    }
-
     public function StartTaskProductionSKU(string $id)
     {
         $task_production_sku = TaskProductionStockKeepingUnit::find($id);

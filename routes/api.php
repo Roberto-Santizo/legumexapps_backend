@@ -143,8 +143,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/tasks_production_plan_sku',TaskProductionSKUPlanController::class);
     Route::patch('/tasks_production_plan_sku/{id}/start',[TaskProductionSKUPlanController::class,'StartTaskProductionSKU']);
     Route::patch('/tasks_production_plan_sku/{id}/end',[TaskProductionSKUPlanController::class,'EndTaskProductionSKU']);
-    Route::patch('/tasks-production_plan_sku/partial-close/open/{id}', [TaskProductionSKUPlanController::class, 'PartialOpen']);
-    Route::patch('/tasks-production_plan_sku/partial-close/close/{id}', [TaskProductionSKUPlanController::class, 'PartialClose']);
 });
 
 //Autenticación
