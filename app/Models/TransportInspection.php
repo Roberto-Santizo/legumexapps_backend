@@ -12,7 +12,6 @@ class TransportInspection extends Model
     protected $fillable = [
         'planta_id',
         'product_id',
-        'rm_reception_id',
         'pilot_name',
         'truck_type',
         'plate',
@@ -25,7 +24,7 @@ class TransportInspection extends Model
 
     public function rm_reception()
     {
-        return $this->belongsTo(RmReception::class);
+        return $this->belongsTo(TransportInspectionRmReception::class,'id','transport_id');
     }
 
     public function planta()

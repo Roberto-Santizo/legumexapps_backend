@@ -31,8 +31,9 @@ class RmReception extends Model
 
     public function transport_doc_data()
     {
-        return $this->hasOne(TransportInspection::class);
+        return $this->hasOne(TransportInspectionRmReception::class,'reception_id','id');
     }
+
     public function finca()
     {
         return $this->belongsTo(Finca::class);

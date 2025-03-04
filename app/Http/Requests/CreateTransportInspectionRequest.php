@@ -24,14 +24,13 @@ class CreateTransportInspectionRequest extends FormRequest
         return [
             'planta_id' => 'required',
             'product_id' => 'required',
-            'rm_reception_id' => 'required',
             'pilot_name' => 'required',
             'truck_type' => 'required',
             'plate' => 'required',
             'observations' => 'sometimes|string|nullable',
             'conditions' => 'required',
-            'quality_manager_signature' => 'required',
-            'verify_by_signature' => 'required'
+            'verify_by_signature' => 'required',
+            'boletas' => 'required'
         ];
     }
 
@@ -40,13 +39,12 @@ class CreateTransportInspectionRequest extends FormRequest
         return [
             'planta_id.required' => 'La planta es requerida',
             'product_id.required' => 'El producto es requerido',
-            'rm_reception_id.required' => 'La boleta es requerida',
             'pilot_name.required' => 'El nombre del piloto es requerido',
             'truck_type.required' => 'El tipo de camión es requerido',
             'plate.required' => 'La placa es requerida',
             'conditions.required' => 'Las condiciones son requeridas',
-            'quality_manager_signature.required' => 'La firma de gerente de calidad es requerida',
-            'verify_by_signature.required' => 'La firma de verificación es requerida'
+            'verify_by_signature.required' => 'La firma de verificación es requerida',
+            'boletas.required' => 'Al menos una boleta es necesaria'
         ];
     }
 }

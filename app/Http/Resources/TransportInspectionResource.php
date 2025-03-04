@@ -20,10 +20,10 @@ class TransportInspectionResource extends JsonResource
             'truck_type' => $this->truck_type,
             'plate' => $this->plate,
             'date' => $this->date->format('d-m-Y'),
-            'product' => $this->rm_reception->field_data->product->name,
-            'variety' => $this->rm_reception->field_data->product->variety->name,
-            'finca' => $this->rm_reception->finca->name,
-            'cdp' => $this->rm_reception->field_data->cdp,
+            'product' => $this->rm_reception->reception_data->field_data->product->name,
+            'variety' => $this->rm_reception->reception_data->field_data->product->variety->name,
+            'finca' => $this->rm_reception->reception_data->finca->name,
+            'cdp' => $this->rm_reception->reception_data->field_data->cdp,
             'planta' => $this->planta->name
 
         ];
