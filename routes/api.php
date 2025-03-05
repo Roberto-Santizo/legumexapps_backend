@@ -29,6 +29,7 @@ use App\Http\Controllers\TaskProductionPlanController;
 use App\Http\Controllers\TaskProductionSKUPlanController;
 use App\Http\Controllers\TasksCropController;
 use App\Http\Controllers\TasksLoteController;
+use App\Http\Controllers\TimeOutController;
 use App\Http\Controllers\TransportConditionController;
 use App\Http\Controllers\TransportInspectionsController;
 use App\Http\Controllers\UserController;
@@ -135,6 +136,8 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::apiResource('/lines',LinesController::class);
     Route::get('/lines-all',[LinesController::class,'GetAllLines']);
+
+    Route::apiResource('/timeouts',TimeOutController::class);
 
     Route::apiResource('/weekly_production_plan',WeeklyProductionPlanController::class);
     
