@@ -11,7 +11,7 @@ class DashboardCalidad extends Controller
 {
     public function ReceptionPedingQuality()
     {
-        $rm_receptions = RmReception::where('status', 2)->get();
+        $rm_receptions = RmReception::where('quality_status_id', 2)->get();
 
         return response()->json([
             'total_docs' => $rm_receptions->count()
@@ -24,7 +24,7 @@ class DashboardCalidad extends Controller
         $startDate = Carbon::now()->startOfMonth();
         $endDate = Carbon::now()->endOfMonth();
 
-        $rm_receptions = RmReception::where('status', 5)
+        $rm_receptions = RmReception::where('quality_status_id', 4)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->get();
 

@@ -140,6 +140,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //BOLETAS RECEPCIÓN MATERIA PRIMA
     Route::apiResource('/boleta-rmp',RmReceptionsController::class);
     Route::get('/boleta-rmp-all',[RmReceptionsController::class,'GetAllBoletas']);
+    Route::get('/boleta-rmp/{id}/reject',[RmReceptionsController::class,'RejectBoleta']);
     Route::get('/boleta-rmp-info-doc/{id}',[RmReceptionsController::class,'GetInfoDoc']);
     Route::post('/boleta-rmp/prod/{id}',[RmReceptionsController::class,'updateProd']);
     Route::post('/boleta-rmp/calidad/{id}',[RmReceptionsController::class,'updateCalidad']);

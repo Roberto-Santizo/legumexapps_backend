@@ -10,7 +10,8 @@ class RmReception extends Model
         'grn',
         'doc_date',
         'finca_id',
-        'consignacion'
+        'consignacion',
+        'quality_status_id'
     ];
 
 
@@ -37,5 +38,10 @@ class RmReception extends Model
     public function finca()
     {
         return $this->belongsTo(Finca::class);
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(QualityStatus::class,'quality_status_id','id');
     }
 }

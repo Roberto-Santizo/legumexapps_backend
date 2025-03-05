@@ -25,7 +25,8 @@ class RmReceptionsResource extends JsonResource
             'coordinator' => $this->field_data->producer->name,
             'cdp' => $this->field_data->cdp,
             'transport' => $this->field_data->transport,
-            'status' => $this->status,
+            'status' => $this->status->name,
+            'quality_status_id' => $this->quality_status_id,
             'date' => $this->created_at->format('d-m-Y'),
             'pilot_name' => $this->field_data->pilot_name,
             'consignacion' => $this->consignacion ? true : false

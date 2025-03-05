@@ -99,7 +99,8 @@ class RmReceptionsController extends Controller
             $rm_reception = RmReception::create([
                 'doc_date' => Carbon::now(),
                 'finca_id' => $finca->id,
-                'consignacion' => 0
+                'consignacion' => 0,
+                'quality_status_id' => 1
             ]);
 
             $producer = Producer::find($data['producer_id']);
@@ -184,7 +185,7 @@ class RmReceptionsController extends Controller
                 "receptor_signature" => $filename1
             ]);
 
-            $rm_reception->status = 2;
+            $rm_reception->quality_status_id = 2;
             $rm_reception->save();
 
             return response()->json([
@@ -218,7 +219,7 @@ class RmReceptionsController extends Controller
             if(!$data['data']['isMinimunRequire']){
                 $rm_reception->consignacion = 1;
             }
-            $rm_reception->status = 3;
+            $rm_reception->quality_status_id = 3;
             $rm_reception->save();
             list(, $signature1) = explode(',', $signature1);
             $signature1 = base64_decode($signature1);
@@ -287,7 +288,7 @@ class RmReceptionsController extends Controller
 
         try {
             $rm_reception->grn = $data['grn'];
-            $rm_reception->status = 5;
+            $rm_reception->quality_status_id = 4;
             $rm_reception->save();
 
             return response()->json([
@@ -317,7 +318,7 @@ class RmReceptionsController extends Controller
         $transport_data = $rm_reception->transport_doc_data ? new RmReceptionTransportDataResource($rm_reception->load('transport_doc_data')) : null;
         
         return response()->json([
-            'status' => $rm_reception->status,
+            'status' => $rm_reception->quality_status_id,
             'finca' => $rm_reception->finca->name,
             'consignacion' => $rm_reception->consignacion ? true : false,
             'grn' => $rm_reception->grn,
@@ -326,5 +327,23 @@ class RmReceptionsController extends Controller
             'quality_doc_data' => $quality_doc_data,
             'transport_data' => $transport_data
         ]);
+    }
+
+    public function RejectBoleta(string $id)
+    {
+        $rm_reception = RmReception::find($id);
+
+        if(!$rm_reception){
+            return response()->json([
+                'msg' => 'Rm Reception Not Foud'
+            ],404);
+        }
+
+        $rm_reception->quality_status_id = 5;
+        $rm_reception->save();
+
+        return response()->json([
+            'msg' => 'Updated Successfully' 
+        ],200);
     }
 }
