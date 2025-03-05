@@ -11,8 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('defects', function (Blueprint $table) {
-            $table->boolean('status')->default(1);
+        Schema::create('quality_statuses', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('defects', function (Blueprint $table) {
-            $table->dropColumn('status');
-        });
+        Schema::dropIfExists('quality_statuses');
     }
 };

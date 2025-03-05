@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('no_doc_cosechero')->nullable();
             $table->string('sample_units');
             $table->integer('total_baskets');
-            $table->float('ph');
-            $table->float('brix');
+            $table->float('ph')->nullable();
+            $table->float('brix')->nullable();
             $table->float('percentage');
             $table->float('valid_pounds');
             $table->foreignId('user_id')->constrained();

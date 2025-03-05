@@ -58,68 +58,74 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
     public function employeesDistribution($task, &$rows)
     {
         $dates = [];
-        foreach ($task->closures as $index => $closure) {
-            $dates[$index][] = $closure->start_date;
-            $dates[$index][] = $closure->end_date;
-        }
 
-        $all_dates = array_merge(...$dates);
-        array_unshift($all_dates, $task->start_date);
-        array_push($all_dates, $task->end_date);
-
-        $groupedByDay = array_reduce($all_dates, function ($carry, $datetime) {
-            $date = $datetime->format('Y-m-d');
-            $carry[$date][] = $datetime->toDateTimeString();
-            return $carry;
-        }, []);
-
-        foreach ($groupedByDay as $key => $dates) {
-            $first_date = Carbon::parse($dates[0]);
-            $second_date = Carbon::parse($dates[1]);
-            $total_hours = $first_date->diffInHours($second_date);
-            $groupedByDay[$key] = $total_hours;
-        }
-
-        $task->employees->map(function ($employeeAssignment) use ($groupedByDay) {
-            $employeeAssignment->total_hours = 0;
-            $employeeAssignment->dates = [];
-            $dates = [];
-            foreach ($groupedByDay as $day => $hours) {
-                $flag = count($this->getEmployeeRegistration($employeeAssignment->employee_id, $day)) > 1;
-                if ($flag) {
-                    $dates[$day][] = $hours;
-                    $employeeAssignment->dates = $dates;
-                    $employeeAssignment->total_hours += $hours;
+        try {
+            foreach ($task->closures as $index => $closure) {
+                $dates[$index][] = $closure->start_date;
+                $dates[$index][] = $closure->end_date;
+            }
+    
+            $all_dates = array_merge(...$dates);
+            array_unshift($all_dates, $task->start_date);
+            array_push($all_dates, $task->end_date);
+    
+            $groupedByDay = array_reduce($all_dates, function ($carry, $datetime) {
+                $date = $datetime->format('Y-m-d');
+                $carry[$date][] = $datetime->toDateTimeString();
+                return $carry;
+            }, []);
+    
+            foreach ($groupedByDay as $key => $dates) {
+                $first_date = Carbon::parse($dates[0]);
+                $second_date = Carbon::parse($dates[1]);
+                $total_hours = $first_date->diffInHours($second_date);
+                $groupedByDay[$key] = $total_hours;
+            }
+    
+            $task->employees->map(function ($employeeAssignment) use ($groupedByDay) {
+                $employeeAssignment->total_hours = 0;
+                $employeeAssignment->dates = [];
+                $dates = [];
+                foreach ($groupedByDay as $day => $hours) {
+                    $flag = count($this->getEmployeeRegistration($employeeAssignment->employee_id, $day)) > 1;
+                    if ($flag) {
+                        $dates[$day][] = $hours;
+                        $employeeAssignment->dates = $dates;
+                        $employeeAssignment->total_hours += $hours;
+                    }
                 }
-            }
-
-            return $employeeAssignment;
-        });
-
-
-        $task->employees->map(function ($employeeAssignment) use ($groupedByDay, $rows, $task) {
-            foreach ($employeeAssignment->dates as $day => $hours) {
-                $total_hours = $task->employees->reduce(function ($carry, $task) {
-                    return $carry + array_sum(array_merge(...array_values($task->dates ?? [])));
-                }, 0);
-
-                $percentage = $hours[0] / $total_hours;
-                $day_carbon = Carbon::parse($day);
-                $registrations = $this->getEmployeeRegistration($employeeAssignment->employee_id, $day_carbon);
-                $rows->push([
-                    'CODIGO' => $employeeAssignment->code,
-                    'EMPLEADO' => $employeeAssignment->name,
-                    'LOTE' => $task->lotePlantationControl->lote->name,
-                    'TAREA REALIZADA' => $task->task->name,
-                    'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
-                    'MONTO' => $percentage * $task->budget,
-                    'HORAS TOTALES' => $percentage * $total_hours,
-                    'ENTRADA' => $registrations['entrance'],
-                    'SALIDA' => $registrations['exit'],
-                    'DIA' => $day_carbon->isoFormat('dddd')
-                ]);
-            }
-        });
+    
+                return $employeeAssignment;
+            });
+    
+    
+            $task->employees->map(function ($employeeAssignment) use ($groupedByDay, $rows, $task) {
+                foreach ($employeeAssignment->dates as $day => $hours) {
+                    $total_hours = $task->employees->reduce(function ($carry, $task) {
+                        return $carry + array_sum(array_merge(...array_values($task->dates ?? [])));
+                    }, 0);
+    
+                    $percentage = $hours[0] / $total_hours;
+                    $day_carbon = Carbon::parse($day);
+                    $registrations = $this->getEmployeeRegistration($employeeAssignment->employee_id, $day_carbon);
+                    $rows->push([
+                        'CODIGO' => $employeeAssignment->code,
+                        'EMPLEADO' => $employeeAssignment->name,
+                        'LOTE' => $task->lotePlantationControl->lote->name,
+                        'TAREA REALIZADA' => $task->task->name,
+                        'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
+                        'MONTO' => $percentage * $task->budget,
+                        'HORAS TOTALES' => $percentage * $total_hours,
+                        'ENTRADA' => $registrations['entrance'],
+                        'SALIDA' => $registrations['exit'],
+                        'DIA' => $day_carbon->isoFormat('dddd')
+                    ]);
+                }
+            });
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+        
     }
 
     public function processTaskCrop($task, &$rows)
