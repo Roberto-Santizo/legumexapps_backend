@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class RmReception extends Model
 {
+    protected $casts = [
+        'doc_date' => 'datetime'
+    ];
+
     protected $fillable = [
         'grn',
         'doc_date',

@@ -34,7 +34,8 @@ class CreateBoletaRMPRequest extends FormRequest
             'transport_plate' => 'required',
             'weight' => 'required',
             'basket_id' => 'required',
-            'calidad_signature' => 'required'
+            'calidad_signature' => 'required',
+            'date' => 'required'
         ];
     }
 }

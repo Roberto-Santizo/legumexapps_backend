@@ -95,9 +95,9 @@ class RmReceptionsController extends Controller
             $product = Product::find($data['product_id']);
             $basket = Basket::find($data['basket_id']);
             $finca = Finca::find($data['finca_id']);
-
+            $date = Carbon::parse($data['date']);
             $rm_reception = RmReception::create([
-                'doc_date' => Carbon::now(),
+                'doc_date' => $date,
                 'finca_id' => $finca->id,
                 'consignacion' => 0,
                 'quality_status_id' => 1

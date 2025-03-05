@@ -28,7 +28,7 @@ class RmReceptionDetailResource extends JsonResource
             'coordinator' => $this->field_data->producer->name,
             'inspector' => $this->field_data->inspector_name,
             'pilot_name' => $this->field_data->pilot_name,
-            'doc_date' => $this->field_data->created_at->format('d-m-Y'),
+            'doc_date' => $this->doc_date->format('d-m-Y'),
             'cdp' => $this->field_data->cdp,
             'transport' => $this->field_data->transport,
             'baskets' => $this->field_data->total_baskets,
