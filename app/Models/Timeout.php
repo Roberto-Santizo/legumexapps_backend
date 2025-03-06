@@ -6,5 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Timeout extends Model
 {
-    //
+    protected $fillable = [
+        'name',
+        'hours'
+    ];
 }

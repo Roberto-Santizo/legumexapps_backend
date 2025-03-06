@@ -38,6 +38,7 @@ use App\Http\Controllers\VarietyProductsController;
 use App\Http\Controllers\WeeklyPlanController;
 use App\Http\Controllers\WeeklyProductionPlan;
 use App\Http\Controllers\WeeklyProductionPlanController;
+use App\Models\Timeout;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -139,10 +140,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/lines-all',[LinesController::class,'GetAllLines']);
 
     Route::apiResource('/timeouts',TimeOutController::class);
+    Route::get('/timeouts-all',[TimeOutController::class,'GetAllTimeouts']);
 
     Route::apiResource('/weekly_production_plan',WeeklyProductionPlanController::class);
     
     Route::apiResource('/task_production_plan',TaskProductionController::class);
+    Route::post('/tasks_production_plan/{id}/add-timeout',[TaskProductionController::class,'AddTimeOut']);
 
     Route::apiResource('/tasks_production_plan_sku',TaskProductionSKUPlanController::class);
     Route::patch('/tasks_production_plan_sku/{id}/start',[TaskProductionSKUPlanController::class,'StartTaskProductionSKU']);
