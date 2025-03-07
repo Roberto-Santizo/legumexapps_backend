@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\TaskProductionSKUPlanResource;
-use App\Models\PartialProductionClosure;
 use App\Models\TaskProductionPlan;
 use App\Models\TaskProductionStockKeepingUnit;
 use Carbon\Carbon;
@@ -17,8 +16,7 @@ class TaskProductionSKUPlanController extends Controller
     public function index()
     {
         $tasks_production = TaskProductionStockKeepingUnit::all();
-
-        return TaskProductionSKUPlanResource::collection($tasks_production);
+        return TaskProductionSKUPlanResource::collection($tasks_production); 
     }
 
     /**
@@ -34,7 +32,8 @@ class TaskProductionSKUPlanController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $tasks_production = TaskProductionStockKeepingUnit::where('task_p_id',$id)->get();
+        return TaskProductionSKUPlanResource::collection($tasks_production);
     }
 
     /**

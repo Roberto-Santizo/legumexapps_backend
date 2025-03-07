@@ -19,7 +19,8 @@ class TaskProductionPlanDetailsResource extends JsonResource
             'line' => $this->line->code,
             'operation_date' => $this->operation_date,
             'total_tarimas' => $this->skus->sum('tarimas'),
-            'skus' => TaskProductionSKUPlanResource::collection($this->skus)
+            'skus' => TaskProductionSKUPlanResource::collection($this->skus),
+            'employees' => TaskProductionEmployeeResource::collection($this->employees)
         ];
     }
 }

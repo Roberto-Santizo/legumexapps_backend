@@ -10,4 +10,9 @@ class WeeklyProductionPlan extends Model
         'week',
         'year'
     ];
+
+    public function tasks()
+    {
+        return $this->hasMany(TaskProductionPlan::class);
+    }
 }

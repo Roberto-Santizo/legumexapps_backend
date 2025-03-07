@@ -10,4 +10,9 @@ class Line extends Model
         'code',
         'total_persons'
     ];
+
+    public function tasks()
+    {
+        return $this->hasMany(TaskProductionPlan::class,'line_id','id');
+    }
 }

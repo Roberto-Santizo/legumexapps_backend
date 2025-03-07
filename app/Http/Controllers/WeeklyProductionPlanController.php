@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\TaskProductionPlanResource;
 use App\Http\Resources\WeeklyPlanProductionResource;
 use App\Imports\WeeklyProductionPlanImport;
 use App\Models\WeeklyProductionPlan;
@@ -14,6 +15,13 @@ class WeeklyProductionPlanController extends Controller
     {
         $plans_production = WeeklyProductionPlan::paginate(10);
         return WeeklyPlanProductionResource::collection($plans_production);
+    }
+
+    public function show(string $id)
+    {
+        $weekly_plan = WeeklyProductionPlan::find($id);
+
+        return TaskProductionPlanResource::collection($weekly_plan->tasks);
     }
     
     public function store(Request $request)
