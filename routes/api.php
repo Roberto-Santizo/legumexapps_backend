@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BasketController;
+use App\Http\Controllers\BiometricAdminController;
 use App\Http\Controllers\CarriersController;
 use App\Http\Controllers\CDPController;
 use App\Http\Controllers\CropController;
@@ -177,6 +178,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/tasks_production_plan_sku',TaskProductionSKUPlanController::class);
     Route::patch('/tasks_production_plan_sku/{id}/start',[TaskProductionSKUPlanController::class,'StartTaskProductionSKU']);
     Route::patch('/tasks_production_plan_sku/{id}/end',[TaskProductionSKUPlanController::class,'EndTaskProductionSKU']);
+
+    Route::get('/produccion-employees',[BiometricAdminController::class,'index']);
 });
 
 //Autenticación
