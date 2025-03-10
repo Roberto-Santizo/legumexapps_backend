@@ -31,23 +31,35 @@ class RmReceptionsController extends Controller
     {
         $query = RmReception::query();
 
+        if($request->has('quality_status_id')){
+            $query->where('quality_status_id',$request->quality_status_id);
+        }
+
         if($request->has('finca_id')){
             $query->where('finca_id',$request->finca_id);
         }
 
+        if($request->has('ref_doc')){
+            $query->whereHas('field_data',function($query) use ($request){
+                $query->where('ref_doc',$request->ref_doc);
+            });
+        }
         if($request->has('grn')){
             $query->where('grn',$request->grn);
         }
 
         if($request->has('date')){
-            $query->whereDate('created_at',$request->date);
+            $query->whereDate('doc_date',$request->date);
         }
 
-        if($request->has('plate')){
-            $query->whereHas('field_data',function($query) use ($request){
-                $query->where('transport_plate','LIKE','%'.$request->plate.'%');
+        if ($request->has('plate')) {
+            $query->whereHas('field_data', function ($query) use ($request) {
+                $query->whereHas('plate', function ($query) use ($request) {
+                    $query->where('name', 'LIKE', "%{$request->plate}%");
+                });
             });
         }
+        
 
         if($request->has('producer_id')){
             $query->whereHas('field_data',function($query) use ($request){
@@ -77,20 +89,15 @@ class RmReceptionsController extends Controller
     {
         $data = $request->validated();
         $signature1 = $data['calidad_signature'];
-        // $signature2 = $data['prod_signature'];
 
         try {
             list(, $signature1) = explode(',', $signature1);
-            // list(, $signature2) = explode(',', $signature2);
 
             $signature1 = base64_decode($signature1);
-            // $signature2 = base64_decode($signature2);
 
             $filename1 = 'signatures/' . uniqid() . '.png';
-            // $filename2 = 'signatures/' . uniqid() . '.png';
 
             Storage::disk('public')->put($filename1, $signature1);
-            // Storage::disk('public')->put($filename2, $signature2);
 
             $product = Product::find($data['product_id']);
             $basket = Basket::find($data['basket_id']);
@@ -115,17 +122,18 @@ class RmReceptionsController extends Controller
                 'producer_id' => $producer->id,
                 'rm_reception_id' => $rm_reception->id,
                 'product_id' => $product->id,
-                'transport' => $data['transport'],
-                'pilot_name' => $data['pilot_name'],
                 'inspector_name' => $data['inspector_name'],
-                'cdp' => $data['cdp'],
-                'transport_plate' => $data['transport_plate'],
                 'weight' => $data['weight'],
                 'total_baskets' => $data['total_baskets'],
                 'weight_baskets' => round(($basket->weight * $data['total_baskets']), 2),
                 'quality_percentage' => $data['quality_percentage'],
                 'basket_id' => $basket->id,
                 'calidad_signature' => $filename1,
+                'plate_id' => $data['plate_id'],
+                'cdp_id' => $data['productor_plantation_control_id'],
+                'carrier_id' => $data['carrier_id'],
+                'driver_id' => $data['driver_id'],
+                'ref_doc' => $data['ref_doc']
             ]);
         } catch (\Throwable $th) {
             throw $th;

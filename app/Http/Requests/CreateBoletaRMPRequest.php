@@ -22,20 +22,22 @@ class CreateBoletaRMPRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'cdp' => 'required',
+            'productor_plantation_control_id' => 'required',
             'producer_id' => 'required',
             'finca_id'=> 'required',
             'inspector_name' => 'required',
-            'pilot_name' => 'required',
             'product_id' => 'required',
             'quality_percentage' => 'required',
             'total_baskets' => 'required',
-            'transport' => 'required',
-            'transport_plate' => 'required',
             'weight' => 'required',
             'basket_id' => 'required',
             'calidad_signature' => 'required',
-            'date' => 'required'
+            'date' => 'required',
+            'carrier_id' => 'required',
+            'driver_id' => 'required',
+            'ref_doc' => 'required',
+            'productor_plantation_control_id' => 'required',
+            'plate_id' => 'required'
         ];
     }
 }

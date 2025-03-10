@@ -10,11 +10,7 @@ class FieldDataReception extends Model
         'producer_id',
         'rm_reception_id',
         'product_id',
-        'transport',
-        'pilot_name',
         'inspector_name',
-        'cdp',
-        'transport_plate',
         'weight',
         'total_baskets',
         'weight_baskets',
@@ -22,7 +18,12 @@ class FieldDataReception extends Model
         'quality_percentage',
         'inspector_signature',
         'prod_signature',
-        'calidad_signature'
+        'calidad_signature',
+        'driver_id',
+        'plate_id',
+        'carrier_id',
+        'cdp_id',
+        'ref_doc'
     ];
 
     public function product()
@@ -38,6 +39,26 @@ class FieldDataReception extends Model
     public function producer()
     {
         return $this->belongsTo(Producer::class);
+    }
+
+    public function plate()
+    {
+        return $this->belongsTo(Plate::class);
+    }
+
+    public function cdp()
+    {
+        return $this->belongsTo(ProductorPlantationControl::class,'cdp_id','id');
+    }
+
+    public function carrier()
+    {
+        return $this->belongsTo(Carrier::class);
+    }
+
+    public function driver()
+    {
+        return $this->belongsTo(Driver::class);
     }
     
 }
