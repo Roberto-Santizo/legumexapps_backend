@@ -2,11 +2,13 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BasketController;
+use App\Http\Controllers\CarriersController;
 use App\Http\Controllers\CDPController;
 use App\Http\Controllers\CropController;
 use App\Http\Controllers\DashboardAgricolaController;
 use App\Http\Controllers\DashboardCalidad;
 use App\Http\Controllers\DefectController;
+use App\Http\Controllers\DriversController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\FincaController;
 use App\Http\Controllers\InspectorController;
@@ -15,8 +17,11 @@ use App\Http\Controllers\LinesController;
 use App\Http\Controllers\LoteController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PlantasController;
+use App\Http\Controllers\PlatesController;
 use App\Http\Controllers\ProducersController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductorPlantationControlController;
+use App\Http\Controllers\QualityStatusesController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RmReceptionsController;
@@ -36,9 +41,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\VarietyProductsController;
 use App\Http\Controllers\WeeklyPlanController;
-use App\Http\Controllers\WeeklyProductionPlan;
 use App\Http\Controllers\WeeklyProductionPlanController;
-use App\Models\Timeout;
+use App\Models\ProductorPlantationControl;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -118,6 +122,27 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/producers-all',[ProducersController::class,'GetAllProducers']);
     Route::apiResource('/inspectors',InspectorController::class);
     Route::apiResource('/plantas',PlantasController::class);
+
+    //ESTADOS DE CALIDAD
+    Route::apiResource('/quality-statuses',QualityStatusesController::class);
+
+    //TRANPORTISTAS
+    Route::apiResource('/carriers',CarriersController::class);
+    Route::get('/carriers-all',[CarriersController::class,'GetAllCarriers']);
+
+    //PILOTOS
+    Route::apiResource('/drivers',DriversController::class);
+    Route::get('/drivers-by-carrier/{id}',[DriversController::class,'getAllPlatesByCarrier']);
+
+    //PLACAS
+    Route::apiResource('/plates',PlatesController::class);
+    Route::get('/plates-by-carrier/{id}',[PlatesController::class,'getAllPlatesByCarrierId']);
+
+    //CDPS de productores
+    Route::apiResource('/productor-cdp',ProductorPlantationControlController::class);
+    Route::get('/productor-cdp-all',[ProductorPlantationControlController::class,'GetAllProductorsCDPS']);
+
+    //BOLETAS RECEPCIÓN MATERIA PRIMA
     Route::apiResource('/boleta-rmp',RmReceptionsController::class);
     Route::get('/boleta-rmp-all',[RmReceptionsController::class,'GetAllBoletas']);
     Route::get('/boleta-rmp/{id}/reject',[RmReceptionsController::class,'RejectBoleta']);

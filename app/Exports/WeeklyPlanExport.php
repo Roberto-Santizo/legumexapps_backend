@@ -1,120 +1,143 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Exports;
 
-use Exception;
 use App\Models\WeeklyPlan;
-use Illuminate\Http\Request;
-use App\Imports\WeeklyPlanImport;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Http\Resources\WeeklyPlanCollection;
-use App\Models\LotePlantationControl;
 use Carbon\Carbon;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class WeeklyPlanController extends Controller
+class WeeklyPlanExport implements FromCollection, WithHeadings, WithTitle, WithStyles, WithColumnFormatting, WithMultipleSheets
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+
+    protected $weekly_plans_id;
+
+    public function __construct($weekly_plans_id)
     {
-        $week = $request->input('week') ?? Carbon::now()->weekOfYear;
-        $year = $request->input('year') ?? Carbon::now()->year;
-
-        $role = $request->user()->getRoleNames();
-
-        if ($role[0] != 'admin' && $role[0] != 'adminagricola') {
-            $permission = $request->user()->permissions()->first();
-            $weekly_plans = WeeklyPlan::whereHas('finca', function ($query) use ($week, $year, $permission) {
-                $query->where('name', 'LIKE', '%' . $permission->name . '%')
-                      ->where(function ($q) use ($week, $year) {
-                          $q->where('week', $week)
-                            ->orWhere('week', $week - 1);
-                      })
-                      ->where('year', $year);
-            })->orderBy('created_at', 'DESC')->paginate(10);
-            
-        }else {
-            $weekly_plans = WeeklyPlan::orderBy('created_at', 'DESC')->paginate(10);
-        }
-
-        return new WeeklyPlanCollection($weekly_plans);
-    }
-
-
-    public function GetAllPlans()
-    {
-        return new WeeklyPlanCollection(WeeklyPlan::all());
+        $this->weekly_plans_id = $weekly_plans_id;
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @return \Illuminate\Support\Collection
      */
-    public function store(Request $request)
+    public function collection()
     {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,csv'
-        ]);
+        $rows = collect();
+        Carbon::setLocale('es');
 
         try {
-            Excel::import(new WeeklyPlanImport, $request->file('file'));
+            foreach ($this->weekly_plans_id as $weekly_plan_id) {
+                $weekly_plan = WeeklyPlan::find($weekly_plan_id);
+                foreach ($weekly_plan->tasks as $task) {
+                    if ($task->end_date) {
+                        $diff_hours = 0;
+                        $performace = 0;
+                        if (!$task->closures->isEmpty()) {
+                            foreach ($task->closures as $closure) {
+                                $diff_hours += $closure->start_date->diffInHours($closure->end_date);
+                            }
+                        }
+                        $start_date = $task->start_date;
+                        $end_date = $task->end_date;
+                        $performace = $start_date->diffInHours($end_date) - $diff_hours;
+                    }
 
-            return response()->json([
-                'message' => 'Plan Creado Correctamente'
-            ]);
-        } catch (\Throwable  $th) {
-            return response()->json([
-                'message' => $th->getMessage()
-            ], 500);
+                    $rows->push([
+                        'FINCA' => $weekly_plan->finca->name,
+                        'SEMANA CALENDARIO' => $weekly_plan->week,
+                        'LOTE' => $task->lotePlantationControl->lote->name,
+                        'CDP' => $task->lotePlantationControl->cdp->name,
+                        'CODIGO TAREA' => $task->task->code,
+                        'TAREA' => $task->task->name,
+                        'EXTRAORDINARIA' => ($task->extraordinary) ?  'EXTRAORDINARIA' : 'PLANIFICADA',
+                        'ESTADO' => ($task->end_date) ? 'CERRADA' : 'ABIERTA',
+                        'FECHA DE INICIO' => ($task->start_date) ? $task->start_date->format('d-m-Y h:i:s') : '',
+                        'FECHA DE CIERRE' => ($task->end_date) ? $task->end_date->format('d-m-Y h:i:s') : '',
+                        'HORA RENDIMIENTO TEORICO' => $task->hours,
+                        'HORA RENDIMIENTO REAL' => ($task->end_date) ? $performace : '',
+                        'RENDIMIENTO' => ($task->end_date) ? (($task->hours / $performace) * 100) : '',
+                        'ATRASADA' => ($task->weeklyPlanChanges->count() > 0) ? 'ATRASADA' : 'PLANIFICADA',
+                        'SEMANA ORIGEN' => ($task->weeklyPlanChanges->count() > 0) ? $task->weeklyPlanChanges->last()->WeeklyPlanOrigin->week : 'PLANIFICADA',
+                    ]);
+                }
+
+                foreach ($weekly_plan->tasks_crops as $task_crop) {
+                    foreach ($task_crop->assigments as $assignment) {
+                        if ($assignment->end_date) {
+                            $emplooyes = $assignment->employees->count();
+                            $reported_hours = $assignment->start_date->diffInHours($assignment->end_date);
+                            $rendimiento_teorico = ($reported_hours * $emplooyes);
+                            $rendimiento_real = $assignment->plants / 120;
+                            
+                            $rows->push([
+                                'FINCA' => $weekly_plan->finca->name,
+                                'SEMANA CALENDARIO' => $weekly_plan->week,
+                                'LOTE' => $task_crop->lotePlantationControl->lote->name,
+                                'CDP' => $task_crop->lotePlantationControl->cdp->name,
+                                'CODIGO TAREA' => $task_crop->task->code,
+                                'TAREA' => $task_crop->task->name,
+                                'EXTRAORDINARIA' => '',
+                                'ESTADO' => ($task_crop->status) ? 'CERRADA' : 'ABIERTA',
+                                'FECHA DE INICIO' => ($assignment->start_date) ? $assignment->start_date->format('d-m-Y h:i:s') : 'SIN ASIGNACION',
+                                'FECHA DE CIERRE' => ($assignment->end_date) ? $assignment->end_date->format('d-m-Y h:i:s') : 'SIN CIERRE',
+                                'HORA RENDIMIENTO TEORICO' => $rendimiento_teorico,
+                                'HORA RENDIMIENTO REAL' => $rendimiento_real,
+                                'RENDIMIENTO' => ($assignment->end_date) ? ($rendimiento_real / ($rendimiento_teorico)) : '0',
+                                'ATRASADA' => '',
+                                'SEMANA ORIGEN' => '',
+                            ]);
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $th) {
+            throw $th;
         }
+
+        return $rows;
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function headings(): array
     {
-        $plan = WeeklyPlan::find($id);
-        if (!$plan) {
-            return response()->json([
-                'errors' => ['El plan no existe']
-            ], 404);
-        }
-        $tasks_by_lote = $plan->tasks->groupBy('lote_plantation_control_id');
-        $tasks_crop_by_lote = $plan->tasks_crops->groupBy('lote_plantation_control_id');
+        return ['FINCA', 'SEMANA CALENDARIO', 'LOTE','CDP', 'CODIGO TAREA', 'TAREA', 'PLAN', 'ESTADO', 'FECHA DE INICIO', 'FECHA DE CIERRE', 'HORAS RENDIMIENTO TEORICO', 'HORAS RENDIMIENTO REAL', 'RENDIMIENTO', 'ATRASADA', 'SEMANA ORIGEN'];
+    }
 
-        $summary_tasks = $tasks_by_lote->map(function ($group, $key) {
-            return [
-                'lote' => LotePlantationControl::find($key)->lote->name,
-                'lote_plantation_control_id' => strval($key),
-                'total_budget' => round($group->sum('budget'), 2),
-                'total_workers' => $group->sum('workers_quantity'),
-                'total_hours' => round($group->sum('hours'), 2),
-                'total_tasks' => $group->count(),
-                'finished_tasks' => $group->filter(function ($task) {
-                    return !is_null($task->end_date);
-                })->count(),
-            ];
-        })->values();
-
-        $summary_crops = $tasks_crop_by_lote->map(function ($group, $key) {
-            $lote_plantation_control = LotePlantationControl::find($key);
-            return [
-                'id' => strval($key),
-                'lote_plantation_control_id' => strval($lote_plantation_control->id),
-                'lote' => $lote_plantation_control->lote->name,
-            ];
-        })->values();
-
-        return response()->json([
-            'data' => [
-                'id' => strval($plan->id),
-                'finca' => $plan->finca->name,
-                'week' => $plan->week,
-                'year' => $plan->year,
-                'summary_tasks' => $summary_tasks,
-                'summary_crops' => $summary_crops
-            ]
+    public function styles(Worksheet $sheet)
+    {
+        $sheet->getStyle('A1:N1')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'color' => ['argb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['argb' => '5564eb'],
+            ],
         ]);
+    }
+
+    public function sheets(): array
+    {
+        return [
+            new WeeklyPlanExport($this->weekly_plans_id),
+            new EmployeeTaskDetailExport($this->weekly_plans_id)
+        ];
+    }
+
+    public function title(): string
+    {
+        return 'General Tareas Finca';
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'L' => '0.00%',
+        ];
     }
 }
