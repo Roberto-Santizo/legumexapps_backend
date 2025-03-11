@@ -34,7 +34,7 @@ class LinesController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'code' => 'required',
+            'code' => 'required|unique:lines,code',
             'total_persons' => 'required'
         ]);
 
@@ -51,12 +51,25 @@ class LinesController extends Controller
         }
     }
 
+    public function show(string $id)
+    {
+        $line = Line::find($id);
+        if (!$line) {
+            return response()->json([
+                'msg' => 'Line not Found'
+            ], 404);
+        }
+
+        return new LinesResource($line);
+    }
+
     public function update(Request $request, string $id)
     {
         $data = $request->validate([
-            "code" => 'required',
-            "total_persons" => 'required'
+            "code" => "required|unique:lines,code,{$id}",
+            "total_persons" => "required"
         ]);
+        
 
         $line = Line::find($id);
 

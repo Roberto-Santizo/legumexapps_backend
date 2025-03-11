@@ -13,7 +13,7 @@ class SKUController extends Controller
      */
     public function index()
     {
-        $skus = StockKeepingUnit::select('id', 'name', 'code')->paginate(10);
+        $skus = StockKeepingUnit::select('id', 'name', 'code','unit_mesurment')->paginate(10);
 
         return SKUResource::collection($skus);
 
@@ -34,7 +34,7 @@ class SKUController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'code' => 'required',
+            'code' => 'required|unique:stock_keeping_units,code',
             'name' => 'required',
             'unit_mesurment' => 'required'
         ]);

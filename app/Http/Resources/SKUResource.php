@@ -14,6 +14,11 @@ class SKUResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id' => strval($this->id),
+            'name' => $this->name,
+            'code' => $this->code,
+            'unit_mesurment' => $this->unit_mesurment
+        ];
     }
 }

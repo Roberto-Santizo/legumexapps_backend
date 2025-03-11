@@ -14,6 +14,10 @@ class LinesResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id' => strval($this->id),
+            'code' => $this->code,
+            'total_persons' => $this->total_persons
+        ];
     }
 }
