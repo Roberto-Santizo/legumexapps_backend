@@ -20,6 +20,11 @@ class InsumosController extends Controller
         return new InsumoCollection(Insumo::paginate(10));
     }
 
+    public function getAllInsumos()
+    {
+        return new InsumoCollection(Insumo::all());
+    }
+
     /**
      * Store a newly created resource in storage.
      */

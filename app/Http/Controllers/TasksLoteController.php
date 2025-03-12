@@ -44,8 +44,9 @@ class TasksLoteController extends Controller
     public function store(CreateTaskWeeklyPlanRequest $request)
     {
         $data = $request->validated();
-        $lote = Lote::find($data['lote_id']);
-        $weekly_plan = WeeklyPlan::find($data['weekly_plan_id']);
+
+        $lote = Lote::find($data['data']['lote_id']);
+        $weekly_plan = WeeklyPlan::find($data['data']['weekly_plan_id']);
         if (!$lote || !$weekly_plan) {
             return response()->json([
                 'msg' => "Data not found"
@@ -59,16 +60,26 @@ class TasksLoteController extends Controller
         }
 
         try {
-            TaskWeeklyPlan::create([
-                'weekly_plan_id' => $data['weekly_plan_id'],
+            $task_weekly_plan = TaskWeeklyPlan::create([
+                'weekly_plan_id' => $data['data']['weekly_plan_id'],
                 'lote_plantation_control_id' => $lote->cdp->id,
-                'tarea_id' => $data['tarea_id'],
-                'workers_quantity' => $data['workers_quantity'],
-                'budget' => $data['budget'],
-                'hours' => $data['hours'],
-                'slots' => $data['workers_quantity'],
-                'extraordinary' => $data['extraordinary'],
+                'tarea_id' => $data['data']['tarea_id'],
+                'workers_quantity' => $data['data']['workers_quantity'],
+                'budget' => $data['data']['budget'],
+                'hours' => $data['data']['hours'],
+                'slots' => $data['data']['workers_quantity'],
+                'extraordinary' => $data['data']['extraordinary'],
             ]);
+
+            if (count($data['insumos']) > 0) {
+                foreach ($data['insumos'] as $insumo) {
+                    TaskInsumos::create([
+                        'insumo_id' => $insumo['insumo_id'],
+                        'task_weekly_plan_id' => $task_weekly_plan->id,
+                        'assigned_quantity' => $insumo['quantity'],
+                    ]);
+                }
+            }
 
             return response()->json([
                 'msg' => 'Task Weekly Plan Created Successfully'
@@ -210,11 +221,11 @@ class TasksLoteController extends Controller
             $task->hours = $data['hours'];
             $task->slots = $data['slots'];
             $task->workers_quantity = $data['slots'];
-    
-            
+
+
             if ($task->weekly_plan_id != $data['weekly_plan_id']) {
                 $dest = WeeklyPlan::find($data['weekly_plan_id']);
-    
+
                 if ($dest->finca->id != $task->plan->finca->id) {
                     throw new Error("Información no válida");
                 }
@@ -225,7 +236,7 @@ class TasksLoteController extends Controller
                 ]);
                 $task->weekly_plan_id = $data['weekly_plan_id'];
             }
-    
+
             $task->save();
         } catch (\Throwable $th) {
             throw $th;

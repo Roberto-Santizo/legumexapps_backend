@@ -82,6 +82,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     
     Route::post('/report/plans',[ReportController::class,'DownloadReport']);
+    Route::get('/report/insumos/{id}',[ReportController::class,'DownloadReportInsumos']);
     
     Route::apiResource('/recipes',RecipeController::class);
     Route::apiResource('/crops',CropController::class);
@@ -110,6 +111,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/employees',EmployeeController::class);
 
     Route::apiResource('/insumos',InsumosController::class);
+    Route::get('/insumos-all',[InsumosController::class,'getAllInsumos']);
     Route::post('/insumos/upload', [InsumosController::class,'UploadInsumos']);
 
     Route::get('/dron-hours',[DashboardAgricolaController::class,'GetDronHours']);
