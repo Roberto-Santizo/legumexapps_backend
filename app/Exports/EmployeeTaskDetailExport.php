@@ -116,8 +116,8 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                         'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
                         'MONTO' => $percentage * $task->budget,
                         'HORAS TOTALES' => $percentage * $total_hours,
-                        'ENTRADA' => $registrations['entrance'],
-                        'SALIDA' => $registrations['exit'],
+                        'ENTRADA' => $registrations['entrance'] ?? '',
+                        'SALIDA' => $registrations['exit'] ?? '',
                         'DIA' => $day_carbon->isoFormat('dddd')
                     ]);
                 }
@@ -148,8 +148,8 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                         'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
                         'MONTO' => $budget,
                         'HORAS TOTALES' => $hours,
-                        'ENTRADA' => $registrations['entrance'],
-                        'SALIDA' => $registrations['exit'],
+                        'ENTRADA' => $registrations['entrance'] ?? '',
+                        'SALIDA' => $registrations['exit'] ?? '',
                         'DIA' => $day
                     ]);
                 }
@@ -189,8 +189,8 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                 'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
                 'MONTO' => $task->end_date ? ($task->budget / $task->employees->count()) : 0,
                 'HORAS TOTALES' => $task->end_date ? ($task->hours / $task->employees->count()) : 0,
-                'ENTRADA' => $registrations['entrance'],
-                'SALIDA' => $registrations['exit'],
+                'ENTRADA' => $registrations['entrance'] ?? '',
+                'SALIDA' => $registrations['exit'] ?? '',
                 'DIA' => $day
             ]);
         }
