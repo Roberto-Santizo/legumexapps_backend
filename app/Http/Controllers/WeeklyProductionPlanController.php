@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\TaskProductionPlanResource;
 use App\Http\Resources\WeeklyPlanProductionResource;
 use App\Imports\WeeklyProductionPlanImport;
+use App\Models\Line;
 use App\Models\WeeklyProductionPlan;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -20,10 +20,23 @@ class WeeklyProductionPlanController extends Controller
     public function show(string $id)
     {
         $weekly_plan = WeeklyProductionPlan::find($id);
-
-        return TaskProductionPlanResource::collection($weekly_plan->tasks);
-    }
     
+        $groupedTasks = $weekly_plan->tasks->groupBy(function ($task) {
+            return $task->line->code;
+        });
+    
+        $lineas = $groupedTasks->keys()->map(function($linea){
+            $line = Line::where('code',$linea)->first();
+            return [
+                'id' => strval($line->id),
+                'line' => $linea
+            ];
+        });  
+        return response()->json([
+            'data' => $lineas
+        ]);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -35,7 +48,7 @@ class WeeklyProductionPlanController extends Controller
 
             return response()->json([
                 'msg' => 'Plan Creado Correctamente'
-            ],200);
+            ], 200);
         } catch (\Throwable  $th) {
             return response()->json([
                 'msg' => $th->getMessage()

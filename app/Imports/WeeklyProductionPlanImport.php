@@ -5,7 +5,6 @@ namespace App\Imports;
 use App\Models\Line;
 use App\Models\StockKeepingUnit;
 use App\Models\TaskProductionPlan;
-use App\Models\TaskProductionStockKeepingUnit;
 use App\Models\WeeklyProductionPlan;
 use Carbon\Carbon;
 use Exception;
@@ -20,13 +19,23 @@ class WeeklyProductionPlanImport implements ToCollection, WithHeadingRow
      * @param Collection $collection
      */
 
+    private $weeklyPlans = [];
+
     public function collection(Collection $rows)
     {
+        $year = Carbon::now()->year;
+        $week = Carbon::now()->weekOfYear + 1;
+        $weekly_production_plan = WeeklyProductionPlan::firstOrCreate(
+            [
+                'week' => $week,
+                'year' => $year
+            ]
+        );
         foreach ($rows as $row) {
+            if (empty($row['linea'])) {
+                return null;
+            }
             $date = Date::excelToDateTimeObject($row['fecha_de_operacion']);
-            $year = Carbon::now()->year;
-            $week = Carbon::now()->weekOfYear + 1;
-            $weekly_production_plan = $this->createWeeklyProductionPlan($week, $year);
             $line = Line::where('code', $row['linea'])->first();
             $sku = StockKeepingUnit::where('code', $row['sku'])->first();
 
@@ -39,15 +48,11 @@ class WeeklyProductionPlanImport implements ToCollection, WithHeadingRow
             }
 
             try {
-                $task_production_plan = TaskProductionPlan::create([
+                TaskProductionPlan::create([
                     'line_id' => $line->id,
                     'weekly_production_plan_id' => $weekly_production_plan->id,
                     'operation_date' => $date,
                     'total_hours' => 12,
-                ]);
-
-                TaskProductionStockKeepingUnit::create([
-                    'task_p_id' => $task_production_plan->id,
                     'sku_id' => $sku->id,
                     'tarimas' => $row['tarimas']
                 ]);
@@ -57,13 +62,21 @@ class WeeklyProductionPlanImport implements ToCollection, WithHeadingRow
         }
     }
 
-    private function createWeeklyProductionPlan($week, $year)
+    private function getOrCreatePlanSemanal($numeroSemana, $anio)
     {
-            $weekly_production_plan = WeeklyProductionPlan::create([
-                'year' => $year,
-                'week' => $week
-            ]);
+        if (isset($this->weeklyPlans[$numeroSemana])) {
+            return $this->weeklyPlans[$numeroSemana];
+        }
 
-        return $weekly_production_plan;
+        $planSemanal = WeeklyProductionPlan::firstOrCreate(
+            [
+                'week' => $numeroSemana,
+                'year' => $anio
+            ]
+        );
+
+        $this->weeklyPlans[$numeroSemana] = $planSemanal;
+
+        return $planSemanal;
     }
 }

@@ -15,7 +15,7 @@ class WeeklyPlanProductionResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'id' => strval($this->id),
             'week' => $this->week,
             'year' => $this->year
         ];

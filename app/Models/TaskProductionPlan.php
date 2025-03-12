@@ -9,7 +9,7 @@ class TaskProductionPlan extends Model
     protected $casts = [
         'operation_date' => 'datetime',
         'start_date'  => 'datetime',
-        'end_date'  => 'datetime'
+        'end_date'  => 'datetime',
     ];
     protected $fillable = [
         'line_id',
@@ -18,6 +18,8 @@ class TaskProductionPlan extends Model
         'total_hours',
         'start_date',
         'end_date',
+        'tarimas',
+        'sku_id'
     ];
 
     public function line()
@@ -28,12 +30,6 @@ class TaskProductionPlan extends Model
     public function weeklyPlan()
     {
         return $this->belongsTo(WeeklyProductionPlan::class,'weekly_production_plan_id','id');
-    }
-
-
-    public function skus()
-    {
-        return $this->hasMany(TaskProductionStockKeepingUnit::class,'task_p_id','id');
     }
 
     public function employees()
