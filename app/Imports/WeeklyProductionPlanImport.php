@@ -19,7 +19,6 @@ class WeeklyProductionPlanImport implements ToCollection, WithHeadingRow
      * @param Collection $collection
      */
 
-    private $weeklyPlans = [];
 
     public function collection(Collection $rows)
     {
@@ -60,23 +59,5 @@ class WeeklyProductionPlanImport implements ToCollection, WithHeadingRow
                 throw $th;
             }
         }
-    }
-
-    private function getOrCreatePlanSemanal($numeroSemana, $anio)
-    {
-        if (isset($this->weeklyPlans[$numeroSemana])) {
-            return $this->weeklyPlans[$numeroSemana];
-        }
-
-        $planSemanal = WeeklyProductionPlan::firstOrCreate(
-            [
-                'week' => $numeroSemana,
-                'year' => $anio
-            ]
-        );
-
-        $this->weeklyPlans[$numeroSemana] = $planSemanal;
-
-        return $planSemanal;
     }
 }

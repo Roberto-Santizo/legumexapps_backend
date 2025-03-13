@@ -21,7 +21,7 @@ class TaskProductionPlanResource extends JsonResource
         return [
             'id' => strval($this->id),
             'line' => $this->line->code,
-            'total_tarimas' => $this->skus->sum('tarimas'),
+            'total_tarimas' => $this->tarimas,
             'operation_date' => $this->operation_date,
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,

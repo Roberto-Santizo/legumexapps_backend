@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\BiometricEmployeeResource;
 use App\Http\Resources\EmployeeCollection;
+use App\Models\BiometricEmployee;
 use App\Models\Employee;
 use App\Models\EmployeeTask;
 use App\Models\EmployeeTaskCrop;
@@ -45,5 +47,11 @@ class EmployeeController extends Controller
         });
 
         return new EmployeeCollection($filter_employees);
+    }
+
+    public function getAllComodines()
+    {
+        $comodines = BiometricEmployee::where('auth_dept_id','3eef8d8594bd4fa80194f5ccac7b1d5c')->orWhere('auth_dept_id','3eef8d8594bd4fa80194f5ccac7b1d5b')->get();
+        return BiometricEmployeeResource::collection($comodines);
     }
 }

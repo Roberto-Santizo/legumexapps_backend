@@ -36,4 +36,10 @@ class TaskProductionPlan extends Model
     {
         return $this->hasMany(TaskProductionEmployee::class,'task_p_id','id');
     }
+
+    public function sku()
+    {
+        return $this->belongsTo(StockKeepingUnit::class);
+    }
+
 }

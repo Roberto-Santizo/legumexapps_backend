@@ -15,11 +15,11 @@ class TaskProductionPlanDetailsResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'id' => strval($this->id),
             'line' => $this->line->code,
             'operation_date' => $this->operation_date,
-            'total_tarimas' => $this->skus->sum('tarimas'),
-            'skus' => TaskProductionSKUPlanResource::collection($this->skus),
+            'total_tarimas' => $this->tarimas,
+            'sku' => new SKUResource($this->sku),
             'employees' => TaskProductionEmployeeResource::collection($this->employees)
         ];
     }

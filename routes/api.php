@@ -44,6 +44,7 @@ use App\Http\Controllers\VarietyProductsController;
 use App\Http\Controllers\WeeklyPlanController;
 use App\Http\Controllers\WeeklyProductionPlanController;
 use App\Models\ProductorPlantationControl;
+use App\Models\WeeklyProductionPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -101,7 +102,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tasks-crops-lotes/close-assignment/{id}', [TasksCropController::class, 'CloseAssigment']);
     Route::post('/tasks-crops-lotes/close-daily-assigment/{id}', [TasksCropController::class, 'CloseDailyAssigment']);
     Route::post('/tasks-crops-lotes/register-daily-assigment',[TasksCropController::class,'RegisterDailyAssigment']);
+    
     Route::apiResource('/employees',EmployeeController::class);
+
     Route::apiResource('/insumos',InsumosController::class);
     Route::get('/insumos-all',[InsumosController::class,'getAllInsumos']);
     Route::post('/insumos/upload', [InsumosController::class,'UploadInsumos']);
@@ -162,6 +165,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     //PRODUCCIÓN
+    Route::get('/employees-comodines',[EmployeeController::class,'getAllComodines']);
+
     Route::apiResource('/sku',SKUController::class);
     Route::get('/sku-all',[SKUController::class,'GetAllSKU']);
     
@@ -172,6 +177,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/timeouts-all',[TimeOutController::class,'GetAllTimeouts']);
 
     Route::apiResource('/weekly_production_plan',WeeklyProductionPlanController::class);
+    Route::get('/weekly_production_plan/details/{weekly_plan_id}/{line_id}',[WeeklyProductionPlanController::class,'getAllTasks']);
+    Route::post('/weekly_production_plan/assign/{id}',[WeeklyProductionPlanController::class,'createAssigments']);
     
     Route::apiResource('/task_production_plan',TaskProductionController::class);
     Route::post('/tasks_production_plan/{id}/add-timeout',[TaskProductionController::class,'AddTimeOut']);
