@@ -18,7 +18,8 @@ class TaskProductionEmployeeResource extends JsonResource
             'id' => strval($this->id),
             'name' => $this->name,
             'code' => $this->code,
-            'position' => $this->position
+            'position' => $this->position,
+            'column_id' => strval(1)
         ];
     }
 }

@@ -15,9 +15,11 @@ class BiometricEmployeeResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => strval($this->id),
             'name' => $this->name,
             'code' => $this->last_name,
-            'position' => $this->pin
+            'position' => $this->pin,
+            'column_id' => strval(2)
         ];
     }
 }
