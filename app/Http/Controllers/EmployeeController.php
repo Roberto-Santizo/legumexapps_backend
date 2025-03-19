@@ -24,24 +24,26 @@ class EmployeeController extends Controller
         ]);
 
         $finca = Finca::find($data['id']);
-        if($finca->id === 2){
-            $employees = Employee::where(function ($query) {$query->where('terminal_id', 1008)->orWhere('terminal_id', 1009);})
-            ->whereDate('punch_time', Carbon::now())
-            ->get();
-        }else{
-            $employees = Employee::where('terminal_id',$finca->terminal_id)->whereDate('punch_time',Carbon::now())->get();
+        if ($finca->id === 2) {
+            $employees = Employee::where(function ($query) {
+                $query->where('terminal_id', 1008)->orWhere('terminal_id', 1009);
+            })
+                ->whereDate('punch_time', Carbon::now())
+                ->get();
+        } else {
+            $employees = Employee::where('terminal_id', $finca->terminal_id)->whereDate('punch_time', Carbon::now())->get();
         }
-        
-        $filter_employees = $employees->filter(function($employee){
-            $assignment = EmployeeTask::where('employee_id',$employee->emp_id)->whereDate('created_at',Carbon::now())->whereHas('task_weekly_plan',function($query){
-                $query->where('end_date',null);
+
+        $filter_employees = $employees->filter(function ($employee) {
+            $assignment = EmployeeTask::where('employee_id', $employee->emp_id)->whereDate('created_at', Carbon::now())->whereHas('task_weekly_plan', function ($query) {
+                $query->where('end_date', null);
             })->first();
 
-            $assignmentCrop = EmployeeTaskCrop::where('employee_id',$employee->emp_id)->whereDate('created_at',Carbon::now())->whereHas('assignment',function($query){
-                $query->where('end_date',null);
+            $assignmentCrop = EmployeeTaskCrop::where('employee_id', $employee->emp_id)->whereDate('created_at', Carbon::now())->whereHas('assignment', function ($query) {
+                $query->where('end_date', null);
             })->first();
 
-            if(!$assignment && !$assignmentCrop){
+            if (!$assignment && !$assignmentCrop) {
                 return $employee;
             }
         });
@@ -51,7 +53,14 @@ class EmployeeController extends Controller
 
     public function getAllComodines()
     {
-        $comodines = BiometricEmployee::where('auth_dept_id','3eef8d8594bd4fa80194f5ccac7b1d5c')->orWhere('auth_dept_id','3eef8d8594bd4fa80194f5ccac7b1d5b')->get();
+        $comodines = BiometricEmployee::where('auth_dept_id', '3eef8d8594bd4fa80194f5ccac7b1d5c')
+            ->orWhere('auth_dept_id', '3eef8d8594bd4fa80194f5ccac7b1d5b')
+            ->get()
+            ->map(function ($item, $index) {
+                $item->temp_id = $index + 10; // Asigna un ID incremental
+                return $item;
+            });
+
         return BiometricEmployeeResource::collection($comodines);
     }
 }

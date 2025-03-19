@@ -53,7 +53,8 @@ class WeeklyProductionPlanImport implements ToCollection, WithHeadingRow
                     'operation_date' => $date,
                     'total_hours' => 12,
                     'sku_id' => $sku->id,
-                    'tarimas' => $row['tarimas']
+                    'tarimas' => $row['tarimas'],
+                    'status' => 0
                 ]);
             } catch (\Throwable $th) {
                 throw $th;

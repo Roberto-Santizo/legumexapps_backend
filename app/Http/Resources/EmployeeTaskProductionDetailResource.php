@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class BiometricEmployeeResource extends JsonResource
+class EmployeeTaskProductionDetailResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,11 +15,10 @@ class BiometricEmployeeResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => strval($this->temp_id),
+            'id' => strval($this->id),
             'name' => $this->name,
-            'code' => $this->last_name,
-            'position' => $this->pin,
-            'column_id' => strval(2)
+            'code' => $this->code,
+            'position' => $this->position,
         ];
     }
 }

@@ -19,7 +19,8 @@ class TaskProductionPlan extends Model
         'start_date',
         'end_date',
         'tarimas',
-        'sku_id'
+        'sku_id',
+        'status'
     ];
 
     public function line()

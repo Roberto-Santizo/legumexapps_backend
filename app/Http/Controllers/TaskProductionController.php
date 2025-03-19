@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ChangeAssignmentRequest;
+use App\Http\Resources\TaskProductionPlanDetailResource;
 use App\Http\Resources\TaskProductionPlanDetailsResource;
 use App\Http\Resources\TaskProductionPlanResource;
 use App\Models\Line;
@@ -11,6 +12,7 @@ use App\Models\TaskProductionEmployeesBitacora;
 use App\Models\TaskProductionPlan;
 use App\Models\TaskProductionTimeout;
 use App\Models\Timeout;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx\Rels;
 
@@ -150,11 +152,11 @@ class TaskProductionController extends Controller
         }
     }
 
-    public function ChangeAssignment(ChangeAssignmentRequest $request, string $id)
+    public function ChangeAssignment(ChangeAssignmentRequest $request)
     {
         $data = $request->validated();
 
-        $assignment = TaskProductionEmployee::find($data['assignment_id'])->first();
+        $assignment = TaskProductionEmployee::find($data['assignment_id']);
 
         if (!$assignment) {
             return response()->json([
@@ -187,5 +189,62 @@ class TaskProductionController extends Controller
                 'msg' => $th->getMessage()
             ],400);
         }
+    }
+
+    public function StartTaskProduction(string $id)
+    {
+        $task_production = TaskProductionPlan::find($id);
+
+        if (!$task_production) {
+            return response()->json([
+                'msg' => 'Task Production SKU Not Found'
+            ], 404);
+        }
+
+        try {
+            $task_production->start_date = Carbon::now();
+            $task_production->save();
+
+            return response()->json([
+                'msg' => 'Task Production SKU Updated Successfully'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function EndTaskProduction(string $id)
+    {
+        $task_production = TaskProductionPlan::find($id);
+
+        if (!$task_production) {
+            return response()->json([
+                'msg' => 'Task Production SKU Not Found'
+            ], 404);
+        }
+
+        try {
+           
+            $task_production->end_date = Carbon::now();
+            $task_production->save();
+
+
+            return response()->json([
+                'msg' => 'Task Production SKU Updated Successfully'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function TaskDetails(string $id)
+    {
+        $task_production = TaskProductionPlan::find($id);
+
+        return new TaskProductionPlanDetailResource($task_production);
     }
 }

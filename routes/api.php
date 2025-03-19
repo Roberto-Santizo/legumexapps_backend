@@ -181,13 +181,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/weekly_production_plan/assign/{id}',[WeeklyProductionPlanController::class,'createAssigments']);
     
     Route::apiResource('/task_production_plan',TaskProductionController::class);
+    Route::get('/tasks_production_plan/details/{id}',[TaskProductionController::class,'TaskDetails']);
+    Route::patch('/tasks_production_plan/{id}/start',[TaskProductionController::class,'StartTaskProduction']);
+    Route::patch('/tasks_production_plan/{id}/end',[TaskProductionController::class,'EndTaskProduction']);
     Route::post('/tasks_production_plan/{id}/add-timeout',[TaskProductionController::class,'AddTimeOut']);
     Route::post('/tasks_production_plan/{id}/assign',[TaskProductionController::class,'Assign']);
-    Route::post('/tasks_production_plan/{id}/change-assignment',[TaskProductionController::class,'ChangeAssignment']);
+    Route::post('/tasks_production_plan/change-assignment',[TaskProductionController::class,'ChangeAssignment']);
 
-    Route::apiResource('/tasks_production_plan_sku',TaskProductionSKUPlanController::class);
-    Route::patch('/tasks_production_plan_sku/{id}/start',[TaskProductionSKUPlanController::class,'StartTaskProductionSKU']);
-    Route::patch('/tasks_production_plan_sku/{id}/end',[TaskProductionSKUPlanController::class,'EndTaskProductionSKU']);
+    // Route::apiResource('/tasks_production_plan_sku',TaskProductionSKUPlanController::class);
+   
 });
 
 //Autenticación
