@@ -73,7 +73,7 @@ class WeeklyPlanExport implements FromCollection, WithHeadings, WithTitle, WithS
                             $reported_hours = $assignment->start_date->diffInHours($assignment->end_date);
                             $rendimiento_teorico = ($reported_hours * $emplooyes);
                             $rendimiento_real = $assignment->plants / 120;
-                            
+
                             $rows->push([
                                 'FINCA' => $weekly_plan->finca->name,
                                 'SEMANA CALENDARIO' => $weekly_plan->week,
@@ -104,12 +104,12 @@ class WeeklyPlanExport implements FromCollection, WithHeadings, WithTitle, WithS
 
     public function headings(): array
     {
-        return ['FINCA', 'SEMANA CALENDARIO', 'LOTE','CDP', 'CODIGO TAREA', 'TAREA', 'PLAN', 'ESTADO', 'FECHA DE INICIO', 'FECHA DE CIERRE', 'HORAS RENDIMIENTO TEORICO', 'HORAS RENDIMIENTO REAL', 'RENDIMIENTO', 'ATRASADA', 'SEMANA ORIGEN'];
+        return ['FINCA', 'SEMANA CALENDARIO', 'LOTE', 'CDP', 'CODIGO TAREA', 'TAREA', 'PLAN', 'ESTADO', 'FECHA DE INICIO', 'FECHA DE CIERRE', 'HORAS RENDIMIENTO TEORICO', 'HORAS RENDIMIENTO REAL', 'RENDIMIENTO', 'ATRASADA', 'SEMANA ORIGEN'];
     }
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('A1:N1')->applyFromArray([
+        $sheet->getStyle('A1:O1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['argb' => 'FFFFFF'],
@@ -137,7 +137,7 @@ class WeeklyPlanExport implements FromCollection, WithHeadings, WithTitle, WithS
     public function columnFormats(): array
     {
         return [
-            'L' => '0.00%',
+            'M' => '0.00%',
         ];
     }
 }

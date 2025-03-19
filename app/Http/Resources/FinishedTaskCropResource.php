@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class FinishedTaskCropResource extends JsonResource
+class FinishedTasksWeeklyPlanResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,12 +16,11 @@ class FinishedTaskCropResource extends JsonResource
     {
         return [
             'id' => strval($this->id),
-            'task' => $this->TaskCropWeeklyPlan->task->name,
-            'finca' => $this->TaskCropWeeklyPlan->plan->finca->name,
-            'lote' => $this->TaskCropWeeklyPlan->lotePlantationControl->lote->name,
-            'start_date' => $this->start_date->format('d-m-Y h:i:s A'),
-            'end_date' => $this->end_date->format('d-m-Y h:i:s A'),
-
+            'task' => $this->task->name,
+            'finca' => $this->plan->finca->name,
+            'lote' => $this->lotePlantationControl->lote->name,
+            'start_date' => '',
+            'end_date' => '',
         ];
     }
 }
