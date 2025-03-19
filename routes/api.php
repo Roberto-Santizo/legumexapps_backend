@@ -187,6 +187,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tasks_production_plan/{id}/add-timeout',[TaskProductionController::class,'AddTimeOut']);
     Route::post('/tasks_production_plan/{id}/assign',[TaskProductionController::class,'Assign']);
     Route::post('/tasks_production_plan/change-assignment',[TaskProductionController::class,'ChangeAssignment']);
+    Route::post('/tasks_production_plan/{id}/performance',[TaskProductionController::class,'TakePerformance']);
 
     // Route::apiResource('/tasks_production_plan_sku',TaskProductionSKUPlanController::class);
    

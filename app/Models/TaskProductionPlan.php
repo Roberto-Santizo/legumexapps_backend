@@ -43,4 +43,9 @@ class TaskProductionPlan extends Model
         return $this->belongsTo(StockKeepingUnit::class);
     }
 
+    public function performances()
+    {
+        return $this->hasMany(TaskProductionPerformance::class);
+    }
+
 }

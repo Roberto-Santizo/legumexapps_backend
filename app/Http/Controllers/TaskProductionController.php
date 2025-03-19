@@ -9,6 +9,7 @@ use App\Http\Resources\TaskProductionPlanResource;
 use App\Models\Line;
 use App\Models\TaskProductionEmployee;
 use App\Models\TaskProductionEmployeesBitacora;
+use App\Models\TaskProductionPerformance;
 use App\Models\TaskProductionPlan;
 use App\Models\TaskProductionTimeout;
 use App\Models\Timeout;
@@ -167,14 +168,14 @@ class TaskProductionController extends Controller
         try {
             TaskProductionEmployeesBitacora::create([
                 "assignment_id" => $assignment->id,
-                "original_name"=> $assignment->name,
-                "original_code"=> $assignment->code,
-                "original_position"=> $assignment->position,
-                "new_name"=> $data['new_name'],
-                "new_code"=> $data['new_code'],
-                "new_position"=> $data['new_position']
+                "original_name" => $assignment->name,
+                "original_code" => $assignment->code,
+                "original_position" => $assignment->position,
+                "new_name" => $data['new_name'],
+                "new_code" => $data['new_code'],
+                "new_position" => $data['new_position']
             ]);
-            
+
             $assignment->name = $data['new_name'];
             $assignment->code = $data['new_code'];
             $assignment->position = $data['new_position'];
@@ -182,12 +183,12 @@ class TaskProductionController extends Controller
 
 
             return response()->json([
-                'msg' => 'Updated Successfully' 
-            ],200);
+                'msg' => 'Updated Successfully'
+            ], 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
-            ],400);
+            ], 400);
         }
     }
 
@@ -226,7 +227,7 @@ class TaskProductionController extends Controller
         }
 
         try {
-           
+
             $task_production->end_date = Carbon::now();
             $task_production->save();
 
@@ -246,5 +247,35 @@ class TaskProductionController extends Controller
         $task_production = TaskProductionPlan::find($id);
 
         return new TaskProductionPlanDetailResource($task_production);
+    }
+
+    public function TakePerformance(Request $request, string $id)
+    {
+        $data = $request->validate([
+            'tarimas_produced' => 'required'
+        ]);
+
+        $task_production = TaskProductionPlan::find($id);
+
+        if (!$task_production) {
+            return response()->json([
+                'msg' => 'Task Production Not Found'
+            ], 404);
+        }
+
+        try {
+            TaskProductionPerformance::create([
+                'task_production_plan_id' => $task_production->id,
+                'tarimas_produced' => $data['tarimas_produced'],
+            ]);
+
+            return response()->json([
+                'msg' => 'Data Created Successfully'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
     }
 }
