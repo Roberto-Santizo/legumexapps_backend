@@ -51,7 +51,7 @@ class WeeklyProductionPlanImport implements ToCollection, WithHeadingRow
                     'line_id' => $line->id,
                     'weekly_production_plan_id' => $weekly_production_plan->id,
                     'operation_date' => $date,
-                    'total_hours' => 12,
+                    'total_hours' => $row['horas'],
                     'sku_id' => $sku->id,
                     'tarimas' => $row['tarimas'],
                     'status' => 0
