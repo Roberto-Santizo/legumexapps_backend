@@ -111,6 +111,7 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                     $entrance = Carbon::parse($registrations['entrance']);
                     $exit = Carbon::parse($registrations['exit']);
 
+                    $hours_teoricas_employee = $task->hours;
                     $rows->push([
                         'CODIGO' => $employeeAssignment->code,
                         'EMPLEADO' => $employeeAssignment->name,
@@ -118,8 +119,8 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                         'TAREA REALIZADA' => $task->task->name,
                         'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
                         'MONTO' => $percentage * $task->budget,
-                        'HORAS REALES' => $total_hours / $task->employees->count(),
-                        'HORAS TOTALES' => $percentage * $total_hours,
+                        'HORAS REALES' => $total_hours*$percentage,
+                        'HORAS TEORICAS' => $hours_teoricas_employee*$percentage,
                         'HORAS BIOMETRICO' => $entrance->diffInHours($exit),
                         'ENTRADA' => $registrations['entrance'] ?? '',
                         'SALIDA' => $registrations['exit'] ?? '',
@@ -154,7 +155,7 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                         'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
                         'MONTO' => $budget,
                         'HORAS TOTALES' => $hours,
-                        'HORAS REALES' => 0,
+                        'HORAS REALES' => '',
                         'HORAS BIOMETRICO' =>  $entrance->diffInHours($exit),
                         'ENTRADA' => $registrations['entrance'] ?? '',
                         'SALIDA' => $registrations['exit'] ?? '',
@@ -176,7 +177,9 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
             'TAREA REALIZADA' => $task->task->name,
             'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
             'MONTO' => '',
-            'HORAS TOTALES' => $task->start_date->diffInHours($task->end_date),
+            'HORAS REALES' => $task->start_date->diffInHours($task->end_date),
+            'HORAS TEORICAS' => $task->hours,
+            'HORAS BIOMETRICO' => '',
             'ENTRADA' => '',
             'SALIDA' => '',
             'DIA' => $task->start_date->IsoFormat('dddd')
@@ -198,8 +201,8 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                 'TAREA REALIZADA' => $task->task->name,
                 'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
                 'MONTO' => $task->end_date ? ($task->budget / $task->employees->count()) : 0,
-                'HORAS TOTALES' => $task->end_date ? ($task->hours / $task->employees->count()) : 0,
-                'HORAS REALES' => $task->end_date ? ($task->start_date->diffInHours($task->end_date)) / $task->employees->count() : 0,
+                'HORAS REALES' => $task->end_date ? ($task->start_date->diffInHours($task->end_date)) : '',
+                'HORAS TEORICAS' => $task->end_date ? ($task->hours / $task->employees->count()) : 0,
                 'HORAS BIOMETRICO' => $entrance->diffInHours($exit),
                 'ENTRADA' => $registrations['entrance'] ?? '',
                 'SALIDA' => $registrations['exit'] ?? '',
@@ -225,7 +228,7 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
 
     public function headings(): array
     {
-        return ['CODIGO', 'EMPLEADO', 'LOTE', 'TAREA REALIZADA', 'PLAN', 'MONTO GANADO', 'HORAS TOTALES', 'HORAS REALES', 'HORAS BIOMETRICO', 'ENTRADA BIOMETRICO', 'SALIDA BIOMETRICO', 'DIA'];
+        return ['CODIGO', 'EMPLEADO', 'LOTE', 'TAREA REALIZADA', 'PLAN', 'MONTO GANADO', 'HORAS REALES', 'HORAS TEORICAS', 'HORAS BIOMETRICO', 'ENTRADA BIOMETRICO', 'SALIDA BIOMETRICO', 'DIA'];
     }
     public function styles(Worksheet $sheet)
     {
