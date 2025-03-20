@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\EmployeesResource;
 use App\Http\Resources\FinishedTaskCropResource;
+use App\Http\Resources\FinishedTasksCropWeeklyPlanResource;
 use App\Http\Resources\FinishedTasksWeeklyPlanResource;
 use App\Http\Resources\PlanFincaFinishedTasksResource;
 use App\Http\Resources\TasksCropWeeklyPlanInProgressResource;
@@ -176,7 +177,7 @@ class DashboardAgricolaController extends Controller
             })->get();
         }
 
-        return FinishedTasksWeeklyPlanResource::collection($tasks);
+        return FinishedTasksCropWeeklyPlanResource::collection($tasks);
     }
 
     public function GetFinishedTasksByFinca(Request $request)
