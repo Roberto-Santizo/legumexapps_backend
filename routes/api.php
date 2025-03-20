@@ -11,6 +11,7 @@ use App\Http\Controllers\DashboardCalidad;
 use App\Http\Controllers\DefectController;
 use App\Http\Controllers\DriversController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\EmployeePermissionsController;
 use App\Http\Controllers\FincaController;
 use App\Http\Controllers\InspectorController;
 use App\Http\Controllers\InsumosController;
@@ -189,6 +190,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tasks_production_plan/change-assignment',[TaskProductionController::class,'ChangeAssignment']);
     Route::post('/tasks_production_plan/{id}/performance',[TaskProductionController::class,'TakePerformance']);
 
+    Route::apiResource('/employee-permissions',EmployeePermissionsController::class);
     // Route::apiResource('/tasks_production_plan_sku',TaskProductionSKUPlanController::class);
    
 });

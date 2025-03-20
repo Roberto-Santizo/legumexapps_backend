@@ -6,6 +6,7 @@ use App\Http\Requests\ChangeAssignmentRequest;
 use App\Http\Resources\TaskProductionPlanDetailResource;
 use App\Http\Resources\TaskProductionPlanDetailsResource;
 use App\Http\Resources\TaskProductionPlanResource;
+use App\Models\EmployeeTransfer;
 use App\Models\Line;
 use App\Models\TaskProductionEmployee;
 use App\Models\TaskProductionEmployeesBitacora;
@@ -13,12 +14,20 @@ use App\Models\TaskProductionPerformance;
 use App\Models\TaskProductionPlan;
 use App\Models\TaskProductionTimeout;
 use App\Models\Timeout;
+use App\Services\ChangeEmployeeNotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx\Rels;
 
 class TaskProductionController extends Controller
 {
+    protected $emailService;
+
+    public function __construct(ChangeEmployeeNotificationService $emailService)
+    {
+        $this->emailService = $emailService;
+    }
+
+
     /**
      * Display a listing of the resource.
      */
@@ -166,7 +175,7 @@ class TaskProductionController extends Controller
         }
 
         try {
-            TaskProductionEmployeesBitacora::create([
+            $change = TaskProductionEmployeesBitacora::create([
                 "assignment_id" => $assignment->id,
                 "original_name" => $assignment->name,
                 "original_code" => $assignment->code,
@@ -176,11 +185,18 @@ class TaskProductionController extends Controller
                 "new_position" => $data['new_position']
             ]);
 
+            $transfer = EmployeeTransfer::create([
+                'change_employee_id' => $change->id,
+                'confirmed' => false
+            ]);
+
             $assignment->name = $data['new_name'];
             $assignment->code = $data['new_code'];
             $assignment->position = $data['new_position'];
             $assignment->save();
 
+
+            $this->emailService->sendNotification($assignment,$change,$transfer);
 
             return response()->json([
                 'msg' => 'Updated Successfully'

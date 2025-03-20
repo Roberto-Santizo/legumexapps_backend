@@ -12,4 +12,10 @@ class TaskProductionEmployee extends Model
         'code',
         'position'
     ];
+
+
+    public function TaskProduction()
+    {
+        return $this->belongsTo(TaskProductionPlan::class,'task_p_id','id');
+    }
 }

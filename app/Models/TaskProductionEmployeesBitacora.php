@@ -15,4 +15,10 @@ class TaskProductionEmployeesBitacora extends Model
         "new_code",
         "new_position",
     ];
+
+
+    public function assignment()
+    {
+        return $this->belongsTo(TaskProductionEmployee::class, 'assignment_id','id');
+    }
 }
