@@ -388,8 +388,12 @@ class TaskProductionController extends Controller
 
         try {
             $last_task = TaskProductionPlan::whereDate('operation_date',$data['date'])->orderBy('priority','DESC')->get()->first();
+            if($last_task){
+                $task_production->priority = $last_task->priority+1;
+            }else{
+                $task_production->priority = 1;
+            }
             $task_production->operation_date = $data['date'];
-            $task_production->priority = $last_task->priority+1;
             $task_production->save();
 
             return response()->json([

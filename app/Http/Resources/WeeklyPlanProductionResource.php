@@ -17,7 +17,8 @@ class WeeklyPlanProductionResource extends JsonResource
         return [
             'id' => strval($this->id),
             'week' => $this->week,
-            'year' => $this->year
+            'year' => $this->year,
+            'completed' => $this->completed
         ];
     }
 }

@@ -20,6 +20,16 @@ class WeeklyProductionPlanController extends Controller
     public function index()
     {
         $plans_production = WeeklyProductionPlan::paginate(10);
+        $planes_validos = $plans_production->map(function ($plan) {
+            if ($plan->tasks->every(fn($task) => $task->end_date !== null)){
+                $plan->completed = true;
+            }else{
+                $plan->completed = false;
+            }
+
+            return $plan;
+        });
+        
         return WeeklyPlanProductionResource::collection($plans_production);
     }
 
