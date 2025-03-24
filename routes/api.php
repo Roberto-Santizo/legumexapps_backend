@@ -178,7 +178,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/timeouts-all',[TimeOutController::class,'GetAllTimeouts']);
 
     Route::apiResource('/weekly_production_plan',WeeklyProductionPlanController::class);
-    Route::get('/weekly_production_plan/details/{weekly_plan_id}/{line_id}',[WeeklyProductionPlanController::class,'getAllTasks']);
+    Route::get('/weekly_production_plan/details/{weekly_plan_id}/{line_id}',[WeeklyProductionPlanController::class,'GetTasksByLineId']);
+    Route::get('/weekly_production_plan/details/{weekly_plan_id}',[WeeklyProductionPlanController::class,'GetTasksForCalendar']);
+    Route::get('/weekly_production_plan/details-by-date/{weekly_plan_id}',[WeeklyProductionPlanController::class,'GetTasksByDate']);
+
     Route::post('/weekly_production_plan/assign/{id}',[WeeklyProductionPlanController::class,'createAssigments']);
     
     Route::apiResource('/task_production_plan',TaskProductionController::class);
@@ -189,6 +192,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tasks_production_plan/{id}/assign',[TaskProductionController::class,'Assign']);
     Route::post('/tasks_production_plan/change-assignment',[TaskProductionController::class,'ChangeAssignment']);
     Route::post('/tasks_production_plan/{id}/performance',[TaskProductionController::class,'TakePerformance']);
+    Route::put('/tasks_production_plan/change-priority',[TaskProductionController::class,'ChangePriority']);
+    Route::patch('/tasks_production_plan/change-operation-date/{id}',[TaskProductionController::class,'ChangeOperationDate']);
 
     Route::apiResource('/employee-permissions',EmployeePermissionsController::class);
     // Route::apiResource('/tasks_production_plan_sku',TaskProductionSKUPlanController::class);

@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\TaskProductionForCalendarResource;
 use App\Http\Resources\TaskProductionPlanResource;
+use App\Http\Resources\TaskProductionPlanSummaryResource;
 use App\Http\Resources\WeeklyPlanProductionResource;
 use App\Imports\CreateAssignmentsProductionImport;
 use App\Imports\WeeklyProductionPlanImport;
 use App\Models\Line;
 use App\Models\TaskProductionPlan;
 use App\Models\WeeklyProductionPlan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -37,7 +40,9 @@ class WeeklyProductionPlanController extends Controller
             return [
                 'id' => strval($line->id),
                 'line' => $linea,
-                'status' => $allCompleted ? true : false
+                'status' => $allCompleted ? true : false,
+                'total_employees' => $line->total_persons,
+                'assigned_employees' => $tasks->first()->employees->count(),
             ];
         });
 
@@ -85,7 +90,41 @@ class WeeklyProductionPlanController extends Controller
         }
     }
 
-    public function getAllTasks(string $weekly_plan_id, string $line_id)
+    public function GetTasksByLineId(Request $request, string $weekly_plan_id, string $line_id)
+    {
+        $date = Carbon::parse($request->query('date'));
+
+        $weekly_plan = WeeklyProductionPlan::find($weekly_plan_id);
+
+        if (!$weekly_plan) {
+            return response()->json([
+                'msg' => 'Plan Semanal Not Found'
+            ], 404);
+        }
+
+        $tasks = $weekly_plan->tasks()->where('line_id', $line_id)->whereDate('operation_date', $date)->orderBy('priority', 'ASC')->get();
+
+        $previousTask = null;
+
+        $tasks->each(function ($task) use (&$previousTask) {
+            if ($task->priority === 1) {
+                $task->available = true;
+            }
+
+            if ($previousTask) {
+                if ($previousTask->end_date) {
+                    $task->available = true;
+                } else {
+                    $task->available = false;
+                }
+            }
+            $previousTask = $task;
+        });
+
+        return TaskProductionPlanResource::collection($tasks);
+    }
+
+    public function GetTasksForCalendar(string $weekly_plan_id)
     {
         $weekly_plan = WeeklyProductionPlan::find($weekly_plan_id);
 
@@ -95,6 +134,25 @@ class WeeklyProductionPlanController extends Controller
             ], 404);
         }
 
-        return TaskProductionPlanResource::collection($weekly_plan->tasks()->where('line_id',$line_id)->get());
+        $tasks = $weekly_plan->tasks()->orderBy('priority', 'ASC')->get();
+
+        return TaskProductionForCalendarResource::collection($tasks);
+    }
+
+    public function GetTasksByDate(Request $request, string $weekly_plan_id)
+    {
+        $date = Carbon::parse($request->query('date'));
+
+        $weekly_plan = WeeklyProductionPlan::find($weekly_plan_id);
+
+        if (!$weekly_plan) {
+            return response()->json([
+                'msg' => 'Plan Semanal Not Found'
+            ], 404);
+        }
+
+        $tasks = $weekly_plan->tasks()->orderBy('priority', 'ASC')->whereDate('operation_date',$date)->get();
+
+        return TaskProductionPlanSummaryResource::collection($tasks);
     }
 }

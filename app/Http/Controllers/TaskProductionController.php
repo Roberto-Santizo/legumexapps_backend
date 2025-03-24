@@ -53,6 +53,56 @@ class TaskProductionController extends Controller
         return new TaskProductionPlanDetailsResource($task_production_plan);
     }
 
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'tarimas' => 'required',
+            'total_hours' => 'required',
+            'operation_date' => 'required',
+            'task_production_plan_id' => 'required',
+        ]);
+
+        $task_production = TaskProductionPlan::find($data['task_production_plan_id']);
+
+        if (!$task_production) {
+            return response()->json([
+                'msg' => 'Task Production Plan Not Found'
+            ], 404);
+        }
+
+        $weekly_plan = $task_production->weeklyPlan;
+        $task = $weekly_plan->tasks()->where('line_id', $task_production->line_id)->OrderBy('priority')->get()->last();
+        try {
+            $task = TaskProductionPlan::create([
+                'line_id' => $task_production->line_id,
+                'weekly_production_plan_id' => $task_production->weekly_production_plan_id,
+                'operation_date' => $data['operation_date'],
+                'total_hours' => $data['total_hours'],
+                'tarimas' => $data['tarimas'],
+                'sku_id' => $task_production->sku_id,
+                'status' => 1,
+                'priority' => $task->priority + 1
+            ]);
+
+            foreach ($task_production->employees as $employee) {
+                TaskProductionEmployee::create([
+                    'task_p_id' => $task->id,
+                    'name' => $employee->name,
+                    'code' => $employee->code,
+                    'position' => $employee->position,
+                ]);
+            }
+
+            return response()->json([
+                'msg' => 'Task Created Successfully'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * Update the specified resource in storage.
      */
@@ -196,7 +246,7 @@ class TaskProductionController extends Controller
             $assignment->save();
 
 
-            $this->emailService->sendNotification($assignment,$change,$transfer);
+            $this->emailService->sendNotification($assignment, $change, $transfer);
 
             return response()->json([
                 'msg' => 'Updated Successfully'
@@ -232,24 +282,28 @@ class TaskProductionController extends Controller
         }
     }
 
-    public function EndTaskProduction(string $id)
+    public function EndTaskProduction(Request $request, string $id)
     {
+        $data = $request->validate([
+            'total_tarimas' => 'required'
+        ]);
+
         $task_production = TaskProductionPlan::find($id);
 
         if (!$task_production) {
             return response()->json([
-                'msg' => 'Task Production SKU Not Found'
+                'msg' => 'Task Production Not Found'
             ], 404);
         }
 
         try {
-
+            $task_production->finished_tarimas = $data['total_tarimas'];
             $task_production->end_date = Carbon::now();
             $task_production->save();
 
 
             return response()->json([
-                'msg' => 'Task Production SKU Updated Successfully'
+                'msg' => 'Task Production Updated Successfully'
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([
@@ -292,6 +346,59 @@ class TaskProductionController extends Controller
             return response()->json([
                 'msg' => $th->getMessage()
             ], 500);
+        }
+    }
+
+    public function ChangePriority(Request $request)
+    {
+        $data = $request->validate([
+            'data' => 'required'
+        ]);
+
+        try {
+            foreach ($data['data'] as $key => $value) {
+                $task_production = TaskProductionPlan::find($value);
+                $task_production->priority = $key + 1;
+                $task_production->save();
+            }
+
+            return response()->json([
+                'msg' => 'Data Updated Successfully'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function ChangeOperationDate(Request $request, string $id)
+    {
+        $data = $request->validate([
+            'date' => 'required'
+        ]);
+
+        $task_production = TaskProductionPlan::find($id);
+
+        if (!$task_production) {
+            return response()->json([
+                'msg' => 'Task Production Plan Not Found'
+            ], 404);
+        }
+
+        try {
+            $last_task = TaskProductionPlan::whereDate('operation_date',$data['date'])->orderBy('priority','DESC')->get()->first();
+            $task_production->operation_date = $data['date'];
+            $task_production->priority = $last_task->priority+1;
+            $task_production->save();
+
+            return response()->json([
+                'msg' =>  'Task Production Plan Updated Successfully'
+            ],200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage() 
+            ],500);
         }
     }
 }
