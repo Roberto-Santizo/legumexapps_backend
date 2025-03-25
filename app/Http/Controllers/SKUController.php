@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\SKUResource;
+use App\Http\Resources\SKUSelectResource;
 use App\Models\StockKeepingUnit;
 use Illuminate\Http\Request;
 
@@ -23,9 +24,7 @@ class SKUController extends Controller
     {
         $skus = StockKeepingUnit::select('id', 'name', 'code')->get();
 
-        return response()->json([
-            'data' => $skus
-        ]);
+        return SKUSelectResource::collection($skus);
     }
 
     /**

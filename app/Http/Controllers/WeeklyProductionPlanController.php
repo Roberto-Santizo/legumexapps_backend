@@ -20,7 +20,7 @@ class WeeklyProductionPlanController extends Controller
     public function index()
     {
         $plans_production = WeeklyProductionPlan::paginate(10);
-        $planes_validos = $plans_production->map(function ($plan) {
+        $plans_production->map(function ($plan) {
             if ($plan->tasks->every(fn($task) => $task->end_date !== null)){
                 $plan->completed = true;
             }else{
@@ -100,11 +100,10 @@ class WeeklyProductionPlanController extends Controller
         }
     }
 
-    public function GetTasksByLineId(Request $request, string $weekly_plan_id, string $line_id)
+    public function GetTasksByLineId(string $weekly_plan_id, string $line_id)
     {
-        $date = Carbon::parse($request->query('date'));
-
         $weekly_plan = WeeklyProductionPlan::find($weekly_plan_id);
+        $today = Carbon::today();
 
         if (!$weekly_plan) {
             return response()->json([
@@ -112,7 +111,7 @@ class WeeklyProductionPlanController extends Controller
             ], 404);
         }
 
-        $tasks = $weekly_plan->tasks()->where('line_id', $line_id)->whereDate('operation_date', $date)->orderBy('priority', 'ASC')->get();
+        $tasks = $weekly_plan->tasks()->where('line_id', $line_id)->whereDate('operation_date',$today)->orderBy('priority', 'ASC')->get();
 
         $previousTask = null;
 
@@ -131,7 +130,7 @@ class WeeklyProductionPlanController extends Controller
             $previousTask = $task;
         });
 
-        return TaskProductionPlanResource::collection($tasks);
+        return TaskProductionPlanResource::collection($tasks->sortBy('operation_date'));
     }
 
     public function GetTasksForCalendar(string $weekly_plan_id)

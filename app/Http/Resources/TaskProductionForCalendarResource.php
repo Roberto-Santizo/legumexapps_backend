@@ -14,11 +14,14 @@ class TaskProductionForCalendarResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $flag = $this->end_date ? false : true;
         return [
             'id' => strval($this->id),
-            'title' => $this->line->code . ' - ' . $this->sku->code,
+            'title' => $this->id . ' - ' . $this->line->code . ' - ' . $this->sku->code,
             'start' => $this->operation_date->format('Y-m-d'),
-            'priority' => strval($this->priority)
+            'priority' => strval($this->priority),
+            'backgroundColor' => !$flag ? 'green' : 'orange',
+            'editable' => $flag
         ];
     }
 }

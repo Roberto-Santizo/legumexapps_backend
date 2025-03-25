@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\BiometricTransaction;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -17,6 +18,7 @@ class TaskProductionPlanResource extends JsonResource
     {
         $total_hours = 0;
         $total_in_employees = 0;
+        $today = Carbon::today();
 
         if ($this->start_date && $this->end_date) {
             $total_hours = $this->start_date->diffInHours($this->end_date);
@@ -43,7 +45,7 @@ class TaskProductionPlanResource extends JsonResource
             'total_in_employees' => $total_in_employees,
             'total_employees' => $this->employees->count(),
             'priority' => $this->priority,
-            'available' => $this->available === null ? false : $this->available
+            'available' => $this->available === null ? false : $this->available,
         ];
     }
 }

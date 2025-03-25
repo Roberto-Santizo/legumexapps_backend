@@ -26,6 +26,8 @@ class TaskProductionPlanDetailResource extends JsonResource
             'sku' => $this->sku->name,
             'start_date' => $this->start_date,
             'biometric_hours' => 8,
+            'last_take' => $this->performances->last()->created_at->format('d-m-Y H:m:i A'),
+            'last_finished_tarimas' => $this->performances->last()->tarimas_produced,
             'total_hours' => $this->total_hours,
             'performance_hours' => round($performance_hours,3),
             'line_hours' => round($line_hours,3),

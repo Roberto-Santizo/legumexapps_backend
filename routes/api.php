@@ -185,6 +185,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/weekly_production_plan/assign/{id}',[WeeklyProductionPlanController::class,'createAssigments']);
     
     Route::apiResource('/task_production_plan',TaskProductionController::class);
+    
+    Route::post('/tasks_production_plan/new-task',[TaskProductionController::class,'CreateNewTaskProduction']);
     Route::get('/tasks_production_plan/details/{id}',[TaskProductionController::class,'TaskDetails']);
     Route::patch('/tasks_production_plan/{id}/start',[TaskProductionController::class,'StartTaskProduction']);
     Route::patch('/tasks_production_plan/{id}/end',[TaskProductionController::class,'EndTaskProduction']);

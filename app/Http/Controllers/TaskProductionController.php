@@ -8,12 +8,14 @@ use App\Http\Resources\TaskProductionPlanDetailsResource;
 use App\Http\Resources\TaskProductionPlanResource;
 use App\Models\EmployeeTransfer;
 use App\Models\Line;
+use App\Models\StockKeepingUnit;
 use App\Models\TaskProductionEmployee;
 use App\Models\TaskProductionEmployeesBitacora;
 use App\Models\TaskProductionPerformance;
 use App\Models\TaskProductionPlan;
 use App\Models\TaskProductionTimeout;
 use App\Models\Timeout;
+use App\Models\WeeklyProductionPlan;
 use App\Services\ChangeEmployeeNotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -386,23 +388,138 @@ class TaskProductionController extends Controller
             ], 404);
         }
 
+        $new_date = Carbon::parse($data['date']);
+        $old_date = $task_production->operation_date;
+        $today = Carbon::today();
+        
+        if($new_date->weekOfYear != $today->weekOfYear){
+            return response()->json([
+                'msg' => 'No puede mover tareas fuera de la semana actual'
+            ],500);
+        }
+
+        if(abs($today->diffInDays($new_date)) < 1){
+            return response()->json([
+                'msg' => 'No se pueden mover tareas entre fechas con una diferencia mayor a 1'
+            ],500);
+        }
+
         try {
-            $last_task = TaskProductionPlan::whereDate('operation_date',$data['date'])->orderBy('priority','DESC')->get()->first();
-            if($last_task){
-                $task_production->priority = $last_task->priority+1;
-            }else{
+            $last_task = TaskProductionPlan::whereDate('operation_date', $data['date'])->orderBy('priority', 'DESC')->get()->first();
+         
+            if ($last_task) {
+                $task_production->priority = $last_task->priority + 1;
+            } else {
                 $task_production->priority = 1;
             }
             $task_production->operation_date = $data['date'];
             $task_production->save();
 
+            $tasks_old_date = TaskProductionPlan::whereDate('operation_date', $old_date)->orderBy('priority', 'ASC')->get();
+         
+            if($tasks_old_date){
+                foreach ($tasks_old_date as $key => $value) {
+                    $value->priority = $key+1;
+                    $value->save();
+                }
+            }
+
             return response()->json([
                 'msg' =>  'Task Production Plan Updated Successfully'
-            ],200);
+            ], 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'msg' => $th->getMessage() 
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function CreateNewTaskProduction(Request $request)
+    {
+        $data = $request->validate([
+            'line_id' => 'required',
+            'operation_date' => 'required',
+            'sku_id' => 'required',
+            'tarimas' => 'required',
+            'total_hours' => 'required'
+        ]);
+
+
+        $line = Line::find($data['line_id']);
+        $sku = StockKeepingUnit::find($data['sku_id']);
+
+        if (!$line) {
+            return response()->json([
+                'msg' => 'Line Not Found'
+            ], 404);
+        }
+
+        if (!$sku) {
+            return response()->json([
+                'msg' => 'SKU Not Found'
+            ], 404);
+        }
+        
+        $operation_date = Carbon::parse($data['operation_date']);
+        $today = Carbon::today();
+        $limit_hour = Carbon::createFromTime(15, 0, 0); 
+        $hour = Carbon::now();
+
+        if(!$hour->lessThan($limit_hour)){
+            return response()->json([
+                'msg' => 'No se puede programar la tarea, la hora limite para poder programar son las 3:00 PM'
+            ],500); 
+        }
+        
+        if($operation_date->lessThan($today)){
+            return response()->json([
+                'msg' => 'No puede programar tareas a fechas pasadas'
+            ],500); 
+        }
+        
+        if(abs($today->diffInDays($operation_date)) < 1){
+            return response()->json([
+                'msg' => 'No puede programar tareas para el día de hoy'
             ],500);
+        }
+
+        try {
+            $task_line = TaskProductionPlan::where('line_id', $line->id)->get()->last();
+            $weekly_production_plan = WeeklyProductionPlan::all()->last();
+            if (!$task_line) {
+                return response()->json([
+                    'msg' => 'Unvalid Data'
+                ], 500);
+            }
+
+            $task_week = TaskProductionPlan::where('line_id', $line->id)->whereDate('operation_date', $data['operation_date'])->get()->last();
+            $new_task = TaskProductionPlan::create([
+                'line_id' => $line->id,
+                'weekly_production_plan_id' => $weekly_production_plan->id,
+                'operation_date' => $data['operation_date'],
+                'total_hours' => $data['total_hours'],
+                'sku_id' => $sku->id,
+                'tarimas' => $data['tarimas'],
+                'priority' => $task_week ? $task_week->priority + 1 : 1,
+                'status' => 1
+            ]);
+
+            foreach ($task_line->employees as $employee) {
+                TaskProductionEmployee::create([
+                    'task_p_id' => $new_task->id,
+                    'name' => $employee->name,
+                    'code' => $employee->code,
+                    'position' => $employee->position
+                ]);
+            }
+
+            return response()->json([
+                'msg' => 'Task Production Created Successfully'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
         }
     }
 }

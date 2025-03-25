@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\LinesResource;
+use App\Http\Resources\LinesSelectResource;
 use App\Models\BitacoraLines;
 use App\Models\Line;
 use Illuminate\Http\Request;
@@ -23,9 +24,7 @@ class LinesController extends Controller
     {
         $lines = Line::select('id', 'code', 'total_persons')->get();
 
-        return response()->json([
-            'data' => $lines
-        ]);
+       return LinesSelectResource::collection($lines);
     }
 
     /**

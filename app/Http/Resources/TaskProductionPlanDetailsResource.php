@@ -14,6 +14,7 @@ class TaskProductionPlanDetailsResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        
         return [
             'id' => strval($this->id),
             'line' => $this->line->code,
