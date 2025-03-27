@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('timeouts', function (Blueprint $table) {
-            $table->id();
+        Schema::table('lines', function (Blueprint $table) {
+            $table->integer('shift');
             $table->string('name');
-            $table->float('hours');
-            $table->timestamps();
         });
     }
 
@@ -24,6 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('timeouts');
+        Schema::table('lines', function (Blueprint $table) {
+            $table->dropColumn('shift');
+            $table->dropColumn('name');
+        });
     }
 };

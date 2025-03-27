@@ -45,7 +45,6 @@ class TaskProductionController extends Controller
     public function show(string $id)
     {
         $task_production_plan = TaskProductionPlan::find($id);
-
         if (!$task_production_plan) {
             return response()->json([
                 'msg' => 'Task Production Plan Not Found'
@@ -137,7 +136,7 @@ class TaskProductionController extends Controller
         }
     }
 
-    public function AddTimeOut(Request $request, string $id)
+    public function AddTimeOutOpen(Request $request, string $id)
     {
         $data = $request->validate([
             'timeout_id' => 'required'
@@ -164,6 +163,7 @@ class TaskProductionController extends Controller
             TaskProductionTimeout::create([
                 'timeout_id' => $data['timeout_id'],
                 'task_p_id' => $task_production_plan->id,
+                'start_date' => Carbon::now()
             ]);
 
             return response()->json([
@@ -173,6 +173,28 @@ class TaskProductionController extends Controller
             return response()->json([
                 'msg' => $th->getMessage()
             ], 500);;
+        }
+    }
+
+    public function AddTimeOutClose(string $id)
+    {
+        $task_production_plan = TaskProductionPlan::find($id);
+
+        if (!$task_production_plan) {
+            return response()->json([
+                'msg' => 'Task Production Plan Not Found'
+            ], 404);
+        }
+
+        try {
+            $timeout = $task_production_plan->timeouts->last();
+            $timeout->end_date = Carbon::now();
+            $timeout->save();
+            return response()->json('Tarea Reanudada Correctamente',200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
         }
     }
 
@@ -247,6 +269,20 @@ class TaskProductionController extends Controller
             $assignment->position = $data['new_position'];
             $assignment->save();
 
+            $line = $assignment->TaskProduction->line->code;
+            $employees = TaskProductionEmployee::whereHas('TaskProduction', function ($query) use ($line) {
+                $query->whereHas('line', function ($query) use ($line) {
+                    $query->where('code', $line);
+                    $query->whereDate('operation_date', Carbon::now());
+                });
+            })->where('position', $change->original_position)->get();
+
+            foreach ($employees as $employee) {
+                $employee->name = $change->new_name;
+                $employee->code = $change->new_code;
+                $employee->position = $change->new_position;
+                $employee->save();
+            }
 
             $this->emailService->sendNotification($assignment, $change, $transfer);
 
@@ -391,22 +427,31 @@ class TaskProductionController extends Controller
         $new_date = Carbon::parse($data['date']);
         $old_date = $task_production->operation_date;
         $today = Carbon::today();
-        
-        if($new_date->weekOfYear != $today->weekOfYear){
+
+        $limit_hour = Carbon::createFromTime(15, 0, 0);
+        $hour = Carbon::now();
+
+        if (!$hour->lessThan($limit_hour)) {
             return response()->json([
-                'msg' => 'No puede mover tareas fuera de la semana actual'
-            ],500);
+                'msg' => 'No se puede programar la tarea, la hora limite para poder programar son las 3:00 PM'
+            ], 500);
         }
 
-        if(abs($today->diffInDays($new_date)) < 1){
+        if ($new_date->weekOfYear != $today->weekOfYear) {
+            return response()->json([
+                'msg' => 'No puede mover tareas fuera de la semana actual'
+            ], 500);
+        }
+
+        if (abs($today->diffInDays($new_date)) < 1) {
             return response()->json([
                 'msg' => 'No se pueden mover tareas entre fechas con una diferencia mayor a 1'
-            ],500);
+            ], 500);
         }
 
         try {
             $last_task = TaskProductionPlan::whereDate('operation_date', $data['date'])->orderBy('priority', 'DESC')->get()->first();
-         
+
             if ($last_task) {
                 $task_production->priority = $last_task->priority + 1;
             } else {
@@ -416,10 +461,10 @@ class TaskProductionController extends Controller
             $task_production->save();
 
             $tasks_old_date = TaskProductionPlan::whereDate('operation_date', $old_date)->orderBy('priority', 'ASC')->get();
-         
-            if($tasks_old_date){
+
+            if ($tasks_old_date) {
                 foreach ($tasks_old_date as $key => $value) {
-                    $value->priority = $key+1;
+                    $value->priority = $key + 1;
                     $value->save();
                 }
             }
@@ -459,28 +504,28 @@ class TaskProductionController extends Controller
                 'msg' => 'SKU Not Found'
             ], 404);
         }
-        
+
         $operation_date = Carbon::parse($data['operation_date']);
         $today = Carbon::today();
-        $limit_hour = Carbon::createFromTime(15, 0, 0); 
+        $limit_hour = Carbon::createFromTime(15, 0, 0);
         $hour = Carbon::now();
 
-        if(!$hour->lessThan($limit_hour)){
+        if (!$hour->lessThan($limit_hour)) {
             return response()->json([
                 'msg' => 'No se puede programar la tarea, la hora limite para poder programar son las 3:00 PM'
-            ],500); 
+            ], 500);
         }
-        
-        if($operation_date->lessThan($today)){
+
+        if ($operation_date->lessThan($today)) {
             return response()->json([
                 'msg' => 'No puede programar tareas a fechas pasadas'
-            ],500); 
+            ], 500);
         }
-        
-        if(abs($today->diffInDays($operation_date)) < 1){
+
+        if (abs($today->diffInDays($operation_date)) < 1) {
             return response()->json([
                 'msg' => 'No puede programar tareas para el día de hoy'
-            ],500);
+            ], 500);
         }
 
         try {

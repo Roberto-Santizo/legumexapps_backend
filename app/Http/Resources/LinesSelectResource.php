@@ -14,9 +14,10 @@ class LinesSelectResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $shift = $this->shift ? 'AM' : 'PM';
         return [
             'value' => strval($this->id),
-            'label' => $this->code,
+            'label' => $this->name . ' - '  .$shift,
         ];
     }
 }

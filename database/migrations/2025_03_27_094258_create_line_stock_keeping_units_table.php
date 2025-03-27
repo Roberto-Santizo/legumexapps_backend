@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('timeouts', function (Blueprint $table) {
+        Schema::create('line_stock_keeping_units', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->float('hours');
+            $table->foreignId('sku_id')->constrained()->on('stock_keeping_units');
+            $table->foreignId('line_id')->constrained();
+            $table->foreignId('client_id')->constrained();
+            $table->float('lbs_performance');
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('timeouts');
+        Schema::dropIfExists('line_stock_keeping_units');
     }
 };

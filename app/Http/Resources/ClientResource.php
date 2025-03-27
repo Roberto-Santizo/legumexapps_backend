@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class SKUResource extends JsonResource
+class ClientResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,10 +14,6 @@ class SKUResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
-            'id' => strval($this->id),
-            'code' => $this->code,
-            'product' => $this->product->name
-        ];
+        return parent::toArray($request);
     }
 }

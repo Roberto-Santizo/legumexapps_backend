@@ -19,9 +19,9 @@ class TaskProductionPlan extends Model
         'start_date',
         'end_date',
         'tarimas',
-        'sku_id',
         'status',
-        'priority'
+        'priority',
+        'line_sku_id'
     ];
 
     public function line()
@@ -39,14 +39,19 @@ class TaskProductionPlan extends Model
         return $this->hasMany(TaskProductionEmployee::class,'task_p_id','id');
     }
 
-    public function sku()
+    public function line_sku()
     {
-        return $this->belongsTo(StockKeepingUnit::class);
+        return $this->belongsTo(LineStockKeepingUnits::class,'line_sku_id','id');
     }
 
     public function performances()
     {
         return $this->hasMany(TaskProductionPerformance::class);
+    }
+
+    public function timeouts()
+    {
+        return $this->hasMany(TaskProductionTimeout::class,'task_p_id','id');
     }
 
 }

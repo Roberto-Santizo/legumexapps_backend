@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class SKUResource extends JsonResource
+class TaskProductionPerformaceResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,8 +16,8 @@ class SKUResource extends JsonResource
     {
         return [
             'id' => strval($this->id),
-            'code' => $this->code,
-            'product' => $this->product->name
+            'take_date' => $this->created_at->format('d-m-Y h:i:s A'),
+            'tarimas_produced' => $this->tarimas_produced
         ];
     }
 }

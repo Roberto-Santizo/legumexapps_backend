@@ -14,6 +14,10 @@ class TimeoutResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id' => strval($this->id),
+            'name' =>  $this->name,
+            'hours' =>  $this->hours,
+        ];
     }
 }

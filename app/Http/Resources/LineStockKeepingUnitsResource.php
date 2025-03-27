@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class LinesResource extends JsonResource
+class LineStockKeepingUnitsResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,13 +14,15 @@ class LinesResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $shift = $this->shift ? 'AM' : 'PM';
+        $shift = $this->line->shift ? 'AM' : 'PM';
         return [
             'id' => strval($this->id),
-            'code' => $this->code,
-            'total_persons' => $this->total_persons,
+            'line' => $this->line->name,
+            'sku' => $this->sku->code,
+            'client' => $this->client->name,
+            'product' => $this->sku->product->name,
             'shift' => $shift,
-            'name' => $this->name
+            'performance' => $this->lbs_performance
         ];
     }
 }

@@ -8,7 +8,9 @@ class Line extends Model
 {
     protected $fillable = [
         'code',
-        'total_persons'
+        'total_persons',
+        'shift',
+        'name'
     ];
 
     public function tasks()

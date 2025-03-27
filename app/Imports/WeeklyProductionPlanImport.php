@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Line;
+use App\Models\LineStockKeepingUnits;
 use App\Models\StockKeepingUnit;
 use App\Models\TaskProductionPlan;
 use App\Models\WeeklyProductionPlan;
@@ -37,13 +38,18 @@ class WeeklyProductionPlanImport implements ToCollection, WithHeadingRow
             $date = Date::excelToDateTimeObject($row['fecha_de_operacion']);
             $line = Line::where('code', $row['linea'])->first();
             $sku = StockKeepingUnit::where('code', $row['sku'])->first();
+            $sku_line = LineStockKeepingUnits::where('line_id',$line->id)->where('sku_id',$sku->id)->first();
 
             if (!$line) {
-                throw new Exception("Line Not Found");
+                throw new Exception("La linea " . $row['linea'] . " no existe");
             }
 
             if (!$sku) {
-                throw new Exception("SKU Not Found");
+                throw new Exception("El SKU " . $row['sku'] . " no existe");
+            }
+
+            if(!$sku_line){
+                throw new Exception("El SKU " . $row['sku'] . " no coincide con la linea " . $row['linea']);
             }
 
             try {
@@ -52,7 +58,7 @@ class WeeklyProductionPlanImport implements ToCollection, WithHeadingRow
                     'weekly_production_plan_id' => $weekly_production_plan->id,
                     'operation_date' => $date,
                     'total_hours' => $row['horas'],
-                    'sku_id' => $sku->id,
+                    'line_sku_id' => $sku_line->id,
                     'tarimas' => $row['tarimas'],
                     'priority' => $row['prioridad'],
                     'status' => 0

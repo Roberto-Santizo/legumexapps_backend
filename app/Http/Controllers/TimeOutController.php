@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\TimeoutResource;
+use App\Http\Resources\TimeoutSelectResource;
 use App\Models\Timeout;
 use Illuminate\Http\Request;
 
@@ -20,7 +21,7 @@ class TimeOutController extends Controller
     public function GetAllTimeouts()
     {
         $timeouts = Timeout::all();
-        return TimeoutResource::collection($timeouts);
+        return TimeoutSelectResource::collection($timeouts);
     }
 
     /**
@@ -47,6 +48,19 @@ class TimeOutController extends Controller
                 'msg' => $th->getMessage()
             ], 500);
         }
+    }
+
+    public function show(string $id)
+    {
+        $timeout = Timeout::select(['id','name','hours'])->find($id);
+
+        if (!$timeout) {
+            return response()->json([
+                'msg' => 'Timeout Not Found'
+            ], 404);
+        }
+
+        return new TimeoutResource($timeout);
     }
 
     /**

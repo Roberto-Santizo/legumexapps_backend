@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('timeouts', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->float('hours');
-            $table->timestamps();
+        Schema::table('task_production_timeouts', function (Blueprint $table) {
+            $table->datetime('start_date');
+            $table->datetime('end_date')->nullable();
         });
     }
 
@@ -24,6 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('timeouts');
+        Schema::table('task_production_timeouts', function (Blueprint $table) {
+            $table->dropColumn('start_date');
+            $table->dropColumn('end_date');
+        });
     }
 };

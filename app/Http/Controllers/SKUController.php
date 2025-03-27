@@ -14,7 +14,7 @@ class SKUController extends Controller
      */
     public function index()
     {
-        $skus = StockKeepingUnit::select('id', 'name', 'code','unit_mesurment')->paginate(10);
+        $skus = StockKeepingUnit::paginate(10);
 
         return SKUResource::collection($skus);
 
@@ -22,7 +22,7 @@ class SKUController extends Controller
 
     public function GetAllSKU()
     {
-        $skus = StockKeepingUnit::select('id', 'name', 'code')->get();
+        $skus = StockKeepingUnit::select('id', 'code')->get();
 
         return SKUSelectResource::collection($skus);
     }
@@ -34,8 +34,7 @@ class SKUController extends Controller
     {
         $data = $request->validate([
             'code' => 'required|unique:stock_keeping_units,code',
-            'name' => 'required',
-            'unit_mesurment' => 'required'
+            'product_id' => 'required',
         ]);
 
         try {

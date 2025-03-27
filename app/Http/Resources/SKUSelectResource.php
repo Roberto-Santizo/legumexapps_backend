@@ -16,7 +16,7 @@ class SKUSelectResource extends JsonResource
     {
         return [
             'value' => strval($this->id),
-            'label' => $this->name . ' ' . $this->code
+            'label' => $this->code
         ];
     }
 }

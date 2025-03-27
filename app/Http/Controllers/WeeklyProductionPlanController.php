@@ -71,9 +71,7 @@ class WeeklyProductionPlanController extends Controller
         try {
             Excel::import(new WeeklyProductionPlanImport, $request->file('file'));
 
-            return response()->json([
-                'msg' => 'Plan Creado Correctamente'
-            ], 200);
+            return response()->json('Plan Semanal Creado Correctamente',200);
         } catch (\Throwable  $th) {
             return response()->json([
                 'msg' => $th->getMessage()

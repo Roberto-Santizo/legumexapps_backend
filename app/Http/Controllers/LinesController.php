@@ -15,14 +15,14 @@ class LinesController extends Controller
      */
     public function index()
     {
-        $lines = Line::select('id', 'code', 'total_persons')->paginate(10);
+        $lines = Line::select('id', 'code', 'total_persons', 'name')->paginate(10);
 
         return LinesResource::collection($lines);
     }
 
     public function GetAllLines()
     {
-        $lines = Line::select('id', 'code', 'total_persons')->get();
+        $lines = Line::select('id', 'code', 'total_persons','shift','name')->get();
 
        return LinesSelectResource::collection($lines);
     }
@@ -34,15 +34,15 @@ class LinesController extends Controller
     {
         $data = $request->validate([
             'code' => 'required|unique:lines,code',
-            'total_persons' => 'required'
+            'total_persons' => 'required',
+            'shift' => 'required',
+            'name' => 'required'
         ]);
 
         try {
             Line::create($data);
 
-            return response()->json([
-                'msg' => 'Line Created Successfully'
-            ]);
+            return response()->json('Linea Creada Correctamente',200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
@@ -66,7 +66,8 @@ class LinesController extends Controller
     {
         $data = $request->validate([
             "code" => "required|unique:lines,code,{$id}",
-            "total_persons" => "required"
+            "total_persons" => "required",
+            'shift' => 'required'
         ]);
         
 
@@ -93,9 +94,7 @@ class LinesController extends Controller
             $line->total_persons = $data['total_persons'];
             $line->save();
 
-            return response()->json([
-                'msg' => 'Line Updated Successfully'
-            ], 200);
+            return response()->json('Linea Actualizada Correctamente',200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()

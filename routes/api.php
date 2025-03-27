@@ -2,9 +2,9 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BasketController;
-use App\Http\Controllers\BiometricAdminController;
 use App\Http\Controllers\CarriersController;
 use App\Http\Controllers\CDPController;
+use App\Http\Controllers\ClientsController;
 use App\Http\Controllers\CropController;
 use App\Http\Controllers\DashboardAgricolaController;
 use App\Http\Controllers\DashboardCalidad;
@@ -16,6 +16,7 @@ use App\Http\Controllers\FincaController;
 use App\Http\Controllers\InspectorController;
 use App\Http\Controllers\InsumosController;
 use App\Http\Controllers\LinesController;
+use App\Http\Controllers\LineStockKeepingUnitsController;
 use App\Http\Controllers\LoteController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PlantasController;
@@ -23,6 +24,7 @@ use App\Http\Controllers\PlatesController;
 use App\Http\Controllers\ProducersController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductorPlantationControlController;
+use App\Http\Controllers\ProductsSKUController;
 use App\Http\Controllers\QualityStatusesController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\ReportController;
@@ -32,8 +34,6 @@ use App\Http\Controllers\SKUController;
 use App\Http\Controllers\TareaController;
 use App\Http\Controllers\TaskCropController;
 use App\Http\Controllers\TaskProductionController;
-use App\Http\Controllers\TaskProductionPlanController;
-use App\Http\Controllers\TaskProductionSKUPlanController;
 use App\Http\Controllers\TasksCropController;
 use App\Http\Controllers\TasksLoteController;
 use App\Http\Controllers\TimeOutController;
@@ -44,8 +44,6 @@ use App\Http\Controllers\UsersController;
 use App\Http\Controllers\VarietyProductsController;
 use App\Http\Controllers\WeeklyPlanController;
 use App\Http\Controllers\WeeklyProductionPlanController;
-use App\Models\ProductorPlantationControl;
-use App\Models\WeeklyProductionPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -174,6 +172,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/lines',LinesController::class);
     Route::get('/lines-all',[LinesController::class,'GetAllLines']);
 
+    Route::apiResource('/sku-products',ProductsSKUController::class);
+    Route::get('/sku-products-all',[ProductsSKUController::class,'GetAllProducts']);
+
+    Route::apiResource('/lines-skus',LineStockKeepingUnitsController::class);
+
+    Route::apiResource('/clients',ClientsController::class);
+    Route::get('/clients-all',[ClientsController::class,'GetAllClients']);
+
     Route::apiResource('/timeouts',TimeOutController::class);
     Route::get('/timeouts-all',[TimeOutController::class,'GetAllTimeouts']);
 
@@ -190,7 +196,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/tasks_production_plan/details/{id}',[TaskProductionController::class,'TaskDetails']);
     Route::patch('/tasks_production_plan/{id}/start',[TaskProductionController::class,'StartTaskProduction']);
     Route::patch('/tasks_production_plan/{id}/end',[TaskProductionController::class,'EndTaskProduction']);
-    Route::post('/tasks_production_plan/{id}/add-timeout',[TaskProductionController::class,'AddTimeOut']);
+    
+    Route::post('/tasks_production_plan/{id}/add-timeout/open',[TaskProductionController::class,'AddTimeOutOpen']);
+    Route::post('/tasks_production_plan/{id}/add-timeout/close',[TaskProductionController::class,'AddTimeOutClose']);
+
+
     Route::post('/tasks_production_plan/{id}/assign',[TaskProductionController::class,'Assign']);
     Route::post('/tasks_production_plan/change-assignment',[TaskProductionController::class,'ChangeAssignment']);
     Route::post('/tasks_production_plan/{id}/performance',[TaskProductionController::class,'TakePerformance']);
@@ -198,8 +208,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/tasks_production_plan/change-operation-date/{id}',[TaskProductionController::class,'ChangeOperationDate']);
 
     Route::apiResource('/employee-permissions',EmployeePermissionsController::class);
-    // Route::apiResource('/tasks_production_plan_sku',TaskProductionSKUPlanController::class);
    
+    Route::post('/report-production/{weekly_production_plan}/{line_id}',[ReportController::class,'PlanillaProduccion']);
 });
 
 //Autenticación
