@@ -21,15 +21,15 @@ class WeeklyProductionPlanController extends Controller
     {
         $plans_production = WeeklyProductionPlan::paginate(10);
         $plans_production->map(function ($plan) {
-            if ($plan->tasks->every(fn($task) => $task->end_date !== null)){
+            if ($plan->tasks->every(fn($task) => $task->end_date !== null)) {
                 $plan->completed = true;
-            }else{
+            } else {
                 $plan->completed = false;
             }
 
             return $plan;
         });
-        
+
         return WeeklyPlanProductionResource::collection($plans_production);
     }
 
@@ -71,7 +71,7 @@ class WeeklyProductionPlanController extends Controller
         try {
             Excel::import(new WeeklyProductionPlanImport, $request->file('file'));
 
-            return response()->json('Plan Semanal Creado Correctamente',200);
+            return response()->json('Plan Semanal Creado Correctamente', 200);
         } catch (\Throwable  $th) {
             return response()->json([
                 'msg' => $th->getMessage()
@@ -109,7 +109,7 @@ class WeeklyProductionPlanController extends Controller
             ], 404);
         }
 
-        $tasks = $weekly_plan->tasks()->where('line_id', $line_id)->whereDate('operation_date',$today)->orderBy('priority', 'ASC')->get();
+        $tasks = $weekly_plan->tasks()->where('line_id', $line_id)->whereDate('operation_date', $today)->orderBy('priority', 'ASC')->get();
 
         $previousTask = null;
 
@@ -158,8 +158,56 @@ class WeeklyProductionPlanController extends Controller
             ], 404);
         }
 
-        $tasks = $weekly_plan->tasks()->orderBy('priority', 'ASC')->whereDate('operation_date',$date)->get();
+        $tasks = $weekly_plan->tasks()->orderBy('priority', 'ASC')
+            ->whereDate('operation_date', $date)
+            ->get();
 
-        return TaskProductionPlanSummaryResource::collection($tasks);
+        $newTasks = TaskProductionPlanSummaryResource::collection($tasks);
+
+        $summary = $tasks->groupBy('line')->map(function ($group) {
+            return [
+                'line' => $group->first()->line->name,
+                'total_hours' => $group->sum(fn($task) => $task->total_hours ?? 0)
+            ];
+        })->values(); 
+
+        return response()->json([
+            'summary' => $summary,
+            'data' => $newTasks
+        ], 200);
+    }
+
+
+    public function GetHoursByDate(string $weekly_plan_id)
+    {
+        $weekly_plan = WeeklyProductionPlan::find($weekly_plan_id);
+        if (!$weekly_plan) {
+            return response()->json([
+                'msg' => 'Plan Semanal Not Found'
+            ], 404);
+        }
+
+        $startOfWeek = Carbon::now()
+            ->setISODate($weekly_plan->year, $weekly_plan->week)
+            ->startOfWeek();
+
+        $groupedTasks = [];
+
+        for ($i = 0; $i < 7; $i++) {
+            $date = $startOfWeek->copy()->addDays($i)->toDateString();
+            $tasks_by_line = $weekly_plan->tasks()->whereDate('operation_date', $date)->get()->groupBy('line_id');
+
+            foreach ($tasks_by_line as $line_id => $tasks) {
+                $groupedTasks[] = [
+                    'date' => $date,
+                    'line_id' => strval($line_id),
+                    'total_hours' => $tasks->sum('total_hours')
+                ];
+            }
+        }
+
+        return response()->json([
+            'data' => $groupedTasks
+        ], 200);
     }
 }

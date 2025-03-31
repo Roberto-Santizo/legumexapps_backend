@@ -22,10 +22,25 @@ class LinesController extends Controller
 
     public function GetAllLines()
     {
-        $lines = Line::select('id', 'code', 'total_persons','shift','name')->get();
+        $lines = Line::select('id', 'code', 'total_persons', 'shift', 'name')->get();
 
-       return LinesSelectResource::collection($lines);
+        return LinesSelectResource::collection($lines);
     }
+
+    public function GetAllLinesBySku(string $id)
+    {
+        $lines = Line::select('id', 'code', 'total_persons', 'shift', 'name')
+            ->whereHas('skus', function ($query) use ($id) {
+                $query->where('sku_id', $id);
+            })
+            ->with(['skus' => function ($query) use ($id) {
+                $query->where('sku_id', $id);
+            }])
+            ->get();
+
+        return LinesSelectResource::collection($lines);
+    }
+    
 
     /**
      * Store a newly created resource in storage.
@@ -42,7 +57,7 @@ class LinesController extends Controller
         try {
             Line::create($data);
 
-            return response()->json('Linea Creada Correctamente',200);
+            return response()->json('Linea Creada Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
@@ -67,9 +82,8 @@ class LinesController extends Controller
         $data = $request->validate([
             "code" => "required|unique:lines,code,{$id}",
             "total_persons" => "required",
-            'shift' => 'required'
         ]);
-        
+
 
         $line = Line::find($id);
 
@@ -94,7 +108,7 @@ class LinesController extends Controller
             $line->total_persons = $data['total_persons'];
             $line->save();
 
-            return response()->json('Linea Actualizada Correctamente',200);
+            return response()->json('Linea Actualizada Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()

@@ -27,7 +27,7 @@ class ChangeEmployeeNotificationService
         $recipient1->setEmailAddress(new EmailAddress(['address' => 'soportetecnico.tejar@legumex.net']));
 
         $message = new Message();
-        $message->setSubject('Cambio de empleado en linea ' . $assignment->TaskProduction->line->code . ' ' . $assignment->TaskProduction->sku->name);
+        $message->setSubject('Cambio de empleado en linea ' . $assignment->TaskProduction->line->code . ' ' . $assignment->TaskProduction->line_sku->sku->name);
         $message->setBody([
             'content' => $this->buildMessageBody($assignment, $change, $transfer),
             'contentType' => 'HTML'
@@ -63,7 +63,7 @@ class ChangeEmployeeNotificationService
 
     private function buildMessageBody($assignment, $change, $transfer)
     {
-        $line = $assignment->TaskProduction->line->code;
+        $line = $assignment->TaskProduction->line_sku->line->code;
         $link = 'http://localhost:5173/permisos-empleados/' . $transfer->id;
         $message = <<<HTML
                 <!DOCTYPE html>

@@ -6,7 +6,6 @@ use App\Http\Requests\CreateLineStockKeepingUnitRequest;
 use App\Http\Resources\LineStockKeepingUnitsResource;
 use App\Models\LineStockKeepingUnits;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class LineStockKeepingUnitsController extends Controller
 {

@@ -16,9 +16,9 @@ class TaskProductionPlanSummaryResource extends JsonResource
     {
         return [
             'id' => strval($this->id),
-            'line' => $this->line->code,
-            'sku' => $this->sku->code,
-            'total_tarimas' => $this->tarimas,
+            'line' => $this->line_sku->line->code,
+            'sku' => $this->line_sku->sku->code,
+            'total_lbs' => $this->total_lbs,
             'finished_tarimas' => $this->finished_tarimas,
             'operation_date' => $this->operation_date->format('d-m-Y'),
             'start_date' => $this->start_date ? $this->start_date->format('d-m-Y h:i:s A') : null,

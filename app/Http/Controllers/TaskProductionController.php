@@ -8,6 +8,7 @@ use App\Http\Resources\TaskProductionPlanDetailsResource;
 use App\Http\Resources\TaskProductionPlanResource;
 use App\Models\EmployeeTransfer;
 use App\Models\Line;
+use App\Models\LineStockKeepingUnits;
 use App\Models\StockKeepingUnit;
 use App\Models\TaskProductionEmployee;
 use App\Models\TaskProductionEmployeesBitacora;
@@ -190,7 +191,7 @@ class TaskProductionController extends Controller
             $timeout = $task_production_plan->timeouts->last();
             $timeout->end_date = Carbon::now();
             $timeout->save();
-            return response()->json('Tarea Reanudada Correctamente',200);
+            return response()->json('Tarea Reanudada Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
@@ -269,7 +270,7 @@ class TaskProductionController extends Controller
             $assignment->position = $data['new_position'];
             $assignment->save();
 
-            $line = $assignment->TaskProduction->line->code;
+            $line = $assignment->TaskProduction->line_sku->line->code;
             $employees = TaskProductionEmployee::whereHas('TaskProduction', function ($query) use ($line) {
                 $query->whereHas('line', function ($query) use ($line) {
                     $query->where('code', $line);
@@ -323,7 +324,8 @@ class TaskProductionController extends Controller
     public function EndTaskProduction(Request $request, string $id)
     {
         $data = $request->validate([
-            'total_tarimas' => 'required'
+            'total_tarimas' => 'required',
+            'total_lbs_bascula' => 'required'
         ]);
 
         $task_production = TaskProductionPlan::find($id);
@@ -335,14 +337,25 @@ class TaskProductionController extends Controller
         }
 
         try {
+            $total_boxes = $data['total_tarimas'] * $task_production->line_sku->sku->boxes_tarima;
+            $lbs_teoricas = $total_boxes * $task_production->line_sku->sku->product->box_weight;
+            $performance_hours = $lbs_teoricas / $task_production->line_sku->lbs_performance;
+            $percentage = $performance_hours / $task_production->total_hours;
+
+            if ($percentage < ($task_production->line_sku->sku->accepted_percentage / 100)) {
+                $task_production->is_minimum_require = false;
+            } else {
+                $task_production->is_minimum_require = true;
+            };
+
+            $task_production->is_justified = false;
             $task_production->finished_tarimas = $data['total_tarimas'];
+            $task_production->total_lbs_bascula = $data['total_lbs_bascula'];
             $task_production->end_date = Carbon::now();
             $task_production->save();
 
 
-            return response()->json([
-                'msg' => 'Task Production Updated Successfully'
-            ], 200);
+            return response()->json('Tarea Cerrada Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
@@ -360,7 +373,8 @@ class TaskProductionController extends Controller
     public function TakePerformance(Request $request, string $id)
     {
         $data = $request->validate([
-            'tarimas_produced' => 'required'
+            'tarimas_produced' => 'required',
+            'lbs_bascula' => 'required'
         ]);
 
         $task_production = TaskProductionPlan::find($id);
@@ -375,11 +389,10 @@ class TaskProductionController extends Controller
             TaskProductionPerformance::create([
                 'task_production_plan_id' => $task_production->id,
                 'tarimas_produced' => $data['tarimas_produced'],
+                'lbs_bascula' => $data['lbs_bascula']
             ]);
 
-            return response()->json([
-                'msg' => 'Data Created Successfully'
-            ], 200);
+            return response()->json('Rendimiento Tomado Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
@@ -415,6 +428,8 @@ class TaskProductionController extends Controller
         $data = $request->validate([
             'date' => 'required'
         ]);
+        $user = $request->user();
+        $role = $user->getRoleNames()->first();
 
         $task_production = TaskProductionPlan::find($id);
 
@@ -431,22 +446,18 @@ class TaskProductionController extends Controller
         $limit_hour = Carbon::createFromTime(15, 0, 0);
         $hour = Carbon::now();
 
-        if (!$hour->lessThan($limit_hour)) {
-            return response()->json([
-                'msg' => 'No se puede programar la tarea, la hora limite para poder programar son las 3:00 PM'
-            ], 500);
-        }
+        if ($role !== 'admin') {
+            if (!$hour->lessThan($limit_hour)) {
+                return response()->json([
+                    'msg' => 'No se puede programar la tarea, la hora limite para poder programar son las 3:00 PM'
+                ], 500);
+            }
 
-        if ($new_date->weekOfYear != $today->weekOfYear) {
-            return response()->json([
-                'msg' => 'No puede mover tareas fuera de la semana actual'
-            ], 500);
-        }
-
-        if (abs($today->diffInDays($new_date)) < 1) {
-            return response()->json([
-                'msg' => 'No se pueden mover tareas entre fechas con una diferencia mayor a 1'
-            ], 500);
+            if ($new_date->weekOfYear != $today->weekOfYear) {
+                return response()->json([
+                    'msg' => 'No puede mover tareas fuera de la semana actual'
+                ], 500);
+            }
         }
 
         try {
@@ -485,13 +496,14 @@ class TaskProductionController extends Controller
             'line_id' => 'required',
             'operation_date' => 'required',
             'sku_id' => 'required',
-            'tarimas' => 'required',
-            'total_hours' => 'required'
+            'total_lbs' => 'required',
+            'destination' => 'required'
         ]);
 
-
+        $role = $request->user()->getRoleNames()->first();
         $line = Line::find($data['line_id']);
         $sku = StockKeepingUnit::find($data['sku_id']);
+        $line_sku = LineStockKeepingUnits::where('line_id', $line->id)->where('sku_id', $sku->id)->get()->first();
 
         if (!$line) {
             return response()->json([
@@ -505,66 +517,73 @@ class TaskProductionController extends Controller
             ], 404);
         }
 
+        if (!$line) {
+            return response()->json([
+                'msg' => 'Performance Not Found'
+            ], 404);
+        }
+
         $operation_date = Carbon::parse($data['operation_date']);
         $today = Carbon::today();
         $limit_hour = Carbon::createFromTime(15, 0, 0);
         $hour = Carbon::now();
 
-        if (!$hour->lessThan($limit_hour)) {
-            return response()->json([
-                'msg' => 'No se puede programar la tarea, la hora limite para poder programar son las 3:00 PM'
-            ], 500);
-        }
+        if ($role != 'admin') {
+            if (!$hour->lessThan($limit_hour)) {
+                return response()->json([
+                    'msg' => 'No se puede programar la tarea, la hora limite para poder programar son las 3:00 PM'
+                ], 500);
+            }
 
-        if ($operation_date->lessThan($today)) {
-            return response()->json([
-                'msg' => 'No puede programar tareas a fechas pasadas'
-            ], 500);
-        }
-
-        if (abs($today->diffInDays($operation_date)) < 1) {
-            return response()->json([
-                'msg' => 'No puede programar tareas para el día de hoy'
-            ], 500);
+            if ($operation_date->lessThan($today)) {
+                return response()->json([
+                    'msg' => 'No puede programar tareas a fechas pasadas'
+                ], 500);
+            }
         }
 
         try {
             $task_line = TaskProductionPlan::where('line_id', $line->id)->get()->last();
             $weekly_production_plan = WeeklyProductionPlan::all()->last();
-            if (!$task_line) {
-                return response()->json([
-                    'msg' => 'Unvalid Data'
-                ], 500);
-            }
 
             $task_week = TaskProductionPlan::where('line_id', $line->id)->whereDate('operation_date', $data['operation_date'])->get()->last();
+            $total_hours = $data['total_lbs'] / $line_sku->lbs_performance;
             $new_task = TaskProductionPlan::create([
                 'line_id' => $line->id,
                 'weekly_production_plan_id' => $weekly_production_plan->id,
                 'operation_date' => $data['operation_date'],
-                'total_hours' => $data['total_hours'],
-                'sku_id' => $sku->id,
-                'tarimas' => $data['tarimas'],
+                'total_hours' => round($total_hours, 2),
+                'line_sku_id' => $line_sku->id,
                 'priority' => $task_week ? $task_week->priority + 1 : 1,
-                'status' => 1
+                'status' => $task_line ? 0 : 1,
+                'destination' => $data['destination'],
+                'total_lbs' => $data['total_lbs']
             ]);
 
-            foreach ($task_line->employees as $employee) {
-                TaskProductionEmployee::create([
-                    'task_p_id' => $new_task->id,
-                    'name' => $employee->name,
-                    'code' => $employee->code,
-                    'position' => $employee->position
-                ]);
-            }
+            if ($task_line) {
+                foreach ($task_line->employees as $employee) {
+                    TaskProductionEmployee::create([
+                        'task_p_id' => $new_task->id,
+                        'name' => $employee->name,
+                        'code' => $employee->code,
+                        'position' => $employee->position
+                    ]);
+                }
 
-            return response()->json([
-                'msg' => 'Task Production Created Successfully'
-            ], 200);
+                return response()->json('Tarea Creada Correctamente', 200);
+            } else {
+                return response()->json('Tarea Creada Correctamente, Pendiente de Asignación de Personal', 200);
+            }
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
             ], 500);
         }
+    }
+
+    public function FinishedTaskDetails(string $id)
+    {
+        $task_production = TaskProductionPlan::find($id);
+        dd($task_production);
     }
 }

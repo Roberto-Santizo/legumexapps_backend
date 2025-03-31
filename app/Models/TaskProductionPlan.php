@@ -18,10 +18,13 @@ class TaskProductionPlan extends Model
         'total_hours',
         'start_date',
         'end_date',
-        'tarimas',
         'status',
         'priority',
-        'line_sku_id'
+        'line_sku_id',
+        'is_minimum_require',
+        'is_justified',
+        'destination',
+        'total_lbs'
     ];
 
     public function line()

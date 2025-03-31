@@ -17,7 +17,9 @@ class SKUResource extends JsonResource
         return [
             'id' => strval($this->id),
             'code' => $this->code,
-            'product' => $this->product->name
+            'product_name' => $this->product_name,
+            'presentation' => $this->presentation ? strval($this->presentation) : 'SIN PRESENTACIÓN',
+            'client_name' => $this->client_name
         ];
     }
 }

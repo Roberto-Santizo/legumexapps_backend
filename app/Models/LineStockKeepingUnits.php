@@ -9,8 +9,8 @@ class LineStockKeepingUnits extends Model
     protected $fillable = [
         'sku_id',
         'line_id',
-        'client_id',
-        'lbs_performance'  
+        'lbs_performance',
+        'accepted_percentage'  
     ];
 
     public function sku()

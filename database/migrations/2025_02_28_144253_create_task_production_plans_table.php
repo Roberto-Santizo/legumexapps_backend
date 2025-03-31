@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('weekly_production_plan_id')->constrained();
             $table->foreignId('line_id')->constrained();
             $table->datetime('operation_date');
-            $table->float('total_hours');
+            $table->float('total_hours')->nullab();
             $table->datetime('start_date')->nullable();
             $table->datetime('end_date')->nullable();
             $table->timestamps();

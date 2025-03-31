@@ -10,10 +10,9 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    { 
-        Schema::table('lines', function (Blueprint $table) {
-            $table->integer('shift');
-            $table->string('name');
+    {
+        Schema::table('task_production_performances', function (Blueprint $table) {
+            $table->float('lbs_bascula');
         });
     }
 
@@ -22,9 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('lines', function (Blueprint $table) {
-            $table->dropColumn('shift');
-            $table->dropColumn('name');
+        Schema::table('task_production_performances', function (Blueprint $table) {
+            $table->dropColumn('lbs_bascula');
         });
     }
 };

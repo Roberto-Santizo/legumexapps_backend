@@ -16,9 +16,10 @@ class TaskProductionPlanDetailResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $performance_hours = 0;
         $line_hours = $this->start_date->diffInHours(Carbon::now());
-
+        $total_boxes = $this->line_sku->sku->boxes_pallet ? ($this->performances->sum('tarimas_produced') * $this->line_sku->sku->boxes_pallet) : 0;
+        $lbs_teoricas = $this->line_sku->sku->presentation ? ($total_boxes*$this->line_sku->sku->presentation) : 0;
+        $performance_hours = $this->line_sku->lbs_performance ?( $lbs_teoricas/$this->line_sku->lbs_performance) : 0;
         foreach ($this->timeouts as $timeout) {
             $hours = 0;
             if($timeout->end_date){
@@ -26,16 +27,21 @@ class TaskProductionPlanDetailResource extends JsonResource
             }
             $line_hours -= $hours;
         }
-        foreach ($this->performances as $performance) {
-            $performance_hours += $performance->tarimas_produced / 2;
-        }
+
+        $this->performances->map(function($performance){
+            $total_boxes = $performance->tarimas_produced * $this->line_sku->sku->boxes_pallet;
+            $lbs_teoricas = $total_boxes*$this->line_sku->sku->presentation;
+            $performance->lbs_teoricas = $lbs_teoricas;
+
+            return $performance;
+        });
 
         return [
             'line' => $this->line_sku->line->name,
             'sku' => $this->line_sku->sku->code,
             'start_date' => $this->start_date,
             'biometric_hours' => 8,
-            'total_hours' => $this->total_hours,
+            'total_hours' => $this->total_hours ?? 0,
             'performance_hours' => round($performance_hours, 3),
             'line_hours' => round($line_hours, 3),
             'timeouts' => TaskProductionTimeoutResource::collection($this->timeouts),

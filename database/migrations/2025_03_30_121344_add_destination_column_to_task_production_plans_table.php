@@ -11,12 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('stock_keeping_units_products', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('presentation');
-            $table->float('box_weight')->nullable();
-            $table->timestamps();
+        Schema::table('task_production_plans', function (Blueprint $table) {
+            $table->string('destination')->nullable();
+            $table->dropColumn('tarimas');
         });
     }
 
@@ -25,6 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('stock_keeping_units_products');
+        Schema::table('task_production_plans', function (Blueprint $table) {
+            $table->dropColumn('destination');
+            $table->float('tarimas');
+        });
     }
 };

@@ -19,10 +19,11 @@ class LineStockKeepingUnitsResource extends JsonResource
             'id' => strval($this->id),
             'line' => $this->line->name,
             'sku' => $this->sku->code,
-            'client' => $this->client->name,
-            'product' => $this->sku->product->name,
+            'client' => $this->sku->client_name,
+            'product' => $this->sku->product_name,
             'shift' => $shift,
-            'performance' => $this->lbs_performance
+            'performance' => $this->lbs_performance ? strval($this->lbs_performance) : 'SIN RENDIMIENTO REGISTRADO',
+            'accepted_percentage' => $this->accepted_percentage
         ];
     }
 }

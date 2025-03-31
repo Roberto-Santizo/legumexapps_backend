@@ -26,13 +26,12 @@ class CreateLineStockKeepingUnitRequest extends FormRequest
             'sku_id' => [
                 'required',
                 Rule::unique('line_stock_keeping_units')->where(function ($query) {
-                    return $query->where('line_id', $this->line_id)
-                        ->where('client_id', $this->client_id);
+                    return $query->where('line_id', $this->line_id);
                 })
             ],
-            'line_id' => 'required',
-            'client_id' => 'required',
-            'lbs_performance' => 'required|numeric'
+            'line_id' => 'required|exists:lines,id',
+            'lbs_performance' => 'sometimes',
+            'accepted_percentage' => 'required|numeric'
         ];
     }
 
@@ -43,8 +42,8 @@ class CreateLineStockKeepingUnitRequest extends FormRequest
             'sku_id.required' => 'El SKU es requerido',
             'line_id.required' => 'La linea es requerida',
             'client_id.required' => 'El cliente es requerido',
-            'lbs_performance.required' => 'El rendimeinto es requerido',
-            'lbs_performance.numeric' => 'El dato debería de ser númerico'
+            'accepted_percentage.required' => 'El porcentaje aceptado es requerido',
+            'accepted_percentage.numeric' => 'El porcentaje aceptado debe',
         ];
     }
 }

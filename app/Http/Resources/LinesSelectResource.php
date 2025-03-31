@@ -18,6 +18,7 @@ class LinesSelectResource extends JsonResource
         return [
             'value' => strval($this->id),
             'label' => $this->name . ' - '  .$shift,
+            'performance' => $this->skus->first()->lbs_performance,
         ];
     }
 }

@@ -17,4 +17,9 @@ class Line extends Model
     {
         return $this->hasMany(TaskProductionPlan::class,'line_id','id');
     }
+
+    public function skus()
+    {
+        return $this->hasMany(LineStockKeepingUnits::class);
+    }
 }

@@ -19,7 +19,6 @@ class TaskProductionPlanResource extends JsonResource
         $total_hours = 0;
         $total_in_employees = 0;
         $paused = false;
-
         if($this->timeouts->count() > 0){
             $paused =( $this->timeouts->last()->end_date === null) ? true : false;
         }
@@ -39,9 +38,8 @@ class TaskProductionPlanResource extends JsonResource
             'id' => strval($this->id),
             'line' => $this->line_sku->line->code,
             'sku' => $this->line_sku->sku->code,
-            'product' => $this->line_sku->sku->product->name,
-            'total_tarimas' => $this->tarimas,
-            'finished_tarimas' => $this->finished_tarimas,
+            'product' => $this->line_sku->sku->product_name,
+            'total_lbs' => $this->total_lbs,
             'operation_date' => $this->operation_date->format('d-m-Y'),
             'start_date' => $this->start_date ? $this->start_date->format('d-m-Y h:i:s A') : null,
             'end_date' => $this->end_date ? $this->end_date->format('d-m-Y h:i:s A') : null,
@@ -51,7 +49,9 @@ class TaskProductionPlanResource extends JsonResource
             'total_employees' => $this->employees->count(),
             'priority' => $this->priority,
             'available' => $this->available === null ? false : $this->available,
-            'paused' => $paused
+            'paused' => $paused,
+            'is_minimum_requrire' => $this->is_minimum_require ? true : false,
+            'is_justified' => $this->is_justified ? true : false
         ];
     }
 }

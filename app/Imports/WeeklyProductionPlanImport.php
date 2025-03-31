@@ -31,6 +31,7 @@ class WeeklyProductionPlanImport implements ToCollection, WithHeadingRow
                 'year' => $year
             ]
         );
+
         foreach ($rows as $row) {
             if (empty($row['linea'])) {
                 return null;
@@ -38,7 +39,7 @@ class WeeklyProductionPlanImport implements ToCollection, WithHeadingRow
             $date = Date::excelToDateTimeObject($row['fecha_de_operacion']);
             $line = Line::where('code', $row['linea'])->first();
             $sku = StockKeepingUnit::where('code', $row['sku'])->first();
-            $sku_line = LineStockKeepingUnits::where('line_id',$line->id)->where('sku_id',$sku->id)->first();
+            $sku_line = LineStockKeepingUnits::where('line_id', $line->id)->where('sku_id', $sku->id)->first();
 
             if (!$line) {
                 throw new Exception("La linea " . $row['linea'] . " no existe");
@@ -48,19 +49,22 @@ class WeeklyProductionPlanImport implements ToCollection, WithHeadingRow
                 throw new Exception("El SKU " . $row['sku'] . " no existe");
             }
 
-            if(!$sku_line){
+            if (!$sku_line) {
                 throw new Exception("El SKU " . $row['sku'] . " no coincide con la linea " . $row['linea']);
             }
 
             try {
+                $total_hours = $sku_line->lbs_performance ? $row['libras']/$sku_line->lbs_performance : null;
+
                 TaskProductionPlan::create([
                     'line_id' => $line->id,
                     'weekly_production_plan_id' => $weekly_production_plan->id,
                     'operation_date' => $date,
-                    'total_hours' => $row['horas'],
+                    'total_hours' => $total_hours,
                     'line_sku_id' => $sku_line->id,
-                    'tarimas' => $row['tarimas'],
                     'priority' => $row['prioridad'],
+                    'destination' => $row['destino'],
+                    'total_lbs' => $row['libras'],
                     'status' => 0
                 ]);
             } catch (\Throwable $th) {

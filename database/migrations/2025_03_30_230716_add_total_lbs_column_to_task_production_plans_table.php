@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('clients', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->timestamps();
+        Schema::table('task_production_plans', function (Blueprint $table) {
+            $table->float('total_lbs');
         });
     }
 
@@ -23,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('clients');
+        Schema::table('task_production_plans', function (Blueprint $table) {
+            $table->dropColumn('total_lbs');
+        });
     }
 };

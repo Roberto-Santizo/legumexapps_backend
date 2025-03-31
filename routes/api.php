@@ -34,6 +34,7 @@ use App\Http\Controllers\SKUController;
 use App\Http\Controllers\TareaController;
 use App\Http\Controllers\TaskCropController;
 use App\Http\Controllers\TaskProductionController;
+use App\Http\Controllers\TaskProductionPlanNotesController;
 use App\Http\Controllers\TasksCropController;
 use App\Http\Controllers\TasksLoteController;
 use App\Http\Controllers\TimeOutController;
@@ -162,7 +163,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/rm-receptions-pending/quality-test',[DashboardCalidad::class,'ReceptionPedingQuality']);
     Route::get('/rm-receptions/by-percentage-diference',[DashboardCalidad::class,'ReceptionByPercentageDiference']);
 
-
     //PRODUCCIÓN
     Route::get('/employees-comodines',[EmployeeController::class,'getAllComodines']);
 
@@ -171,36 +171,32 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::apiResource('/lines',LinesController::class);
     Route::get('/lines-all',[LinesController::class,'GetAllLines']);
-
-    Route::apiResource('/sku-products',ProductsSKUController::class);
-    Route::get('/sku-products-all',[ProductsSKUController::class,'GetAllProducts']);
+    Route::get('/lines-by-sku/{id}',[LinesController::class,'GetAllLinesBySku']);
 
     Route::apiResource('/lines-skus',LineStockKeepingUnitsController::class);
 
-    Route::apiResource('/clients',ClientsController::class);
-    Route::get('/clients-all',[ClientsController::class,'GetAllClients']);
-
     Route::apiResource('/timeouts',TimeOutController::class);
     Route::get('/timeouts-all',[TimeOutController::class,'GetAllTimeouts']);
+
+    Route::apiResource('/notes',TaskProductionPlanNotesController::class);
 
     Route::apiResource('/weekly_production_plan',WeeklyProductionPlanController::class);
     Route::get('/weekly_production_plan/details/{weekly_plan_id}/{line_id}',[WeeklyProductionPlanController::class,'GetTasksByLineId']);
     Route::get('/weekly_production_plan/details/{weekly_plan_id}',[WeeklyProductionPlanController::class,'GetTasksForCalendar']);
     Route::get('/weekly_production_plan/details-by-date/{weekly_plan_id}',[WeeklyProductionPlanController::class,'GetTasksByDate']);
+    Route::get('/weekly_production_plan/hours-by-date/{weekly_plan_id}',[WeeklyProductionPlanController::class,'GetHoursByDate']);
 
     Route::post('/weekly_production_plan/assign/{id}',[WeeklyProductionPlanController::class,'createAssigments']);
     
     Route::apiResource('/task_production_plan',TaskProductionController::class);
+    Route::get('/tasks_production_plan/finished/details/{id}',[TaskProductionController::class,'FinishedTaskDetails']);
     
     Route::post('/tasks_production_plan/new-task',[TaskProductionController::class,'CreateNewTaskProduction']);
     Route::get('/tasks_production_plan/details/{id}',[TaskProductionController::class,'TaskDetails']);
     Route::patch('/tasks_production_plan/{id}/start',[TaskProductionController::class,'StartTaskProduction']);
     Route::patch('/tasks_production_plan/{id}/end',[TaskProductionController::class,'EndTaskProduction']);
-    
     Route::post('/tasks_production_plan/{id}/add-timeout/open',[TaskProductionController::class,'AddTimeOutOpen']);
     Route::post('/tasks_production_plan/{id}/add-timeout/close',[TaskProductionController::class,'AddTimeOutClose']);
-
-
     Route::post('/tasks_production_plan/{id}/assign',[TaskProductionController::class,'Assign']);
     Route::post('/tasks_production_plan/change-assignment',[TaskProductionController::class,'ChangeAssignment']);
     Route::post('/tasks_production_plan/{id}/performance',[TaskProductionController::class,'TakePerformance']);

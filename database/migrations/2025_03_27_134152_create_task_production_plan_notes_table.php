@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('line_stock_keeping_units', function (Blueprint $table) {
+        Schema::create('task_production_plan_notes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sku_id')->constrained()->on('stock_keeping_units');
-            $table->foreignId('line_id')->constrained();
-            $table->float('lbs_performance')->nullable();
-            $table->float('accepted_percentage');
+            $table->foreignId('task_p_id')->constrained()->on('task_production_plans');
+            $table->string('reason');
+            $table->string('action');
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('line_stock_keeping_units');
+        Schema::dropIfExists('task_production_plan_notes');
     }
 };
