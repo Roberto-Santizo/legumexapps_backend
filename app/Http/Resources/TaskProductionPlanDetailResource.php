@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Models\TaskProductionTimeout;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -19,7 +18,7 @@ class TaskProductionPlanDetailResource extends JsonResource
         $line_hours = $this->start_date->diffInHours(Carbon::now());
         $total_boxes = $this->line_sku->sku->boxes_pallet ? ($this->performances->sum('tarimas_produced') * $this->line_sku->sku->boxes_pallet) : 0;
         $lbs_teoricas = $this->line_sku->sku->presentation ? ($total_boxes*$this->line_sku->sku->presentation) : 0;
-        $performance_hours = $this->line_sku->lbs_performance ?( $lbs_teoricas/$this->line_sku->lbs_performance) : 0;
+        $performance_hours = $this->line_sku->lbs_performance ? ( $lbs_teoricas/$this->line_sku->lbs_performance) : $line_hours;
         foreach ($this->timeouts as $timeout) {
             $hours = 0;
             if($timeout->end_date){

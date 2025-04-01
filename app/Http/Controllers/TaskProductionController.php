@@ -8,6 +8,7 @@ use App\Http\Resources\TaskProductionPlanDetailsResource;
 use App\Http\Resources\TaskProductionPlanResource;
 use App\Models\EmployeeTransfer;
 use App\Models\Line;
+use App\Models\LinePosition;
 use App\Models\LineStockKeepingUnits;
 use App\Models\StockKeepingUnit;
 use App\Models\TaskProductionEmployee;
@@ -17,6 +18,7 @@ use App\Models\TaskProductionPlan;
 use App\Models\TaskProductionTimeout;
 use App\Models\Timeout;
 use App\Models\WeeklyProductionPlan;
+use App\Services\AssignEmployeeNotificationService;
 use App\Services\ChangeEmployeeNotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -24,10 +26,12 @@ use Illuminate\Http\Request;
 class TaskProductionController extends Controller
 {
     protected $emailService;
+    protected $emailCreateAssigneeService;
 
-    public function __construct(ChangeEmployeeNotificationService $emailService)
+    public function __construct(ChangeEmployeeNotificationService $emailService, AssignEmployeeNotificationService $emailCreateAssigneeService)
     {
         $this->emailService = $emailService;
+        $this->emailCreateAssigneeService = $emailCreateAssigneeService;
     }
 
 
@@ -324,7 +328,7 @@ class TaskProductionController extends Controller
     public function EndTaskProduction(Request $request, string $id)
     {
         $data = $request->validate([
-            'total_tarimas' => 'required',
+            'total_tarimas' => 'sometimes',
             'total_lbs_bascula' => 'required'
         ]);
 
@@ -337,20 +341,32 @@ class TaskProductionController extends Controller
         }
 
         try {
-            $total_boxes = $data['total_tarimas'] * $task_production->line_sku->sku->boxes_tarima;
-            $lbs_teoricas = $total_boxes * $task_production->line_sku->sku->product->box_weight;
-            $performance_hours = $lbs_teoricas / $task_production->line_sku->lbs_performance;
-            $percentage = $performance_hours / $task_production->total_hours;
+            $total_boxes = 0;
+            $lbs_teoricas = 0;
+            $performance_hours = 0;
+            $percentage = 0;
 
-            if ($percentage < ($task_production->line_sku->sku->accepted_percentage / 100)) {
+            if ($task_production->line_sku->lbs_performance) {
+                $total_boxes = $data['total_tarimas'] * $task_production->line_sku->sku->boxes_pallet;
+                $lbs_teoricas = $total_boxes * $task_production->line_sku->sku->product->presentation;
+                $performance_hours = $lbs_teoricas / $task_production->line_sku->lbs_performance;
+                $percentage = $performance_hours / $task_production->total_hours;
+            }
+
+
+            if ($task_production->line_sku->lbs_performance && $percentage < ($task_production->line_sku->sku->accepted_percentage / 100)) {
                 $task_production->is_minimum_require = false;
+                $task_production->is_justified = false;
             } else {
                 $task_production->is_minimum_require = true;
+                $task_production->is_justified = true;
             };
 
-            $task_production->is_justified = false;
-            $task_production->finished_tarimas = $data['total_tarimas'];
+            $lbs_produced = $data['total_tarimas'] ? (($data['total_tarimas'] * $task_production->line_sku->sku->boxes_pallet) * $task_production->line_sku->sku->presentation) : $data['total_lbs_bascula'];
+
+            $task_production->finished_tarimas = $data['total_tarimas'] ?? 0;
             $task_production->total_lbs_bascula = $data['total_lbs_bascula'];
+            $task_production->total_lbs_produced = $lbs_produced;
             $task_production->end_date = Carbon::now();
             $task_production->save();
 
@@ -373,7 +389,7 @@ class TaskProductionController extends Controller
     public function TakePerformance(Request $request, string $id)
     {
         $data = $request->validate([
-            'tarimas_produced' => 'required',
+            'tarimas_produced' => 'sometimes',
             'lbs_bascula' => 'required'
         ]);
 
@@ -388,7 +404,7 @@ class TaskProductionController extends Controller
         try {
             TaskProductionPerformance::create([
                 'task_production_plan_id' => $task_production->id,
-                'tarimas_produced' => $data['tarimas_produced'],
+                'tarimas_produced' => $data['tarimas_produced'] ?? null,
                 'lbs_bascula' => $data['lbs_bascula']
             ]);
 
@@ -493,9 +509,9 @@ class TaskProductionController extends Controller
     public function CreateNewTaskProduction(Request $request)
     {
         $data = $request->validate([
-            'line_id' => 'required',
+            'line_id' => 'required|exists:lines,id',
             'operation_date' => 'required',
-            'sku_id' => 'required',
+            'sku_id' => 'required|exists:stock_keeping_units,id',
             'total_lbs' => 'required',
             'destination' => 'required'
         ]);
@@ -504,24 +520,6 @@ class TaskProductionController extends Controller
         $line = Line::find($data['line_id']);
         $sku = StockKeepingUnit::find($data['sku_id']);
         $line_sku = LineStockKeepingUnits::where('line_id', $line->id)->where('sku_id', $sku->id)->get()->first();
-
-        if (!$line) {
-            return response()->json([
-                'msg' => 'Line Not Found'
-            ], 404);
-        }
-
-        if (!$sku) {
-            return response()->json([
-                'msg' => 'SKU Not Found'
-            ], 404);
-        }
-
-        if (!$line) {
-            return response()->json([
-                'msg' => 'Performance Not Found'
-            ], 404);
-        }
 
         $operation_date = Carbon::parse($data['operation_date']);
         $today = Carbon::today();
@@ -547,7 +545,8 @@ class TaskProductionController extends Controller
             $weekly_production_plan = WeeklyProductionPlan::all()->last();
 
             $task_week = TaskProductionPlan::where('line_id', $line->id)->whereDate('operation_date', $data['operation_date'])->get()->last();
-            $total_hours = $data['total_lbs'] / $line_sku->lbs_performance;
+            $total_hours =  $line_sku->lbs_performance ? ($data['total_lbs'] / $line_sku->lbs_performance) : null;
+
             $new_task = TaskProductionPlan::create([
                 'line_id' => $line->id,
                 'weekly_production_plan_id' => $weekly_production_plan->id,
@@ -581,9 +580,44 @@ class TaskProductionController extends Controller
         }
     }
 
-    public function FinishedTaskDetails(string $id)
+    public function CreateAssignee(Request $request, string $id)
     {
+        $data = $request->validate([
+            'name' => 'required',
+            'code' => 'required',
+            'old_position' => 'required',
+            'position_id' => 'required|exists:line_positions,id'
+        ]);
+
         $task_production = TaskProductionPlan::find($id);
-        dd($task_production);
+
+        if (!$task_production) {
+            return response()->json([
+                'msg' => 'Tarea de Producción No Encontrada'
+            ], 404);
+        }
+
+        try {
+            $tasks = TaskProductionPlan::where('line_id', $task_production->line_id)->whereDate('operation_date', $task_production->operation_date)->where('start_date', null)->where('end_date', null)->get();
+            $position = LinePosition::find($data['position_id']);
+
+            foreach ($tasks as $task) {
+                $newAssignee = TaskProductionEmployee::create([
+                    'task_p_id' => $task->id,
+                    'name' => $data['name'],
+                    'code' => $data['code'],
+                    'position' => $position->name
+                ]);
+            }
+
+            $newAssignee->old_position = $data['old_position'];
+            
+            $this->emailCreateAssigneeService->sendNotification($newAssignee);
+            return response()->json('Asignación creada correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
     }
 }

@@ -22,4 +22,9 @@ class Line extends Model
     {
         return $this->hasMany(LineStockKeepingUnits::class);
     }
+
+    public function positions()
+    {
+        return $this->hasMany(LinePosition::class);
+    }
 }

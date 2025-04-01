@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\BiometricEmployeeResource;
 use App\Http\Resources\EmployeeCollection;
 use App\Models\BiometricEmployee;
+use App\Models\BiometricTransaction;
 use App\Models\Employee;
 use App\Models\EmployeeTask;
 use App\Models\EmployeeTaskCrop;
@@ -57,10 +58,19 @@ class EmployeeController extends Controller
             ->orWhere('auth_dept_id', '3eef8d8594bd4fa80194f5ccac7b1d5b')
             ->get()
             ->map(function ($item, $index) {
-                $item->temp_id = $index + 10; // Asigna un ID incremental
+                $item->temp_id = $index + 10; 
                 return $item;
             });
+        
+        $comodines->filter(function($comodin){
+            $today = Carbon::today();
+            $entrance = BiometricTransaction::where('pin', $comodin->position)->whereDate('event_time',$today)->first();
 
+            if ($entrance) {
+                return $comodin;
+            }
+        });
+        
         return BiometricEmployeeResource::collection($comodines);
     }
 }

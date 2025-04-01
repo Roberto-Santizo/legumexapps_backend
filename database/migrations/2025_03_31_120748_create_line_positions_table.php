@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('task_production_performances', function (Blueprint $table) {
+        Schema::create('line_positions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('task_production_plan_id')->constrained();
-            $table->integer('tarimas_produced')->nullable();
+            $table->string('name');
+            $table->foreignId('line_id')->constrained();
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('task_production_performances');
+        Schema::dropIfExists('line_positions');
     }
 };

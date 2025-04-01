@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use App\Models\BiometricTransaction;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -19,7 +21,8 @@ class BiometricEmployeeResource extends JsonResource
             'name' => $this->name,
             'code' => $this->last_name,
             'position' => $this->pin,
-            'column_id' => strval(2)
+            'column_id' => strval(2),
+            'active' => 1
         ];
     }
 }

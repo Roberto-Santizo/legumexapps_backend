@@ -170,6 +170,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/sku-all',[SKUController::class,'GetAllSKU']);
     
     Route::apiResource('/lines',LinesController::class);
+    Route::post('/lines/update-positions/{id}',[LinesController::class,'UpdatePositions']);
+    
+    Route::get('/lines/performances-per-day/{id}',[LinesController::class,'GetPerformanceByLine']);
+
     Route::get('/lines-all',[LinesController::class,'GetAllLines']);
     Route::get('/lines-by-sku/{id}',[LinesController::class,'GetAllLinesBySku']);
 
@@ -190,18 +194,18 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::apiResource('/task_production_plan',TaskProductionController::class);
     Route::get('/tasks_production_plan/finished/details/{id}',[TaskProductionController::class,'FinishedTaskDetails']);
-    
-    Route::post('/tasks_production_plan/new-task',[TaskProductionController::class,'CreateNewTaskProduction']);
     Route::get('/tasks_production_plan/details/{id}',[TaskProductionController::class,'TaskDetails']);
-    Route::patch('/tasks_production_plan/{id}/start',[TaskProductionController::class,'StartTaskProduction']);
-    Route::patch('/tasks_production_plan/{id}/end',[TaskProductionController::class,'EndTaskProduction']);
+    Route::post('/tasks_production_plan/new-task',[TaskProductionController::class,'CreateNewTaskProduction']);
+    Route::post('/tasks_production_plan/create-assignee/{id}',[TaskProductionController::class,'CreateAssignee']);
     Route::post('/tasks_production_plan/{id}/add-timeout/open',[TaskProductionController::class,'AddTimeOutOpen']);
     Route::post('/tasks_production_plan/{id}/add-timeout/close',[TaskProductionController::class,'AddTimeOutClose']);
     Route::post('/tasks_production_plan/{id}/assign',[TaskProductionController::class,'Assign']);
     Route::post('/tasks_production_plan/change-assignment',[TaskProductionController::class,'ChangeAssignment']);
     Route::post('/tasks_production_plan/{id}/performance',[TaskProductionController::class,'TakePerformance']);
     Route::put('/tasks_production_plan/change-priority',[TaskProductionController::class,'ChangePriority']);
+    Route::patch('/tasks_production_plan/{id}/start',[TaskProductionController::class,'StartTaskProduction']);
     Route::patch('/tasks_production_plan/change-operation-date/{id}',[TaskProductionController::class,'ChangeOperationDate']);
+    Route::patch('/tasks_production_plan/{id}/end',[TaskProductionController::class,'EndTaskProduction']);
 
     Route::apiResource('/employee-permissions',EmployeePermissionsController::class);
    

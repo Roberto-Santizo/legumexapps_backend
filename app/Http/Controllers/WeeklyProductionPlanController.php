@@ -51,7 +51,7 @@ class WeeklyProductionPlanController extends Controller
                 'id' => strval($line->id),
                 'line' => $linea,
                 'status' => $allCompleted ? true : false,
-                'total_employees' => $line->total_persons,
+                'total_employees' => $line->positions()->count(),
                 'assigned_employees' => $tasks->first()->employees->count(),
             ];
         });
@@ -88,9 +88,7 @@ class WeeklyProductionPlanController extends Controller
         try {
             Excel::import(new CreateAssignmentsProductionImport($id), $request->file('file'));
 
-            return response()->json([
-                'msg' => 'Assignments Created Successfully'
-            ], 200);
+            return response()->json('Asignaciones Cargadas Correctamente',200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()

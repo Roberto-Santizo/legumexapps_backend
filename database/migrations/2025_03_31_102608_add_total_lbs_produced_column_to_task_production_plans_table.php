@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('task_production_performances', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('task_production_plan_id')->constrained();
-            $table->integer('tarimas_produced')->nullable();
-            $table->timestamps();
+        Schema::table('task_production_plans', function (Blueprint $table) {
+            $table->float('total_lbs_produced')->nullable();
         });
     }
 
@@ -24,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('task_production_performances');
+        Schema::table('task_production_plans', function (Blueprint $table) {
+            $table->dropColumn('total_lbs_produced');
+        });
     }
 };
