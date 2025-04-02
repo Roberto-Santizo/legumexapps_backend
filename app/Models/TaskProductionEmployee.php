@@ -18,4 +18,9 @@ class TaskProductionEmployee extends Model
     {
         return $this->belongsTo(TaskProductionPlan::class,'task_p_id','id');
     }
+
+    public function bitacoras()
+    {
+        return $this->hasMany(TaskProductionEmployeesBitacora::class,'assignment_id','id');
+    }
 }

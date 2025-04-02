@@ -164,6 +164,7 @@ class WeeklyProductionPlanController extends Controller
 
         $summary = $tasks->groupBy('line')->map(function ($group) {
             return [
+                'id' => strval($group->first()->line->id),
                 'line' => $group->first()->line->name,
                 'total_hours' => $group->sum(fn($task) => $task->total_hours ?? 0)
             ];

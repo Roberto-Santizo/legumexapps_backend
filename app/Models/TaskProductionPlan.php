@@ -57,4 +57,9 @@ class TaskProductionPlan extends Model
         return $this->hasMany(TaskProductionTimeout::class,'task_p_id','id');
     }
 
+    public function note()
+    {
+        return $this->hasOne(TaskProductionPlanNote::class,'task_p_id','id');
+    }
+
 }

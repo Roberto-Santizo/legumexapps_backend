@@ -2,11 +2,10 @@
 
 namespace App\Http\Resources;
 
-use App\Models\TaskProductionEmployeesBitacora;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class EmployeeTaskProductionDetailResource extends JsonResource
+class TaskProductionEmployeeBitacoraResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,10 +16,8 @@ class EmployeeTaskProductionDetailResource extends JsonResource
     {
         return [
             'id' => strval($this->id),
-            'name' => $this->name,
-            'code' => $this->code,
-            'position' => $this->position,
-            'bitacoras' => TaskProductionEmployeeBitacoraResource::collection($this->bitacoras)
+            'original_name' => $this->original_name,
+            'original_position' => $this->original_position
         ];
     }
 }

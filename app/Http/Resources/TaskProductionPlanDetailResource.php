@@ -39,10 +39,9 @@ class TaskProductionPlanDetailResource extends JsonResource
             'line' => $this->line_sku->line->name,
             'sku' => $this->line_sku->sku->code,
             'start_date' => $this->start_date,
-            'biometric_hours' => 8,
-            'total_hours' => $this->total_hours ?? 0,
-            'performance_hours' => round($performance_hours, 3),
-            'line_hours' => round($line_hours, 3),
+            'HPlan' => $this->total_hours ?? 0,
+            'HRendimiento' => round($performance_hours, 3),
+            'HLinea' => round($line_hours, 3),
             'timeouts' => TaskProductionTimeoutResource::collection($this->timeouts),
             'performances' => TaskProductionPerformaceResource::collection($this->performances),
             'employees' => EmployeeTaskProductionDetailResource::collection($this->employees)

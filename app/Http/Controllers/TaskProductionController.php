@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ChangeAssignmentRequest;
+use App\Http\Resources\FinishedTaskProductionResource;
 use App\Http\Resources\TaskProductionPlanDetailResource;
 use App\Http\Resources\TaskProductionPlanDetailsResource;
 use App\Http\Resources\TaskProductionPlanResource;
@@ -477,7 +478,7 @@ class TaskProductionController extends Controller
         }
 
         try {
-            $last_task = TaskProductionPlan::whereDate('operation_date', $data['date'])->orderBy('priority', 'DESC')->get()->first();
+            $last_task = TaskProductionPlan::whereDate('operation_date', $data['date'])->orderBy('priority', 'DESC')->where('line_id',$task_production->line_id)->get()->first();
 
             if ($last_task) {
                 $task_production->priority = $last_task->priority + 1;
@@ -487,7 +488,7 @@ class TaskProductionController extends Controller
             $task_production->operation_date = $data['date'];
             $task_production->save();
 
-            $tasks_old_date = TaskProductionPlan::whereDate('operation_date', $old_date)->orderBy('priority', 'ASC')->get();
+            $tasks_old_date = TaskProductionPlan::whereDate('operation_date', $old_date)->orderBy('priority', 'ASC')->where('line_id',$task_production->line_id)->get();
 
             if ($tasks_old_date) {
                 foreach ($tasks_old_date as $key => $value) {
@@ -619,5 +620,20 @@ class TaskProductionController extends Controller
                 'msg' => $th->getMessage()
             ], 500);
         }
+    }
+
+    public function FinishedTaskDetails(string $id)
+    {
+        $task_production = TaskProductionPlan::find($id);
+
+        if(!$task_production){
+            return response()->json([
+                'msg' => 'Tarea de Producción No Encontrada'
+            ],404);
+        }
+
+        $info = new FinishedTaskProductionResource($task_production);
+
+        return response()->json($info,200);
     }
 }
