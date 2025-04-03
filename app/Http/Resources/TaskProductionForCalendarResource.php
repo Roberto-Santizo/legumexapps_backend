@@ -14,7 +14,21 @@ class TaskProductionForCalendarResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $flag = $this->end_date ? false : true;
+        $colors = [
+            '1' => 'red',
+            '2' => 'orange',
+            '3' => 'green',
+        ];
+
+        $color = match (true) {
+            !$this->start_date => '1',
+            $this->start_date && !$this->end_date => '2',
+            default => '3'
+        };
+
+        $flag = $color !== '3';
+
+
         return [
             'id' => strval($this->id),
             'title' => $this->id . ' - ' . $this->line_sku->line->code . ' - ' . $this->line_sku->sku->code,
@@ -22,7 +36,7 @@ class TaskProductionForCalendarResource extends JsonResource
             'total_hours' => $this->total_hours ?? 0,
             'priority' => strval($this->priority),
             'line_id' => strval($this->line_id),
-            'backgroundColor' => !$flag ? 'green' : 'orange',
+            'backgroundColor' => $colors[$color],
             'editable' => $flag
         ];
     }

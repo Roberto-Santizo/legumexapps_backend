@@ -349,7 +349,7 @@ class TaskProductionController extends Controller
 
             if ($task_production->line_sku->lbs_performance) {
                 $total_boxes = $data['total_tarimas'] * $task_production->line_sku->sku->boxes_pallet;
-                $lbs_teoricas = $total_boxes * $task_production->line_sku->sku->product->presentation;
+                $lbs_teoricas = $total_boxes * $task_production->line_sku->sku->presentation;
                 $performance_hours = $lbs_teoricas / $task_production->line_sku->lbs_performance;
                 $percentage = $performance_hours / $task_production->total_hours;
             }

@@ -2,7 +2,6 @@
 
 namespace App\Exports;
 
-use App\Models\BiometricEmployee;
 use App\Models\BiometricTransaction;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -11,18 +10,18 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-use function PHPUnit\Framework\isEmpty;
-
 class PlanillaProductionExport implements FromCollection, WithHeadings, WithTitle, WithStyles
 {
     /**
      * @return \Illuminate\Support\Collection
      */
     protected $tasks;
+    protected $line;
 
-    public function __construct($tasks)
+    public function __construct($tasks, $line)
     {
         $this->tasks = $tasks;
+        $this->line = $line;
     }
 
     public function collection()
@@ -30,42 +29,49 @@ class PlanillaProductionExport implements FromCollection, WithHeadings, WithTitl
         $rows = collect();
         Carbon::setLocale('es');
 
-        try {
-            foreach ($this->tasks as $task) {
-                $total_hours = ($task->finished_tarimas / 2);
+        foreach ($this->tasks as $task) {
+            try {
+                $total_hours = 0;
+
+                if ($task->line_sku->payment_method) {
+                    $total_hours = $task->start_date->diffInHours($task->end_date);
+                } else {
+                    $total_hours = $task->total_lbs_produced / $task->line_sku->lbs_performance;
+                };
+
                 $day = $task->end_date ? $task->start_date->isoFormat('dddd') : '';
-                $total_employees = $task->employees->filter(function($employee) use($task){
-                    $entrance = BiometricTransaction::where('pin',$employee->position)->whereDate('event_time',$task->start_date)->get()->first();
-                    if($entrance){
+                $total_employees = $task->employees->filter(function ($employee) use ($task) {
+                    $entrance = BiometricTransaction::where('pin', $employee->position)->whereDate('event_time', $task->start_date)->get()->first();
+                    if ($entrance) {
                         return $employee;
                     }
                 });
 
-                foreach ($task->employees as $employee) {
-                    $exists = $total_employees->where('position',$employee->position)->first();
-                    if($exists){
+                foreach ($this->line->positions as $position) {
+                    $exists = $total_employees->where('position', $position->name)->first();
+                    if ($exists) {
                         $rows->push([
-                            'POSICION' => $employee->position,
-                            'CODIGO' => $employee->code,
-                            'NOMBRE' => $employee->name,
+                            'POSICION' => $exists->position,
+                            'CODIGO' => $exists->code,
+                            'NOMBRE' => $exists->name,
                             'HORAS' =>  $total_hours / $total_employees->count(),
                             'DIA' => $day
                         ]);
-                    } else{
+                    } else {
                         $rows->push([
-                            'POSICION' => $employee->position,
-                            'CODIGO' => $employee->code,
-                            'NOMBRE' => $employee->name,
-                            'HORAS' =>  '',
+                            'POSICION' => $position->name,
+                            'CODIGO' => 'VACANTE',
+                            'NOMBRE' => 'VACANTE',
+                            'HORAS' =>  'VACANTE',
                             'DIA' => $day
                         ]);
                     }
-                  
                 }
+            } catch (\Throwable $th) {
+                throw $th;
             }
-        } catch (\Throwable $th) {
-            throw $th;
         }
+
 
         return $rows;
     }

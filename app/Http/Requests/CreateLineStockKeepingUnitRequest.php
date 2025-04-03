@@ -31,7 +31,8 @@ class CreateLineStockKeepingUnitRequest extends FormRequest
             ],
             'line_id' => 'required|exists:lines,id',
             'lbs_performance' => 'sometimes',
-            'accepted_percentage' => 'required|numeric'
+            'accepted_percentage' => 'required|numeric',
+            'payment_method' => 'required'
         ];
     }
 
@@ -43,7 +44,8 @@ class CreateLineStockKeepingUnitRequest extends FormRequest
             'line_id.required' => 'La linea es requerida',
             'client_id.required' => 'El cliente es requerido',
             'accepted_percentage.required' => 'El porcentaje aceptado es requerido',
-            'accepted_percentage.numeric' => 'El porcentaje aceptado debe',
+            'accepted_percentage.numeric' => 'El porcentaje aceptado debe ser un valor númerico',
+            'payment_method' => 'El método de pago es requerido'
         ];
     }
 }

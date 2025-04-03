@@ -15,22 +15,24 @@ class FinishedTaskProductionResource extends JsonResource
     public function toArray(Request $request): array
     {
         $line_hours = round($this->start_date->diffInHours($this->end_date), 2);
-
+        $hours_timeout = 0;
         $total_boxes = $this->line_sku->sku->boxes_pallet ? ($this->finished_tarimas * $this->line_sku->sku->boxes_pallet) : 0;
         $lbs_teoricas = $this->line_sku->sku->presentation ? ($total_boxes * $this->line_sku->sku->presentation) : 0;
         $performance_hours = $this->line_sku->lbs_performance ? ($lbs_teoricas / $this->line_sku->lbs_performance) : $line_hours;
+
         foreach ($this->timeouts as $timeout) {
             $hours = 0;
             if ($timeout->end_date) {
                 $hours = $timeout->start_date->diffInHours($timeout->end_date);
             }
-            $line_hours -= $hours;
+            $hours_timeout += $hours;
         }
 
         $summary = [
             'HLinea' => $line_hours,
             'HPlan' => $this->total_hours ?? $line_hours,
-            'HRendimiento' => round($performance_hours, 2)
+            'HRendimiento' => round($performance_hours, 2),
+            'HTiemposMuertos' => $hours_timeout
         ];
 
         $note = $this->note ? $this->note()->select('reason', 'action')->first() : null;

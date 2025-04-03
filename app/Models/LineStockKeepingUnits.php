@@ -10,7 +10,8 @@ class LineStockKeepingUnits extends Model
         'sku_id',
         'line_id',
         'lbs_performance',
-        'accepted_percentage'  
+        'accepted_percentage',
+        'payment_method'
     ];
 
     public function sku()

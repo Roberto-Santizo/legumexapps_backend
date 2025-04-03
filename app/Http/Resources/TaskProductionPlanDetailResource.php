@@ -16,15 +16,17 @@ class TaskProductionPlanDetailResource extends JsonResource
     public function toArray(Request $request): array
     {
         $line_hours = $this->start_date->diffInHours(Carbon::now());
+        $hours_timeouts = 0;
         $total_boxes = $this->line_sku->sku->boxes_pallet ? ($this->performances->sum('tarimas_produced') * $this->line_sku->sku->boxes_pallet) : 0;
         $lbs_teoricas = $this->line_sku->sku->presentation ? ($total_boxes*$this->line_sku->sku->presentation) : 0;
         $performance_hours = $this->line_sku->lbs_performance ? ( $lbs_teoricas/$this->line_sku->lbs_performance) : $line_hours;
+
         foreach ($this->timeouts as $timeout) {
             $hours = 0;
             if($timeout->end_date){
                 $hours = $timeout->start_date->diffInHours($timeout->end_date);
             }
-            $line_hours -= $hours;
+            $hours_timeouts += $hours;
         }
 
         $this->performances->map(function($performance){
@@ -42,6 +44,7 @@ class TaskProductionPlanDetailResource extends JsonResource
             'HPlan' => $this->total_hours ?? 0,
             'HRendimiento' => round($performance_hours, 3),
             'HLinea' => round($line_hours, 3),
+            'HTiemposMuertos' => round($hours_timeouts,3), 
             'timeouts' => TaskProductionTimeoutResource::collection($this->timeouts),
             'performances' => TaskProductionPerformaceResource::collection($this->performances),
             'employees' => EmployeeTaskProductionDetailResource::collection($this->employees)

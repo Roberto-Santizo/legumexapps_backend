@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\DefectResource;
 use App\Models\Defect;
-use App\Models\QualityVariety;
 use Illuminate\Http\Request;
 
 class DefectController extends Controller

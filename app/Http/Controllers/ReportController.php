@@ -70,7 +70,7 @@ class ReportController extends Controller
 
         try {
             $tasks = TaskProductionPlan::where('weekly_production_plan_id', $weekly_plan_production->id)->where('line_id', $line->id)->whereNot('end_date', null)->get();
-            $file = Excel::raw(new PlanillaProductionExport($tasks), \Maatwebsite\Excel\Excel::XLSX);
+            $file = Excel::raw(new PlanillaProductionExport($tasks, $line), \Maatwebsite\Excel\Excel::XLSX);
             $fileName = 'PLANILLA' . ' ' . $line->code . ' S' . $weekly_plan_production->week;
             return response()->json([
                 'fileName' => $fileName,
@@ -79,7 +79,7 @@ class ReportController extends Controller
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
-            ],500);
+            ], 500);
         }
     }
 }

@@ -193,6 +193,11 @@ class LinesController extends Controller
                 }else{
                     $performance_hours = $task->start_date->diffInHours($task->end_date);
                 }
+
+                foreach ($task->timeouts as $timeout) {
+                    $total_hours = $timeout->start_date->diffInHours($timeout->end_date);
+                    $line_hours -= $total_hours;
+                }
             });
 
 
