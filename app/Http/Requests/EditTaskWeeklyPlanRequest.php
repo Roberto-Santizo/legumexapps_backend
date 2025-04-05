@@ -23,11 +23,11 @@ class EditTaskWeeklyPlanRequest extends FormRequest
     {
         return [
             "budget" => ['required','min:1'],
-            "end_date" => ['nullable','string'],
-            "end_time" => ['nullable','string'],
+            "end_date" => ['nullable'],
+            "end_time" => ['nullable'],
             "hours" => ['required'],
-            "start_date"=> ['nullable','string'],
-            "start_time" => ['nullable','string'],
+            "start_date"=> ['nullable'],
+            "start_time" => ['nullable'],
             "weekly_plan_id" => ['required','string','exists:weekly_plans,id'],
             "slots" => ['required']
         ];

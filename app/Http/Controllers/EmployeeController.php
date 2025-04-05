@@ -30,20 +30,20 @@ class EmployeeController extends Controller
             $employees = Employee::where('terminal_id',$finca->terminal_id)->whereDate('punch_time',Carbon::now())->get();
         }
         
-        // $filter_employees = $employees->filter(function($employee){
-        //     $assignment = EmployeeTask::where('employee_id',$employee->emp_id)->whereDate('created_at',Carbon::now())->whereHas('task_weekly_plan',function($query){
-        //         $query->where('end_date',null);
-        //     })->first();
+        $filter_employees = $employees->filter(function($employee){
+            $assignment = EmployeeTask::where('employee_id',$employee->emp_id)->whereDate('created_at',Carbon::now())->whereHas('task_weekly_plan',function($query){
+                $query->where('end_date',null);
+            })->first();
 
-        //     $assignmentCrop = EmployeeTaskCrop::where('employee_id',$employee->emp_id)->whereDate('created_at',Carbon::now())->whereHas('assignment',function($query){
-        //         $query->where('end_date',null);
-        //     })->first();
+            $assignmentCrop = EmployeeTaskCrop::where('employee_id',$employee->emp_id)->whereDate('created_at',Carbon::now())->whereHas('assignment',function($query){
+                $query->where('end_date',null);
+            })->first();
 
-        //     if(!$assignment && !$assignmentCrop){
-        //         return $employee;
-        //     }
-        // });
+            if(!$assignment && !$assignmentCrop){
+                return $employee;
+            }
+        });
 
-        return new EmployeeCollection($employees);
+        return new EmployeeCollection($filter_employees);
     }
 }

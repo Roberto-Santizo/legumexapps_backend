@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateTaskWeeklyPlanRequest;
 use App\Http\Requests\EditTaskWeeklyPlanRequest;
+use App\Http\Resources\EditTaskWeeklyPlanResource;
 use App\Http\Resources\TaskLoteResource;
 use App\Http\Resources\TaskWeeklyPlanDetailsCollection;
 use App\Http\Resources\TaskWeeklyPlanDetailsResource;
@@ -188,6 +189,7 @@ class TasksLoteController extends Controller
     public function destroy(string $id)
     {
         $task = TaskWeeklyPlan::find($id);
+        $task->insumos()->delete();
         $task->delete();
 
         return response()->json([
@@ -203,12 +205,12 @@ class TasksLoteController extends Controller
         $start_date = $task->start_date;
         $end_date = $task->end_date;
 
-        if ($task->start_date && $data['start_date']) {
+        if ($start_date && ($data['start_date'] ?? false)) {
             $draft_start_date = $data['start_date'] . ' ' . $data['start_time'];
             $start_date = Carbon::parse($draft_start_date);
         }
 
-        if ($task->end_date && $data['end_date']) {
+        if ($end_date && ($data['end_date'] ?? false)) {
             $draft_end_date = $data['end_date'] . ' ' . $data['end_time'];
             $end_date = Carbon::parse($draft_end_date);
         }
@@ -227,7 +229,7 @@ class TasksLoteController extends Controller
                 $dest = WeeklyPlan::find($data['weekly_plan_id']);
 
                 if ($dest->finca->id != $task->plan->finca->id) {
-                    throw new Error("Información no válida");
+                    throw new Error("La finca no coincide con el lote de la tarea");
                 }
                 BinnacleTaskWeeklyPlan::create([
                     'task_weekly_plan_id' => $task->id,
@@ -238,14 +240,14 @@ class TasksLoteController extends Controller
             }
 
             $task->save();
+            return response()->json('Tarea Actualizada Correctamente',200);
+
         } catch (\Throwable $th) {
-            throw $th;
+            return response()->json([
+                'msg' => $th->getMessage(),
+            ],400);
         }
 
-        return response()->json([
-            'message' => 'Task Updated Successfully',
-            'data' => $task
-        ]);
     }
 
     public function EraseAssignationTask(string $id)
@@ -284,5 +286,18 @@ class TasksLoteController extends Controller
         return response()->json([
             'message' => 'Insumos Registrados Correctamente'
         ]);
+    }
+
+    public function GetTaskForEdit(string $id)
+    {
+        $task = TaskWeeklyPlan::find($id);
+
+        if(!$task){
+            return response()->json([
+                'msg' => 'Tarea de Lote No Encontrada'
+            ],404); 
+        }
+
+        return new EditTaskWeeklyPlanResource($task);
     }
 }
