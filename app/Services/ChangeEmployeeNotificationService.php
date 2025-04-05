@@ -21,7 +21,7 @@ class ChangeEmployeeNotificationService
         $graph = new Graph();
         $graph->setAccessToken($accessToken);
 
-        $userId = 'soportetecnico.tejar@legumex.net';
+        $userId = 'noreply.tic@legumex.net';
 
         $recipient1 = new Recipient();
         $recipient1->setEmailAddress(new EmailAddress(['address' => 'soportetecnico.tejar@legumex.net']));

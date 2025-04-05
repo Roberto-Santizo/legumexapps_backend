@@ -16,10 +16,17 @@ class TaskProductionPlanNotesController extends Controller
             'task_p_id' => 'required|exists:task_production_plans,id'
         ]);
 
+        $user = $request->user();
+
         $task_production = TaskProductionPlan::find($data['task_p_id']);
 
         try {
-            TaskProductionPlanNote::create($data);
+            TaskProductionPlanNote::create([
+                'task_p_id' => $data['task_p_id'],
+                'reason' => $data['reason'],
+                'action' => $data['action'],
+                'user_id' => $user->id,
+            ]);
             $task_production->is_justified = true;
             $task_production->save();
             return response()->json('Nota tomada correctamente', 200);

@@ -25,7 +25,8 @@ class TaskProductionPlanSummaryResource extends JsonResource
             'end_date' => $this->end_date ? $this->end_date->format('d-m-Y h:i:s A') : null,
             'hours' => $this->total_hours,
             'priority' => $this->priority,
-            'line_id' => strval($this->line_id)
+            'line_id' => strval($this->line_id),
+            'isDraggable' => ($this->start_date || $this->end_date) ? false : true
         ];
     }
 }

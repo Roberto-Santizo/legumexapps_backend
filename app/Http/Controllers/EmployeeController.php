@@ -10,6 +10,7 @@ use App\Models\Employee;
 use App\Models\EmployeeTask;
 use App\Models\EmployeeTaskCrop;
 use App\Models\Finca;
+use App\Models\TaskProductionEmployee;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -58,19 +59,24 @@ class EmployeeController extends Controller
             ->orWhere('auth_dept_id', '3eef8d8594bd4fa80194f5ccac7b1d5b')
             ->get()
             ->map(function ($item, $index) {
-                $item->temp_id = $index + 10; 
+                $item->temp_id = $index + 10;
                 return $item;
             });
-        
-        $comodines->filter(function($comodin){
-            $today = Carbon::today();
-            $entrance = BiometricTransaction::where('pin', $comodin->position)->whereDate('event_time',$today)->first();
 
-            if ($entrance) {
-                return $comodin;
-            }
+        $comodinesFiltrados = $comodines->filter(function ($comodin) {
+            $today = Carbon::today();
+
+            $entrance = BiometricTransaction::where('pin', $comodin->pin)
+                ->whereDate('event_time', $today)
+                ->first();
+
+            $assigned = TaskProductionEmployee::where('position', $comodin->pin)
+                ->whereDate('created_at', $today)
+                ->first();
+
+            return $entrance && !$assigned;
         });
-        
-        return BiometricEmployeeResource::collection($comodines);
+
+        return BiometricEmployeeResource::collection($comodinesFiltrados);
     }
 }

@@ -30,18 +30,24 @@ class FinishedTaskProductionResource extends JsonResource
 
         $summary = [
             'HLinea' => $line_hours,
-            'HPlan' => $this->total_hours ?? $line_hours,
+            'HPlan' => round($this->total_hours ?? $line_hours,2),
             'HRendimiento' => round($performance_hours, 2),
-            'HTiemposMuertos' => $hours_timeout
+            'HTiemposMuertos' => round($hours_timeout, 2),
         ];
+        
 
-        $note = $this->note ? $this->note()->select('reason', 'action')->first() : null;
+        $note = $this->note ? [
+            'reason' => $this->note->reason,
+            'action' => $this->note->action,
+            'user' => $this->note->user->name
+        ] : null;
         return [
             'id' => strval($this->id),
             'line' => $this->line->name,
             'sku' => $this->line_sku->sku->code,
             'sku_description' => $this->line_sku->sku->product_name,
             'client' => $this->line_sku->sku->client_name,
+            'total_lbs' => $this->total_lbs,
             'total_lbs_produced' => $this->total_lbs_produced,
             'total_lbs_bascula' => $this->total_lbs_bascula,
             'destination' => $this->destination,
@@ -53,6 +59,7 @@ class FinishedTaskProductionResource extends JsonResource
             'note' => $note,
             'timeouts' => TaskProductionTimeoutResource::collection($this->timeouts),
             'employees' => EmployeeTaskProductionDetailResource::collection($this->employees),
+            'history_operation_date' => TaskOperationDateBitacoraResource::collection($this->operationDateChanges)
         ];
     }
 }

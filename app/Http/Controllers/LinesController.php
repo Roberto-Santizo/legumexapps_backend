@@ -182,21 +182,8 @@ class LinesController extends Controller
                     $total_boxes = $task->line_sku->sku->boxes_pallet * $task->finished_tarimas;
                     $lbs_teoricas = $task->line_sku->sku->presentation * $total_boxes;
                     $performance_hours = $lbs_teoricas / $task->line_sku->lbs_performance;
-
-                    foreach ($task->timeouts as $timeout) {
-                        $hours = 0;
-                        if ($timeout->end_date) {
-                            $hours = $timeout->start_date->diffInHours($timeout->end_date);
-                        }
-                        $performance_hours -= $hours;
-                    }
                 }else{
                     $performance_hours = $task->start_date->diffInHours($task->end_date);
-                }
-
-                foreach ($task->timeouts as $timeout) {
-                    $total_hours = $timeout->start_date->diffInHours($timeout->end_date);
-                    $line_hours -= $total_hours;
                 }
             });
 

@@ -26,7 +26,7 @@ class TaskProductionForCalendarResource extends JsonResource
             default => '3'
         };
 
-        $flag = $color !== '3';
+        $flag = ($color !== '3' && $color !== '2');
 
 
         return [

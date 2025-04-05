@@ -41,7 +41,7 @@ class TaskProductionPlanDetailResource extends JsonResource
             'line' => $this->line_sku->line->name,
             'sku' => $this->line_sku->sku->code,
             'start_date' => $this->start_date,
-            'HPlan' => $this->total_hours ?? 0,
+            'HPlan' => $this->total_hours ? round($this->total_hours,2) : 0,
             'HRendimiento' => round($performance_hours, 3),
             'HLinea' => round($line_hours, 3),
             'HTiemposMuertos' => round($hours_timeouts,3), 

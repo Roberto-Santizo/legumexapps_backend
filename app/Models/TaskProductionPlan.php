@@ -62,4 +62,8 @@ class TaskProductionPlan extends Model
         return $this->hasOne(TaskProductionPlanNote::class,'task_p_id','id');
     }
 
+    public function operationDateChanges()
+    {
+        return $this->hasMany(TaskOperationDateBitacora::class);
+    }
 }

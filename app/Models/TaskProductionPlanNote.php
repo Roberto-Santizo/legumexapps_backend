@@ -9,6 +9,12 @@ class TaskProductionPlanNote extends Model
     protected $fillable =[
         'task_p_id',
         'reason',
-        'action'  
+        'action' ,
+        'user_id'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

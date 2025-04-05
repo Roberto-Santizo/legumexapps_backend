@@ -51,7 +51,7 @@ class WeeklyProductionPlanController extends Controller
                 'id' => strval($line->id),
                 'line' => $linea,
                 'status' => $allCompleted ? true : false,
-                'total_employees' => $line->positions()->count(),
+                'total_employees' => $line->total_persons,
                 'assigned_employees' => $tasks->first()->employees->count(),
             ];
         });
@@ -139,7 +139,11 @@ class WeeklyProductionPlanController extends Controller
             ], 404);
         }
 
-        $tasks = $weekly_plan->tasks()->orderBy('priority', 'ASC')->get();
+        $tasks = $weekly_plan->tasks()
+            ->orderBy('priority', 'ASC')
+            ->orderBy('line_id', 'ASC')
+            ->get();
+
 
         return TaskProductionForCalendarResource::collection($tasks);
     }
@@ -166,7 +170,7 @@ class WeeklyProductionPlanController extends Controller
             return [
                 'id' => strval($group->first()->line->id),
                 'line' => $group->first()->line->name,
-                'total_hours' => $group->sum(fn($task) => $task->total_hours ?? 0)
+                'total_hours' => round($group->sum(fn($task) => $task->total_hours ?? 0),2)
             ];
         })->values(); 
 
