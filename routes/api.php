@@ -89,6 +89,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/fincas',FincaController::class);
 
     Route::apiResource('/tasks-lotes',TasksLoteController::class);
+    Route::get('/tasks-lotes/edit/{id}',[TasksLoteController::class,'GetTaskForEdit']);
     Route::get('/tasks-lotes/{id}/details',[TasksLoteController::class,'TaskDetail']);
     Route::post('/tasks-lotes/register-insumos',[TasksLoteController::class,'RegisterInsumos']);
     Route::post('/tasks-lotes/close-assignment/{id}', [TasksLoteController::class, 'CloseAssigment']);
@@ -97,7 +98,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/tasks-lotes/partial-close/open/{id}', [TasksLoteController::class, 'PartialCloseOpen']);
     Route::delete('/tasks-lotes/erase/{id}',[TasksLoteController::class, 'EraseAssignationTask']);
 
-    
     Route::apiResource('/tasks-crops-lotes',TasksCropController::class);
     Route::get('/tasks-crops-lotes/employees/{id}', [TasksCropController::class, 'EmployeesAssignment']);
     Route::get('/tasks-crops-lotes/daily-employees/{id}', [TasksCropController::class, 'EmployeesAssignment']);

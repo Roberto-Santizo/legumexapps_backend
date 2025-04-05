@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateTaskCropWeeklyPlanRequest;
-use App\Http\Resources\CreateTaskCropWeeklyPlanResource;
 use App\Http\Resources\EmployeeTaskCropResource;
 use App\Http\Resources\EmployeeTaskCropSummaryResource;
 use App\Http\Resources\TaskCropIncomplemeteAssignmentResource;
@@ -92,10 +91,7 @@ class TasksCropController extends Controller
             'data' =>  new TaskCropResource($task)
         ]);
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
+    
     public function update(Request $request, string $id)
     {
         $task = TaskCropWeeklyPlan::find($id);
@@ -105,14 +101,6 @@ class TasksCropController extends Controller
         return response()->json([
             'message' => 'Task Closed'
         ]);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 
     public function CloseAssigment(Request $request, string $id)
