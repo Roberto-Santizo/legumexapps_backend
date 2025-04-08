@@ -29,7 +29,7 @@ class CreatePermissionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.unique' => ['El permiso creado ya existe']
+            'name.unique' => ['El permiso ya existe']
         ];
     }
 }

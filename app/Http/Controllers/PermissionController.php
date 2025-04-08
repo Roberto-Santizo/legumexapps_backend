@@ -23,18 +23,22 @@ class PermissionController extends Controller
     public function store(CreatePermissionRequest $request)
     {
         $data = $request->validated();
-        
-        $permiso = Permission::create([
-            'name' => $data['name'],
-            'guard_name' => 'web'
-        ]);
 
-        return response()->json([
-            'permiso' => $permiso
-        ]);
+        try {
+            Permission::create([
+                'name' => $data['name'],
+                'guard_name' => 'web'
+            ]);
+
+            return response()->json('Permiso Creado Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'errors' => 'Hubo un error al crear el permiso'
+            ], 500);
+        }
     }
 
-    
+
     public function userPermissions(Request $request)
     {
         $user = $request->user();

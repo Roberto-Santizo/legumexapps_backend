@@ -37,12 +37,11 @@ class ProducersController extends Controller
                 'code' => $data['code']
             ]);
 
-            return response()->json([
-                'message' => 'Producer Created Successfully'
-            ]);
+            return response()->json('Productor Creado Correctamente', 200);
         } catch (\Throwable $th) {
-            throw $th;
+            return response()->json([
+                'errors' => $th->getMessage()
+            ], 500);
         }
-        
     }
 }

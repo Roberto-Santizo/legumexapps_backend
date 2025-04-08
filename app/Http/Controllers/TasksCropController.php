@@ -64,9 +64,7 @@ class TasksCropController extends Controller
                 'task_crop_id' => $data['task_crop_id']
             ]);
 
-            return response()->json([
-                'msg' => 'Task Crop Weekly Plan Created Successfully'
-            ]);
+            return response()->json('Cosecha Creada Correctamente',200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()

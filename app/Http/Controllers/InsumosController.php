@@ -32,31 +32,19 @@ class InsumosController extends Controller
     {
         $data = $request->validated();
 
-        $insumo = Insumo::create([
-            'name' => $data['name'],
-            'code' => $data['code'],
-            'measure' => $data['measure']
-        ]);
+        try {
+            Insumo::create([
+                'name' => $data['name'],
+                'code' => $data['code'],
+                'measure' => $data['measure']
+            ]);
 
-        return response()->json([
-            'data' => $insumo
-        ]);
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
+            return response()->json('Insumo Creado Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'errors' => 'Hubo un error al crear el insumo'
+            ], 500);
+        }
     }
 
     /**
@@ -75,8 +63,11 @@ class InsumosController extends Controller
 
         try {
             Excel::import(new InsumosImport, $request->file('file'));
+            return response()->json('Insumos Creados Correctamente', 200);
         } catch (Exception $th) {
-            throw new Exception($th->getMessage());
+            return response()->json([
+                'errors' => 'Hubo un error al crear los insumos'
+            ], 500);
         }
 
         return response()->json([

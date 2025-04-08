@@ -26,14 +26,18 @@ class RoleController extends Controller
     {
         $data = $request->validated();
 
-        $role = Role::create([
-            'name'=> $data['name'],
-            'guard_name' => 'web'
-        ]);
+        try {
+            $role = Role::create([
+                'name' => $data['name'],
+                'guard_name' => 'web'
+            ]);
 
-        return response()->json([
-            'role' => $role
-        ]);
+            return response()->json('Rol Creado Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'errors' => 'Hubo un error al crear el rol'
+            ], 500);
+        }
     }
 
     public function userRoles(Request $request)
@@ -41,7 +45,7 @@ class RoleController extends Controller
         $user = $request->user();
 
         return response()->json([
-            'name'=> $user->getRoleNames()->first()
+            'name' => $user->getRoleNames()->first()
         ]);
     }
 }

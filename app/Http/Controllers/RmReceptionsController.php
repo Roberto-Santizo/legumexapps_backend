@@ -31,25 +31,25 @@ class RmReceptionsController extends Controller
     {
         $query = RmReception::query();
 
-        if($request->has('quality_status_id')){
-            $query->where('quality_status_id',$request->quality_status_id);
+        if ($request->has('quality_status_id')) {
+            $query->where('quality_status_id', $request->quality_status_id);
         }
 
-        if($request->has('finca_id')){
-            $query->where('finca_id',$request->finca_id);
+        if ($request->has('finca_id')) {
+            $query->where('finca_id', $request->finca_id);
         }
 
-        if($request->has('ref_doc')){
-            $query->whereHas('field_data',function($query) use ($request){
-                $query->where('ref_doc',$request->ref_doc);
+        if ($request->has('ref_doc')) {
+            $query->whereHas('field_data', function ($query) use ($request) {
+                $query->where('ref_doc', $request->ref_doc);
             });
         }
-        if($request->has('grn')){
-            $query->where('grn',$request->grn);
+        if ($request->has('grn')) {
+            $query->where('grn', $request->grn);
         }
 
-        if($request->has('date')){
-            $query->whereDate('doc_date',$request->date);
+        if ($request->has('date')) {
+            $query->whereDate('doc_date', $request->date);
         }
 
         if ($request->has('plate')) {
@@ -59,17 +59,17 @@ class RmReceptionsController extends Controller
                 });
             });
         }
-        
 
-        if($request->has('producer_id')){
-            $query->whereHas('field_data',function($query) use ($request){
-                $query->where('producer_id',$request->producer_id);
+
+        if ($request->has('producer_id')) {
+            $query->whereHas('field_data', function ($query) use ($request) {
+                $query->where('producer_id', $request->producer_id);
             });
         }
 
-        if($request->has('product_id')){
-            $query->whereHas('field_data',function($query) use ($request){
-                $query->where('product_id',$request->product_id);
+        if ($request->has('product_id')) {
+            $query->whereHas('field_data', function ($query) use ($request) {
+                $query->where('product_id', $request->product_id);
             });
         }
 
@@ -79,7 +79,7 @@ class RmReceptionsController extends Controller
     public function GetAllBoletas()
     {
         $boletas = RmReception::whereDoesntHave('transport_doc_data')->get();
-        return RmReceptionsResource::collection($boletas); 
+        return RmReceptionsResource::collection($boletas);
     }
 
     /**
@@ -112,7 +112,7 @@ class RmReceptionsController extends Controller
 
             $producer = Producer::find($data['producer_id']);
 
-            if(!$producer){
+            if (!$producer) {
                 return response()->json([
                     'message' => 'Producer Not Found'
                 ], 404);
@@ -135,13 +135,13 @@ class RmReceptionsController extends Controller
                 'driver_id' => $data['driver_id'],
                 'ref_doc' => $data['ref_doc']
             ]);
-        } catch (\Throwable $th) {
-            throw $th;
-        }
 
-        return response()->json([
-            'message' => 'Created Successfully'
-        ]);
+            return response()->json('Boleta Creada Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'errors' => 'Hubo un error al crear la boleta'
+            ], 500);
+        }
     }
 
     /**
@@ -196,13 +196,11 @@ class RmReceptionsController extends Controller
             $rm_reception->quality_status_id = 2;
             $rm_reception->save();
 
-            return response()->json([
-                'message' => 'Data Updated Successfully'
-            ]);
+            return response()->json('Boleta de Recepción Creada Correctamente');
         } catch (\Throwable $th) {
             return response()->json([
-                'message' => $th->getMessage()
-            ],500);
+                'errors' => 'Hubo un error al crear la boleta'
+            ], 500);
         }
     }
 
@@ -220,11 +218,11 @@ class RmReceptionsController extends Controller
                 'msg' => 'Doc Not Found'
             ], 404);
         }
-        
+
         $signature1 = $data['data']['inspector_signature'];
 
         try {
-            if(!$data['data']['isMinimunRequire']){
+            if (!$data['data']['isMinimunRequire']) {
                 $rm_reception->consignacion = 1;
             }
             $rm_reception->quality_status_id = 3;
@@ -254,7 +252,7 @@ class RmReceptionsController extends Controller
             foreach ($data['results'] as $result) {
                 $defect = Defect::find($result['id']);
 
-                if(!$defect){
+                if (!$defect) {
                     return response()->json([
                         'message' => 'Defect Not Found'
                     ], 404);
@@ -267,16 +265,13 @@ class RmReceptionsController extends Controller
                     'result' => $result['result'],
                     'tolerance_percentage' => $result['tolerance_percentage']
                 ]);
-                
             }
 
-            return response()->json([
-                'message' => 'Data Updated Successfully'
-            ]); 
+            return response()->json('Boleta Creada Correctamente', 200);
         } catch (\Throwable $th) {
-           return response()->json([
-               'message' => $th->getMessage()
-           ], 500);
+            return response()->json([
+                'errors' => 'Hubo un error al crear la boleta'
+            ], 500);
         }
     }
 
@@ -299,15 +294,12 @@ class RmReceptionsController extends Controller
             $rm_reception->quality_status_id = 4;
             $rm_reception->save();
 
-            return response()->json([
-                'message' => 'Data Updated Successfully'
-            ]);
+            return response()->json('GRN Creado Correctamente', 200);
         } catch (\Throwable $th) {
-           return response()->json([
-               'message' => $th->getMessage()
-           ], 500);
+            return response()->json([
+                'errors' => 'Hubo un Error Al Genenerar el GRN'
+            ], 500);
         }
-
     }
 
     public function GetInfoDoc(string $id)
@@ -324,7 +316,7 @@ class RmReceptionsController extends Controller
         $prod_data = $rm_reception->prod_data ? new RmReceptionProdDataResource($rm_reception->load('prod_data')) : null;
         $quality_doc_data = $rm_reception->quality_control_doc_data ? new RmReceptionQualityDocDataResource($rm_reception->load('quality_control_doc_data')) : null;
         $transport_data = $rm_reception->transport_doc_data ? new RmReceptionTransportDataResource($rm_reception->load('transport_doc_data')) : null;
-        
+
         return response()->json([
             'status' => $rm_reception->quality_status_id,
             'finca' => $rm_reception->finca->name,
@@ -341,17 +333,21 @@ class RmReceptionsController extends Controller
     {
         $rm_reception = RmReception::find($id);
 
-        if(!$rm_reception){
+        if (!$rm_reception) {
             return response()->json([
                 'msg' => 'Rm Reception Not Foud'
-            ],404);
+            ], 404);
         }
 
-        $rm_reception->quality_status_id = 5;
-        $rm_reception->save();
+        try {
+            $rm_reception->quality_status_id = 5;
+            $rm_reception->save();
 
-        return response()->json([
-            'msg' => 'Updated Successfully' 
-        ],200);
+            return response()->json('Boleta Rechazada', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'errors' => 'Hubo un error al rechazar la boleta'
+            ], 500);
+        }
     }
 }

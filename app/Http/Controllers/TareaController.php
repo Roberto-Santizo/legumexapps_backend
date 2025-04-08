@@ -49,12 +49,12 @@ class TareaController extends Controller
      * Display the specified resource.
      */
     public function show(Tarea $tarea)
-    {   
+    {
 
-        if(!$tarea){
+        if (!$tarea) {
             return response()->json([
                 'message' => 'Tarea no encontrada :('
-            ],404);
+            ], 404);
         }
         return new TareaResource($tarea);
     }
@@ -62,14 +62,26 @@ class TareaController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateTareaRequest $request, Tarea $tarea)
+    public function update(UpdateTareaRequest $request, string $id)
     {
+        $tarea = Tarea::find($id);
         $data = $request->validated();
-        $tarea->update($data);
-        
-        return response()->json([
-            'data' => $tarea
-        ]);
+
+        if (!$tarea) {
+            return response()->json([
+                'msg' => 'Tarea No Encontrada'
+            ], 404);
+        }
+
+        try {
+            $tarea->update($data);
+
+            return response()->json('Tarea Actualizada Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'errors' => 'Hubo un error al crear la tarea'
+            ], 500);
+        }
     }
 
     public function UploadTasks(Request $request)
@@ -80,13 +92,12 @@ class TareaController extends Controller
 
         try {
             Excel::import(new TasksImport, $request->file('file'));
+            return response()->json('Tareas Creadas Correctamente', 200);
         } catch (Exception $th) {
-            throw new Exception($th->getMessage());
+            return response()->json([
+                'errors' => $th->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'message' => 'Tasks Created Successfully'
-        ]);
     }
 
     /**

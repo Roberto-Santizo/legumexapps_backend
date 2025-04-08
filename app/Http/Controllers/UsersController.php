@@ -22,23 +22,25 @@ class UsersController extends Controller
     {
         $data = $request->validated();
 
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'] ?? '',
-            'username' => $data['username'],
-            'password' => bcrypt($data['password']),
-            'status' => 1
-        ])->assignRole($data['roles']);
+        try {
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'] ?? '',
+                'username' => $data['username'],
+                'password' => bcrypt($data['password']),
+                'status' => 1
+            ])->assignRole($data['roles']);
 
-        foreach ($data['permissions'] as $permission_id) {
-            $permission = Permission::find($permission_id);
-            $user->givePermissionTo($permission);
+            foreach ($data['permissions'] as $permission_id) {
+                $permission = Permission::find($permission_id);
+                $user->givePermissionTo($permission);
+            }
+            return  response()->json('Usuario Creado Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'errors' => 'Existe un error al crear el usuario'
+            ], 500);
         }
-
-        return  response()->json([
-            'user' => $user,
-            'message' => 'Usuario creado correctamente'
-        ]);
     }
 
     public function show(User $user)
@@ -58,24 +60,27 @@ class UsersController extends Controller
             $datos['password'] = bcrypt($datos['password']);
         }
 
+        try {
+            $user->removeRole($user->roles->first());
+            $user->revokePermissionTo($user->permissions);
 
-        $user->removeRole($user->roles->first());
-        $user->revokePermissionTo($user->permissions);
+            $user->update($datos);
+            $user->assignRole($datos['roles']);
 
-        $user->update($datos);
-        $user->assignRole($datos['roles']);
+            foreach ($datos['permissions'] as $permission_id) {
+                $permission = Permission::find($permission_id);
+                $user->givePermissionTo($permission);
+            }
 
-        foreach ($datos['permissions'] as $permission_id) {
-            $permission = Permission::find($permission_id);
-            $user->givePermissionTo($permission);
+            return response()->json('Usuario Actualizado Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => 'Ha ocurrido un error al actualizar el usuario'
+            ], 500);
         }
-
-        $user->with(['roles', 'permissions']);
-
-        return new UserResource($user);
     }
 
-    public function updateStatus(Request $request, User $user)
+    public function updateStatus(User $user)
     {
         $user->status = ($user->status === 0) ? 1 : 0;
         $user->save();

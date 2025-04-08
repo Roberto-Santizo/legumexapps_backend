@@ -32,7 +32,7 @@ class CreateProducerRequest extends FormRequest
         return [
             'name.required' => 'El nombre es requerido',
             'code.required' => 'El codigo es obligatorio',
-            'code.unique' => 'El codigo ingresado ya existe' 
+            'code.unique' => 'El codigo ingresado ya existe',
         ];
     }
 }

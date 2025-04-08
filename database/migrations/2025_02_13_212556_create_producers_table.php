@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('producers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->integer('code')->unique();
+            $table->string('code')->unique();
             $table->timestamps();
         });
     }

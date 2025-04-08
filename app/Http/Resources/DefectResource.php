@@ -15,7 +15,7 @@ class DefectResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => strval($this->id),
+            'id' => $this->id,
             'name' => $this->name,
             'tolerance_percentage' => $this->tolerance_percentage,
             'status' => $this->status ? true : false,

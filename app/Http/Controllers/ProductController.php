@@ -47,12 +47,10 @@ class ProductController extends Controller
                 ]);
             }
 
-            return response()->json([
-                'msg' => 'Created Successfully'
-            ]);
+            return response()->json('Producto Creado Correctamente',200);
         } catch (\Throwable $th) {
             return response()->json([
-                'msg' => $th->getMessage()
+                'errors' => $th->getMessage()
             ], 500);
         }
     }

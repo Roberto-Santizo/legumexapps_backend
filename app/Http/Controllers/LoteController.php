@@ -32,52 +32,53 @@ class LoteController extends Controller
     public function store(CreateLoteRequest $request)
     {
         $data = $request->validated();
-        
-        $lote = Lote::create([
-            'name' => $data['name'],
-            'finca_id' => $data['finca_id']
-        ]);
 
-        $lote_cdp = LotePlantationControl::create([
-            'lote_id' => $lote->id,
-            'plantation_controls_id' => $data['cdp_id'],
-            'status' => 1
-        ]);
+        try {
+            $lote = Lote::create([
+                'name' => $data['name'],
+                'finca_id' => $data['finca_id']
+            ]);
 
-        return response()->json([
-            'lote' => $lote,
-            'lote_cdp' => $lote_cdp
-        ]);
+            LotePlantationControl::create([
+                'lote_id' => $lote->id,
+                'plantation_controls_id' => $data['cdp_id'],
+                'status' => 1
+            ]);
+
+            return response()->json('Lote Creado Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => 'Hubo un error al crear el lote'
+            ], 500);
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id) {}
+
+
+    public function GetLotesByFincaId(string $id)
     {
-
-    }
-
-
-    public function GetLotesByFincaId(string $id){
-        $lotes = Lote::where('finca_id',$id)->get();
+        $lotes = Lote::where('finca_id', $id)->get();
         return new LoteCollection($lotes);
     }
 
     public function UpdateLotes(Request $request)
-    {   
+    {
         $request->validate([
             'file' => 'required|mimes:xls,xlsx'
         ]);
 
         try {
             Excel::import(new UpdateLotesImport, $request->file('file'));
-        } catch (Exception $th) {
-            throw new Exception($th->getMessage());
-        }
 
-        return response()->json([
-            'message' => 'Lotes Updated Successfully'
-        ]);
+            return response()->json('Lotes Actualizados Correctamente', 200);
+        } catch (Exception $th) {
+            return response()->json([
+                'errors' => 'Hubo un error al actualizar los lotes'
+            ], 500);
+        }
     }
 }
