@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateTaskWeeklyPlanRequest;
 use App\Http\Requests\EditTaskWeeklyPlanRequest;
+use App\Http\Resources\EditTaskWeeklyPlanResource;
 use App\Http\Resources\TaskLoteResource;
 use App\Http\Resources\TaskWeeklyPlanDetailsCollection;
 use App\Http\Resources\TaskWeeklyPlanDetailsResource;
@@ -71,8 +72,8 @@ class TasksLoteController extends Controller
                 'extraordinary' => $data['data']['extraordinary'],
             ]);
 
-            if (count($data['insumos']) > 0) {
-                foreach ($data['insumos'] as $insumo) {
+            if (count($data['data']['insumos']) > 0) {
+                foreach ($data['data']['insumos'] as $insumo) {
                     TaskInsumos::create([
                         'insumo_id' => $insumo['insumo_id'],
                         'task_weekly_plan_id' => $task_weekly_plan->id,
@@ -81,9 +82,7 @@ class TasksLoteController extends Controller
                 }
             }
 
-            return response()->json([
-                'msg' => 'Task Weekly Plan Created Successfully'
-            ]);
+            return response()->json('Tarea Creada Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
@@ -110,61 +109,89 @@ class TasksLoteController extends Controller
     {
         $task = TaskWeeklyPlan::find($id);
 
-        $partial = PartialClosure::create([
-            'task_weekly_plan_id' => $task->id,
-            'start_date' => Carbon::now(),
-        ]);
+        if (!$task) {
+            return response()->json([
+                'msg' => 'Tarea No Encontrada'
+            ], 404);
+        }
 
-        return response()->json([
-            'data' => $partial
-        ]);
+        try {
+            PartialClosure::create([
+                'task_weekly_plan_id' => $task->id,
+                'start_date' => Carbon::now(),
+            ]);
+
+            return response()->json('Tarea Pausada Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => 'Hubo un error al crear el cierre parcial'
+            ], 500);
+        }
     }
 
     public function PartialCloseOpen(string $id)
     {
         $task = TaskWeeklyPlan::find($id);
 
-        $registro = $task->closures->last();
-        $registro->update([
-            'end_date' => Carbon::now(),
-        ]);
+        if (!$task) {
+            return response()->json([
+                'msg' => 'Tarea No Encontrada'
+            ], 404);
+        }
 
-        return response()->json([
-            'data' => $registro
-        ]);
+
+        try {
+            $registro = $task->closures->last();
+            $registro->update([
+                'end_date' => Carbon::now(),
+            ]);
+
+            return response()->json('Tarea Reaperturada Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => 'Hubo un error al reaperturar la tarea'
+            ], 500);
+        }
     }
 
     public function CloseAssigment(Request $request, string $id)
     {
         $data = $request->input('data');
+        $task = TaskWeeklyPlan::find($id);
 
-        if ($data) {
-            $task = TaskWeeklyPlan::find($id);
-            $task->start_date = Carbon::now();
-            $task->slots -= count($data);
-            $task->save();
-
-
-            foreach ($data as $item) {
-                EmployeeTask::create([
-                    'task_weekly_plan_id' => $task->id,
-                    'employee_id' => $item['emp_id'],
-                    'code' => $item['code'],
-                    'name' => $item['name'],
-                ]);
-            }
-        } else {
-            $task = TaskWeeklyPlan::find($id);
-            $task->start_date = Carbon::now();
-            $task->use_dron = true;
-            $task->save();
+        if (!$task) {
+            return response()->json([
+                'msg' => 'Tarea No Encontrada'
+            ], 404);
         }
 
+        try {
+            if ($data) {
+                $task->start_date = Carbon::now();
+                $task->slots -= count($data);
+                $task->save();
 
 
-        return response()->json([
-            'message' => 'Assigment Closed'
-        ]);
+                foreach ($data as $item) {
+                    EmployeeTask::create([
+                        'task_weekly_plan_id' => $task->id,
+                        'employee_id' => $item['emp_id'],
+                        'code' => $item['code'],
+                        'name' => $item['name'],
+                    ]);
+                }
+            } else {
+                $task->start_date = Carbon::now();
+                $task->use_dron = true;
+                $task->save();
+            }
+
+            return response()->json('Asignación Cerrada Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => 'Hubo un error al cerrar la asignación'
+            ], 500);
+        }
     }
 
     public function TaskDetail(string $id)
@@ -178,17 +205,45 @@ class TasksLoteController extends Controller
     {
         $task = TaskWeeklyPlan::find($id);
 
-        $task->end_date = Carbon::now();
-        $task->save();
-        return response()->json([
-            'data' => $task
-        ]);
+        if (!$task) {
+            return response()->json([
+                'msg' => 'Tarea No Encontrada'
+            ], 404);
+        }
+
+        try {
+            $task->end_date = Carbon::now();
+            $task->save();
+
+            return response()->json('Tarea Cerrada Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => 'Hubo un error al cerrar la tarea'
+            ], 500);
+        }
     }
 
     public function destroy(string $id)
     {
         $task = TaskWeeklyPlan::find($id);
-        $task->delete();
+
+        if (!$task) {
+            return response()->json([
+                'msg' => 'Tarea No Encontrada'
+            ], 404);
+        }
+
+        try {
+            $task->insumos()->delete();
+            $task->delete();
+
+            return response()->json('Tarea Eliminada Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => 'Hubo un error al eliminar la tarea'
+            ], 500);
+        }
+
 
         return response()->json([
             'message' => 'Task Deleted'
@@ -203,12 +258,12 @@ class TasksLoteController extends Controller
         $start_date = $task->start_date;
         $end_date = $task->end_date;
 
-        if ($task->start_date && $data['start_date']) {
+        if ($start_date && ($data['start_date'] ?? false)) {
             $draft_start_date = $data['start_date'] . ' ' . $data['start_time'];
             $start_date = Carbon::parse($draft_start_date);
         }
 
-        if ($task->end_date && $data['end_date']) {
+        if ($end_date && ($data['end_date'] ?? false)) {
             $draft_end_date = $data['end_date'] . ' ' . $data['end_time'];
             $end_date = Carbon::parse($draft_end_date);
         }
@@ -227,7 +282,7 @@ class TasksLoteController extends Controller
                 $dest = WeeklyPlan::find($data['weekly_plan_id']);
 
                 if ($dest->finca->id != $task->plan->finca->id) {
-                    throw new Error("Información no válida");
+                    throw new Error("La finca no coincide con el lote de la tarea");
                 }
                 BinnacleTaskWeeklyPlan::create([
                     'task_weekly_plan_id' => $task->id,
@@ -238,24 +293,38 @@ class TasksLoteController extends Controller
             }
 
             $task->save();
+            return response()->json('Tarea Actualizada Correctamente', 200);
         } catch (\Throwable $th) {
-            throw $th;
+            return response()->json([
+                'msg' => $th->getMessage(),
+            ], 400);
         }
-
-        return response()->json([
-            'message' => 'Task Updated Successfully',
-            'data' => $task
-        ]);
     }
 
     public function EraseAssignationTask(string $id)
     {
         $task = TaskWeeklyPlan::find($id);
-        $task->start_date = null;
-        $task->end_date = null;
-        $task->employees()->delete();
-        $task->slots = $task->workers_quantity;
-        $task->save();
+
+        if (!$task) {
+            return response()->json([
+                'msg' => 'Tarea no Encontrada'
+            ], 404);
+        }
+
+        try {
+            $task->start_date = null;
+            $task->end_date = null;
+            $task->employees()->delete();
+            $task->slots = $task->workers_quantity;
+            $task->save();
+
+            return response()->json('Asignación Eliminada Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => 'Hubo un error al borrar la asignación'
+            ], 500);
+        }
+
 
         return response()->json([
             'message' => 'Task Cleaned'
@@ -284,5 +353,18 @@ class TasksLoteController extends Controller
         return response()->json([
             'message' => 'Insumos Registrados Correctamente'
         ]);
+    }
+
+    public function GetTaskForEdit(string $id)
+    {
+        $task = TaskWeeklyPlan::find($id);
+
+        if (!$task) {
+            return response()->json([
+                'msg' => 'Tarea de Lote No Encontrada'
+            ], 404);
+        }
+
+        return new EditTaskWeeklyPlanResource($task);
     }
 }

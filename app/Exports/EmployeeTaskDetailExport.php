@@ -64,24 +64,24 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                 $dates[$index][] = $closure->start_date;
                 $dates[$index][] = $closure->end_date;
             }
-    
+
             $all_dates = array_merge(...$dates);
             array_unshift($all_dates, $task->start_date);
             array_push($all_dates, $task->end_date);
-    
+
             $groupedByDay = array_reduce($all_dates, function ($carry, $datetime) {
                 $date = $datetime->format('Y-m-d');
                 $carry[$date][] = $datetime->toDateTimeString();
                 return $carry;
             }, []);
-    
+
             foreach ($groupedByDay as $key => $dates) {
                 $first_date = Carbon::parse($dates[0]);
                 $second_date = Carbon::parse($dates[1]);
                 $total_hours = $first_date->diffInHours($second_date);
                 $groupedByDay[$key] = $total_hours;
             }
-    
+
             $task->employees->map(function ($employeeAssignment) use ($groupedByDay) {
                 $employeeAssignment->total_hours = 0;
                 $employeeAssignment->dates = [];
@@ -94,20 +94,24 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                         $employeeAssignment->total_hours += $hours;
                     }
                 }
-    
+
                 return $employeeAssignment;
             });
-    
-    
+
+
             $task->employees->map(function ($employeeAssignment) use ($groupedByDay, $rows, $task) {
                 foreach ($employeeAssignment->dates as $day => $hours) {
                     $total_hours = $task->employees->reduce(function ($carry, $task) {
                         return $carry + array_sum(array_merge(...array_values($task->dates ?? [])));
                     }, 0);
-    
+
                     $percentage = $hours[0] / $total_hours;
                     $day_carbon = Carbon::parse($day);
                     $registrations = $this->getEmployeeRegistration($employeeAssignment->employee_id, $day_carbon);
+                    $entrance = Carbon::parse($registrations['entrance']);
+                    $exit = Carbon::parse($registrations['exit']);
+
+                    $hours_teoricas_employee = $task->hours;
                     $rows->push([
                         'CODIGO' => $employeeAssignment->code,
                         'EMPLEADO' => $employeeAssignment->name,
@@ -115,7 +119,9 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                         'TAREA REALIZADA' => $task->task->name,
                         'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
                         'MONTO' => $percentage * $task->budget,
-                        'HORAS TOTALES' => $percentage * $total_hours,
+                        'HORAS REALES' => $total_hours*$percentage,
+                        'HORAS TEORICAS' => $hours_teoricas_employee*$percentage,
+                        'HORAS BIOMETRICO' => $entrance->diffInHours($exit),
                         'ENTRADA' => $registrations['entrance'] ?? '',
                         'SALIDA' => $registrations['exit'] ?? '',
                         'DIA' => $day_carbon->isoFormat('dddd')
@@ -125,7 +131,6 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
         } catch (\Throwable $th) {
             throw $th;
         }
-        
     }
 
     public function processTaskCrop($task, &$rows)
@@ -135,11 +140,13 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                 foreach ($assignment->employees as $employeeAssignment) {
                     $day = $assignment->start_date->IsoFormat('dddd');
                     $percentage = $employeeAssignment->lbs / $assignment->lbs_finca;
-                    $total_hours = $assignment->plants/150;
-                    $hours = $percentage*$total_hours;
-                    $budget = $hours*12.728;
+                    $total_hours = $assignment->plants / 150;
+                    $hours = $percentage * $total_hours;
+                    $budget = $hours * 12.728;
                     $registrations = $this->getEmployeeRegistration($employeeAssignment->employee_id, $assignment->start_date);
 
+                    $entrance = Carbon::parse($registrations['entrance']);
+                    $exit = Carbon::parse($registrations['exit']);
                     $rows->push([
                         'CODIGO' => $employeeAssignment->code,
                         'EMPLEADO' => $employeeAssignment->name,
@@ -148,6 +155,8 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                         'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
                         'MONTO' => $budget,
                         'HORAS TOTALES' => $hours,
+                        'HORAS REALES' => '',
+                        'HORAS BIOMETRICO' =>  $entrance->diffInHours($exit),
                         'ENTRADA' => $registrations['entrance'] ?? '',
                         'SALIDA' => $registrations['exit'] ?? '',
                         'DIA' => $day
@@ -168,7 +177,9 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
             'TAREA REALIZADA' => $task->task->name,
             'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
             'MONTO' => '',
-            'HORAS TOTALES' => $task->start_date->diffInHours($task->end_date),
+            'HORAS REALES' => $task->start_date->diffInHours($task->end_date),
+            'HORAS TEORICAS' => $task->hours,
+            'HORAS BIOMETRICO' => '',
             'ENTRADA' => '',
             'SALIDA' => '',
             'DIA' => $task->start_date->IsoFormat('dddd')
@@ -181,6 +192,8 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
 
         foreach ($task->employees as $employeeAssignment) {
             $registrations = $this->getEmployeeRegistration($employeeAssignment->employee_id, $task->start_date);
+            $entrance = Carbon::parse($registrations['entrance']);
+            $exit = Carbon::parse($registrations['exit']);
             $rows->push([
                 'CODIGO' => $employeeAssignment->code,
                 'EMPLEADO' => $employeeAssignment->name,
@@ -188,7 +201,9 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                 'TAREA REALIZADA' => $task->task->name,
                 'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
                 'MONTO' => $task->end_date ? ($task->budget / $task->employees->count()) : 0,
-                'HORAS TOTALES' => $task->end_date ? ($task->hours / $task->employees->count()) : 0,
+                'HORAS REALES' => $task->end_date ? ($task->start_date->diffInHours($task->end_date)) : '',
+                'HORAS TEORICAS' => $task->end_date ? ($task->hours / $task->employees->count()) : 0,
+                'HORAS BIOMETRICO' => $entrance->diffInHours($exit),
                 'ENTRADA' => $registrations['entrance'] ?? '',
                 'SALIDA' => $registrations['exit'] ?? '',
                 'DIA' => $day
@@ -213,11 +228,11 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
 
     public function headings(): array
     {
-        return ['CODIGO', 'EMPLEADO', 'LOTE', 'TAREA REALIZADA', 'PLAN', 'MONTO GANADO', 'HORAS TOTALES', 'ENTRADA BIOMETRICO', 'SALIDA BIOMETRICO', 'DIA'];
+        return ['CODIGO', 'EMPLEADO', 'LOTE', 'TAREA REALIZADA', 'PLAN', 'MONTO GANADO', 'HORAS REALES', 'HORAS TEORICAS', 'HORAS BIOMETRICO', 'ENTRADA BIOMETRICO', 'SALIDA BIOMETRICO', 'DIA'];
     }
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('A1:J1')->applyFromArray([
+        $sheet->getStyle('A1:L1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFF']],
             'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => '5564eb']],
         ]);

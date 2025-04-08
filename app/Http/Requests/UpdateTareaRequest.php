@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateTareaRequest extends FormRequest
 {
@@ -21,10 +22,11 @@ class UpdateTareaRequest extends FormRequest
      */
     public function rules(): array
     {
-        $tareaCode = $this->route('tarea')->id;
         return [
             'name' => ['required'],
-            'code' => ['unique:tareas,code,'.$tareaCode],
+            'code' => [
+                'required',
+            ],
             'description' => ['max:125']
         ];
     }

@@ -36,43 +36,22 @@ class CDPController extends Controller
     {
         $data = $request->validated();
 
-        $cdp = PlantationControl::create([
-            'name' => $data['name'],
-            'density' => $data['density'],
-            'size' => $data['size'],
-            'start_date' => $data['start_date'],
-            'crop_id' => $data['crop_id'],
-            'recipe_id' => $data['recipe_id']
-        ]);
+        try {
+            PlantationControl::create([
+                'name' => $data['name'],
+                'density' => $data['density'],
+                'size' => $data['size'],
+                'start_date' => $data['start_date'],
+                'crop_id' => $data['crop_id'],
+                'recipe_id' => $data['recipe_id']
+            ]);
 
-        return response()->json([
-            'data' => $cdp,
-            'message' => 'CDP creado exitosamente'
-        ]);
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+            return response()->json('CDP Creado Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'errors' => 'Hubo un error al crear el cdp'
+            ], 500);
+        }
     }
 
     public function GetCDPSByLoteId(string $id)
@@ -112,12 +91,11 @@ class CDPController extends Controller
 
         try {
             Excel::import(new CDPSImport, $request->file('file'));
+            return response()->json('CDPS Actualizados Correctamente', 200);
         } catch (Exception $th) {
-            throw new Exception($th->getMessage());
+            return response()->json([
+                'errors' => 'Hubo un error al actualizar la tarea'
+            ], 500);
         }
-
-        return response()->json([
-            'message' => 'CDPS Creados Correctamente'
-        ]);
     }
 }

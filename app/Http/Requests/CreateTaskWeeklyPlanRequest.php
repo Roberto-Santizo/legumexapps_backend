@@ -23,7 +23,6 @@ class CreateTaskWeeklyPlanRequest extends FormRequest
     {
         return [
             "data" =>  ['required'],
-            "insumos" => ['nullable']
         ];
     }
 

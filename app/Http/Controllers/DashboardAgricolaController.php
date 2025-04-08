@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\EmployeesResource;
 use App\Http\Resources\FinishedTaskCropResource;
+use App\Http\Resources\FinishedTasksCropWeeklyPlanResource;
 use App\Http\Resources\FinishedTasksWeeklyPlanResource;
 use App\Http\Resources\PlanFincaFinishedTasksResource;
 use App\Http\Resources\TasksCropWeeklyPlanInProgressResource;
@@ -122,11 +123,11 @@ class DashboardAgricolaController extends Controller
             $tasks = TaskWeeklyPlan::whereHas('plan.finca', function ($query) use ($permission) {
                 $query->where('name', 'LIKE', '%' . $permission->name . '%');
             })->whereHas('plan', function ($query) use ($week, $year) {
-                $query->where('week', $week)->OrWhere('week', $week)->where('year', $year);
+                $query->where('week', $week)->where('year', $year);
             })->whereNot('end_date', null)->get();
         }else{
             $tasks = TaskWeeklyPlan::whereHas('plan', function ($query) use ($week, $year) {
-                $query->where('week', $week)->OrWhere('week', $week)->where('year', $year);
+                $query->where('week', $week)->where('year', $year);
             })->whereNot('end_date', null)->get();
         }
 
@@ -168,15 +169,15 @@ class DashboardAgricolaController extends Controller
             $tasks = DailyAssignments::whereNot('end_date', null)->whereHas('TaskCropWeeklyPlan.plan.finca', function ($query) use ($permission) {
                 $query->where('name', 'LIKE', '%' . $permission->name . '%');
             })->whereHas('TaskCropWeeklyPlan.plan', function ($query) use ($week, $year) {
-                $query->where('week', $week)->OrWhere('week', $week)->where('year', $year);
+                $query->where('week', $week)->where('year', $year);
             })->get();
         }else{
             $tasks = DailyAssignments::whereNot('end_date', null)->whereHas('TaskCropWeeklyPlan.plan', function ($query) use ($week, $year) {
-                $query->where('week', $week)->OrWhere('week', $week)->where('year', $year);
+                $query->where('week', $week)->where('year', $year);
             })->get();
         }
 
-        return FinishedTaskCropResource::collection($tasks);
+        return FinishedTasksCropWeeklyPlanResource::collection($tasks);
     }
 
     public function GetFinishedTasksByFinca(Request $request)

@@ -29,7 +29,7 @@ class CreateRoleRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.unique' => ['El rol especificado ya existe']
+            'name.unique' => ['El rol ya existe']
         ];
     }
 }

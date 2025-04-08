@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('producers', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('code')->unique();
-            $table->timestamps();
+        Schema::table('producers', function (Blueprint $table) {
+            $table->string('code')->change();
         });
     }
 
@@ -24,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('producers');
+        Schema::table('producers', function (Blueprint $table) {
+            $table->integer('code')->change();
+        });
     }
 };
