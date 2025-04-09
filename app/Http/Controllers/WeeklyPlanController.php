@@ -22,8 +22,9 @@ class WeeklyPlanController extends Controller
         $year = $request->input('year') ?? Carbon::now()->year;
 
         $role = $request->user()->getRoleNames();
+        $adminroles = ['admin','adminagricola','auxrrhh'];
 
-        if ($role[0] != 'admin' && $role[0] != 'adminagricola') {
+        if (in_array($role,$adminroles)) {
             $permission = $request->user()->permissions()->first();
 
             $weekly_plans = WeeklyPlan::whereHas('finca', function ($query) use ($permission) {

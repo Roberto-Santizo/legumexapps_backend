@@ -28,7 +28,7 @@ class TaskProductionPlanResource extends JsonResource
         }
 
         foreach ($this->employees as $employee) {
-            $entrance = BiometricTransaction::where('pin', $employee->position)->first();
+            $entrance = BiometricTransaction::where('last_name', $employee->position)->first();
             if ($entrance) {
                 $total_in_employees += 1;
             }

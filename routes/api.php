@@ -57,8 +57,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users-info/{user}/info', [UsersController::class, 'UsersInfo']);
     Route::patch('/users/{user}/status', [UsersController::class, 'updateStatus']);
     Route::apiResource('/user', UserController::class);
+    
     Route::get('/permissions/user', [PermissionController::class, 'userPermissions']);
     Route::apiResource('/permissions', PermissionController::class);
+    
     Route::get('/roles/user', [RoleController::class, 'userRoles']);
     Route::apiResource('/roles', RoleController::class);
     Route::apiResource('/tareas', TareaController::class);
@@ -75,6 +77,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/lotes-all', [LoteController::class, 'GetAllLotes']);
     Route::get('/lotes/finca/{finca}', [LoteController::class, 'GetLotesByFincaId']);
     Route::post('/lotes-all/update', [LoteController::class, 'UpdateLotes']);
+    
     Route::apiResource('/plans', WeeklyPlanController::class);
     Route::get('/plans-list/all', [WeeklyPlanController::class, 'GetAllPlans']);
     Route::post('/report/plans', [ReportController::class, 'DownloadReport']);

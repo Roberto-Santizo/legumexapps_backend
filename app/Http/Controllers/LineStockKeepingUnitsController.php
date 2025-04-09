@@ -35,4 +35,33 @@ class LineStockKeepingUnitsController extends Controller
             ], 500);
         }
     }
+
+    public function update(Request $request, string $id)
+    {
+        $data = $request->validate([
+            'performance' => 'sometimes',
+            'accepted_percentage' => 'required'
+        ]);
+
+        $line_sku = LineStockKeepingUnits::find($id);
+
+        if (!$line_sku) {
+            return response()->json([
+                'errors' => 'El SKU no existe'
+            ], 404);
+        }
+
+        try {
+            $line_sku->lbs_performance = $data['performance'];
+            $line_sku->accepted_percentage = $data['accepted_percentage'];
+
+            $line_sku->save();
+
+            return response()->json('SKU Actualizado Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'errors' => 'Hubo un error al actualizar el SKU'
+            ], 500);
+        }
+    }
 }

@@ -19,8 +19,8 @@ class BiometricEmployeeResource extends JsonResource
         return [
             'id' => strval($this->temp_id),
             'name' => $this->name,
-            'code' => $this->last_name,
-            'position' => $this->pin,
+            'code' => $this->pin,
+            'position' => $this->last_name,
             'column_id' => strval(2),
             'active' => 1
         ];

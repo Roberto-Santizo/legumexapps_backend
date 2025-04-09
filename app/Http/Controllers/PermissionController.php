@@ -43,6 +43,7 @@ class PermissionController extends Controller
     {
         $user = $request->user();
 
-        return new PermissionCollection($user->getAllPermissions());
+        $permissions = $user->getAllPermissions();
+        return new PermissionCollection($permissions);
     }
 }

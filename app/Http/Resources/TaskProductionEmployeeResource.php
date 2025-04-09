@@ -18,7 +18,7 @@ class TaskProductionEmployeeResource extends JsonResource
     {
         $active = 0;
         $today = Carbon::today();
-        $entrance = BiometricTransaction::where('pin', $this->position)->whereDate('event_time',$today)->first();
+        $entrance = BiometricTransaction::where('last_name', $this->position)->whereDate('event_time',$today)->first();
 
         if ($entrance) {
             $active = 1;

@@ -66,11 +66,11 @@ class EmployeeController extends Controller
         $comodinesFiltrados = $comodines->filter(function ($comodin) {
             $today = Carbon::today();
 
-            $entrance = BiometricTransaction::where('pin', $comodin->pin)
+            $entrance = BiometricTransaction::where('last_name', $comodin->last_name)
                 ->whereDate('event_time', $today)
                 ->first();
 
-            $assigned = TaskProductionEmployee::where('position', $comodin->pin)
+            $assigned = TaskProductionEmployee::where('position', $comodin->last_name)
                 ->whereDate('created_at', $today)
                 ->first();
 
