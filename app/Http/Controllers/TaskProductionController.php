@@ -521,17 +521,25 @@ class TaskProductionController extends Controller
                 }
             }
 
-            $task_production->employees()->delete();
+            if ($last_task) {
+                if ($task_production->employees->count() > 0) {
+                    $task_production->employees()->delete();
+                }
 
-            foreach ($last_task->employees as $employee) {
-                TaskProductionEmployee::create([
-                    'task_p_id' => $task_production->id,
-                    'name' => $employee->name,
-                    'code' => $employee->code,
-                    'position' => $employee->position
-                ]);
+                foreach ($task_production->employees as $employee) {
+                    $employee->bitacoras()->delete();
+                    $employee->delete();
+                }
+
+                foreach ($last_task->employees as $employee) {
+                    TaskProductionEmployee::create([
+                        'task_p_id' => $task_production->id,
+                        'name' => $employee->name,
+                        'code' => $employee->code,
+                        'position' => $employee->position
+                    ]);
+                }
             }
-
 
             return response()->json([
                 'msg' =>  'Task Production Plan Updated Successfully'

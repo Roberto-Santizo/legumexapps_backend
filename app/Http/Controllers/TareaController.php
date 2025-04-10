@@ -34,15 +34,19 @@ class TareaController extends Controller
     {
         $data = $request->validated();
 
-        $tarea = Tarea::create([
-            'name' => $data['name'],
-            'code' => $data['code'],
-            'description' => $data['description'],
-        ]);
-
-        return response()->json([
-            'data' => $tarea
-        ]);
+        try {
+            Tarea::create([
+                'name' => $data['name'],
+                'code' => $data['code'],
+                'description' => $data['description'] ?? '',
+            ]);
+    
+            return response()->json('Tarea Creada Correctamente',200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'errors' => 'Hubo un error al crear la tarea'
+            ],500);
+        }
     }
 
     /**

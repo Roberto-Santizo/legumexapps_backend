@@ -38,12 +38,10 @@ class PlatesController extends Controller
         try {
             Plate::create($data);
 
-            return response()->json([
-                'msg' => 'Created Successfully'
-            ], 200);
+            return response()->json('Placa Creada Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'mgs' => $th->getMessage()
+                'errors' => $th->getMessage()
             ], 500);
         }
     }
