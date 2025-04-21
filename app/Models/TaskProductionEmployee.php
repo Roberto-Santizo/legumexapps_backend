@@ -23,4 +23,9 @@ class TaskProductionEmployee extends Model
     {
         return $this->hasMany(TaskProductionEmployeesBitacora::class,'assignment_id','id');
     }
+
+    public function unAssigned()
+    {
+        return $this->hasOne(TaskProductionUnassignAssignment::class,'assignment_id','id');
+    }
 }

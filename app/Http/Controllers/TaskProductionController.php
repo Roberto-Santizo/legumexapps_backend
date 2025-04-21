@@ -19,12 +19,15 @@ use App\Models\TaskProductionEmployeesBitacora;
 use App\Models\TaskProductionPerformance;
 use App\Models\TaskProductionPlan;
 use App\Models\TaskProductionTimeout;
+use App\Models\TaskProductionUnassign;
+use App\Models\TaskProductionUnassignAssignment;
 use App\Models\Timeout;
 use App\Models\WeeklyProductionPlan;
 use App\Services\AssignEmployeeNotificationService;
 use App\Services\ChangeEmployeeNotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class TaskProductionController extends Controller
 {
@@ -444,12 +447,10 @@ class TaskProductionController extends Controller
                 $task_production->save();
             }
 
-            return response()->json([
-                'msg' => 'Data Updated Successfully'
-            ], 200);
+            return response()->json('Prioridad Actualizada Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'msg' => $th->getMessage()
+                'errors' => $th->getMessage()
             ], 500);
         }
     }
@@ -541,12 +542,10 @@ class TaskProductionController extends Controller
                 }
             }
 
-            return response()->json([
-                'msg' =>  'Task Production Plan Updated Successfully'
-            ], 200);
+            return response()->json('Fecha de Operación Actualizada Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'msg' => $th->getMessage()
+                'errors' => $th->getMessage()
             ], 500);
         }
     }
@@ -599,7 +598,7 @@ class TaskProductionController extends Controller
                 'total_hours' => round($total_hours, 2),
                 'line_sku_id' => $line_sku->id,
                 'priority' => $task_week ? $task_week->priority + 1 : 1,
-                'status' => $task_line ? 0 : 1,
+                'status' => $task_line ? 1 : 0,
                 'destination' => $data['destination'],
                 'total_lbs' => $data['total_lbs']
             ]);
@@ -679,5 +678,67 @@ class TaskProductionController extends Controller
         $info = new FinishedTaskProductionResource($task_production);
 
         return response()->json($info, 200);
+    }
+
+    public function Unassign(Request $request, string $id)
+    {
+        $data = $request->validate([
+            'reason' => 'required',
+            'assignments' => 'required'
+        ]);
+
+        $task_production = TaskProductionPlan::find($id);
+
+        if (!$task_production) {
+            return response()->json([
+                'errors' => 'Tarea de Producción no Encontrada'
+            ], 404);
+        }
+
+        try {
+            $user = $request->user();
+
+            $unassign_note = TaskProductionUnassign::create([
+                'task_p_id' => $task_production->id,
+                'user_id' => $user->id,
+                'reason' => $data['reason'],
+            ]);
+
+            foreach ($data['assignments'] as $assignment_id) {
+                $task_employee = TaskProductionEmployee::find($assignment_id);
+                $line = $task_production->line_sku->line->code;
+                $employees = TaskProductionEmployee::whereHas('TaskProduction', function ($query) use ($line) {
+                    $query->where('start_date', null)->where('end_date', null);
+                    $query->whereHas('line', function ($query) use ($line) {
+                        $query->where('code', $line);
+                        $query->whereDate('operation_date', Carbon::now());
+                    });
+                })->where('position', $task_employee->position)->get();
+
+                foreach ($employees as $employee) {
+                    $employee->bitacoras()->delete();
+                }
+                $employees->each->delete();
+
+                $hours = round($task_production->start_date->diffInHours(Carbon::now()), 2);
+
+                if (!$task_employee) {
+                    return response()->json([
+                        'errors' => 'La asignación no existe'
+                    ], 404);
+                }
+                TaskProductionUnassignAssignment::create([
+                    'task_p_unassign_id' => $unassign_note->id,
+                    'assignment_id' => $task_employee->id,
+                    'hours' => $hours
+                ]);
+            }
+
+            return response()->json('Nota Creada Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'errors' => $th->getMessage()
+            ], 500);
+        }
     }
 }

@@ -66,4 +66,5 @@ class TaskProductionPlan extends Model
     {
         return $this->hasMany(TaskOperationDateBitacora::class);
     }
+
 }

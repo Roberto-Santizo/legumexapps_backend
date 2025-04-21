@@ -204,6 +204,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tasks_production_plan/{id}/assign', [TaskProductionController::class, 'Assign']);
     Route::post('/tasks_production_plan/change-assignment', [TaskProductionController::class, 'ChangeAssignment']);
     Route::post('/tasks_production_plan/{id}/performance', [TaskProductionController::class, 'TakePerformance']);
+    Route::post('/tasks_production_plan/{id}/unassign', [TaskProductionController::class, 'Unassign']);
+
+
     Route::put('/tasks_production_plan/change-priority', [TaskProductionController::class, 'ChangePriority']);
     Route::patch('/tasks_production_plan/{id}/start', [TaskProductionController::class, 'StartTaskProduction']);
     Route::patch('/tasks_production_plan/change-operation-date/{id}', [TaskProductionController::class, 'ChangeOperationDate']);

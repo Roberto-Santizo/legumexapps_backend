@@ -17,7 +17,6 @@ class TaskProductionPlanResource extends JsonResource
     public function toArray(Request $request): array
     {
         $total_hours = 0;
-        $total_in_employees = 0;
         $paused = false;
         if($this->timeouts->count() > 0){
             $paused =( $this->timeouts->last()->end_date === null) ? true : false;
@@ -27,12 +26,10 @@ class TaskProductionPlanResource extends JsonResource
             $total_hours = $this->start_date->diffInHours($this->end_date);
         }
 
-        foreach ($this->employees as $employee) {
-            $entrance = BiometricTransaction::where('last_name', $employee->position)->first();
-            if ($entrance) {
-                $total_in_employees += 1;
-            }
-        }
+        $total_in_employees = $this->employees->filter(function ($employee) {
+            $today = Carbon::today();
+            return !(BiometricTransaction::where('last_name', $employee->position)->whereDate('event_time', $today)->exists());
+        });
 
         return [
             'id' => strval($this->id),
@@ -45,7 +42,7 @@ class TaskProductionPlanResource extends JsonResource
             'end_date' => $this->end_date ? $this->end_date->format('d-m-Y h:i:s A') : null,
             'hours' => $this->total_hours,
             'total_hours' => $total_hours,
-            'total_in_employees' => $total_in_employees,
+            'total_in_employees' => ($this->employees->count() - $total_in_employees->count()),
             'total_employees' => $this->employees->count(),
             'priority' => $this->priority,
             'available' => $this->available === null ? false : $this->available,

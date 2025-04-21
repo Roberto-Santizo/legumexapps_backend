@@ -10,6 +10,8 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
+use function PHPUnit\Framework\isEmpty;
+
 class PlanillaProductionExport implements FromCollection, WithHeadings, WithTitle, WithStyles
 {
     /**
@@ -41,7 +43,7 @@ class PlanillaProductionExport implements FromCollection, WithHeadings, WithTitl
 
                 $day = $task->end_date ? $task->start_date->isoFormat('dddd') : '';
                 $total_employees = $task->employees->filter(function ($employee) use ($task) {
-                    $entrance = BiometricTransaction::where('pin', $employee->position)->whereDate('event_time', $task->start_date)->get()->first();
+                    $entrance = BiometricTransaction::where('last_name', $employee->position)->whereDate('event_time', $task->start_date)->get()->first();
                     if ($entrance) {
                         return $employee;
                     }
@@ -55,6 +57,9 @@ class PlanillaProductionExport implements FromCollection, WithHeadings, WithTitl
                             'CODIGO' => $exists->code,
                             'NOMBRE' => $exists->name,
                             'HORAS' =>  $total_hours / $total_employees->count(),
+                            'TRABAJO' =>  $exists->unAssigned ? 'PARCIAL' : 'TOTAL',
+                            'HORAS TRABAJADAS' => $exists->unAssigned ? $exists->unAssigned->hours : '',
+                            'RAZON' => $exists->unAssigned ? $exists->unAssigned->taskProductionUnassign->reason : '',
                             'DIA' => $day
                         ]);
                     } else {
@@ -63,6 +68,9 @@ class PlanillaProductionExport implements FromCollection, WithHeadings, WithTitl
                             'CODIGO' => 'VACANTE',
                             'NOMBRE' => 'VACANTE',
                             'HORAS' =>  'VACANTE',
+                            'TRABAJO' =>  'VACANTE',
+                            'HORAS TRABAJADAS' => '',
+                            'RAZON' => '',
                             'DIA' => $day
                         ]);
                     }
@@ -78,12 +86,12 @@ class PlanillaProductionExport implements FromCollection, WithHeadings, WithTitl
 
     public function headings(): array
     {
-        return ['POSICION', 'CODIGO', 'NOMBRE', 'HORAS', 'DIA'];
+        return ['POSICION', 'CODIGO', 'NOMBRE', 'HORAS', 'TRABAJO', 'HORAS TRABAJADAS', 'RAZON', 'DIA'];
     }
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('A1:E1')->applyFromArray([
+        $sheet->getStyle('A1:H1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['argb' => 'FFFFFF'],

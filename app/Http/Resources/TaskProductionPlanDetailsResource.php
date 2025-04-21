@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use App\Models\BiometricTransaction;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -22,14 +24,21 @@ class TaskProductionPlanDetailsResource extends JsonResource
             }
         });
 
+        $employees = $this->employees->filter(function ($employee) {
+            $today = Carbon::today();
+            return !(BiometricTransaction::where('last_name', $employee->position)->whereDate('event_time', $today)->exists());
+        });
+
         return [
             'id' => strval($this->id),
             'line' => $this->line_sku->line->code,
             'operation_date' => $this->operation_date,
+            'assigned_employees' => $this->employees->count(),
             'flag' => $this->employees->count() < $this->line_sku->line->positions->count(),
             'total_lbs' => $this->total_lbs,
             'sku' => new SKUResource($this->line_sku->sku),
-            'employees' => TaskProductionEmployeeResource::collection($this->employees),
+            'in_employees' => TaskProductionEmployeeResource::collection($employees),
+            'all_employees' => TaskProductionEmployeeResource::collection($this->employees),
             'positions' => PositionResource::collection($positions)
         ];
     }
