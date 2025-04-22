@@ -18,7 +18,6 @@ class LinesResource extends JsonResource
         return [
             'id' => strval($this->id),
             'code' => $this->code,
-            'total_persons' => $this->total_persons,
             'shift' => $shift,
             'name' => $this->name,
             'positions' => PositionResource::collection($this->positions)

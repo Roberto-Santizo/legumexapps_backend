@@ -8,7 +8,6 @@ class Line extends Model
 {
     protected $fillable = [
         'code',
-        'total_persons',
         'shift',
         'name'
     ];

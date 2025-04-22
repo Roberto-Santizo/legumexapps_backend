@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('timeouts', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->float('hours');
             $table->timestamps();
         });
     }

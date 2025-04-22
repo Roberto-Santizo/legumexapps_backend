@@ -75,7 +75,7 @@ class UsersController extends Controller
             return response()->json('Usuario Actualizado Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'msg' => 'Ha ocurrido un error al actualizar el usuario'
+                'msg' => $th->getMessage()
             ], 500);
         }
     }

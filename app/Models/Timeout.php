@@ -13,6 +13,5 @@ class Timeout extends Model
     
     protected $fillable = [
         'name',
-        'hours'
     ];
 }

@@ -31,28 +31,24 @@ class TimeOutController extends Controller
     {
         $data = $request->validate([
             'name' => 'required',
-            'hours' => 'required'
         ]);
 
         try {
             Timeout::create([
                 'name' => $data['name'],
-                'hours' => $data['hours'],
             ]);
 
-            return response()->json([
-                'msg' => 'Timeout Created Successfully'
-            ], 200);
+            return response()->json('Tiempo Muerto Creado Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'msg' => $th->getMessage()
+                'errors' => $th->getMessage()
             ], 500);
         }
     }
 
     public function show(string $id)
     {
-        $timeout = Timeout::select(['id','name','hours'])->find($id);
+        $timeout = Timeout::select(['id','name'])->find($id);
 
         if (!$timeout) {
             return response()->json([
@@ -70,7 +66,6 @@ class TimeOutController extends Controller
     {
         $data = $request->validate([
             'name' => 'required',
-            'hours' => 'required'
         ]);
 
         $timeout = Timeout::find($id);
@@ -85,12 +80,10 @@ class TimeOutController extends Controller
             $timeout->update($data);
             $timeout->save();
 
-            return response()->json([
-                'msg' => 'Updated Successfully'
-            ], 200);
+            return response()->json('Cambios Guardados Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'msg' => $th->getMessage()
+                'errors' => $th->getMessage()
             ], 500);
         }
     }

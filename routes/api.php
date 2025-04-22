@@ -51,11 +51,13 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
-    //AGRICOLA
     Route::post('/logout', [AuthController::class, 'logout']);
+
+
     Route::apiResource('/users', UsersController::class);
     Route::get('/users-info/{user}/info', [UsersController::class, 'UsersInfo']);
     Route::patch('/users/{user}/status', [UsersController::class, 'updateStatus']);
+    
     Route::apiResource('/user', UserController::class);
     
     Route::get('/permissions/user', [PermissionController::class, 'userPermissions']);

@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('lines', function (Blueprint $table) {
             $table->id();
             $table->string('code');
-            $table->integer('total_persons');
             $table->timestamps();
         });
     }

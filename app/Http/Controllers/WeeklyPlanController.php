@@ -24,11 +24,10 @@ class WeeklyPlanController extends Controller
         $role = $request->user()->getRoleNames();
         $adminroles = ['admin','adminagricola','auxrrhh'];
 
-        if (in_array($role,$adminroles)) {
-            $permission = $request->user()->permissions()->first();
-
+        if (!in_array($role,$adminroles)) {
+            $permission = $request->user()->getRoleNames()->first();
             $weekly_plans = WeeklyPlan::whereHas('finca', function ($query) use ($permission) {
-                $query->where('name', 'LIKE', '%' . $permission->name . '%');
+                $query->where('name', 'LIKE', '%' . $permission . '%');
             })->where(function ($query) use ($week) {
                 $query->where('week', $week)->orWhere('week', $week - 1);
             })->where('year', $year)->orderBy('created_at', 'DESC')->paginate(10);

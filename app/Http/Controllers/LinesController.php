@@ -24,7 +24,7 @@ class LinesController extends Controller
      */
     public function index()
     {
-        $lines = Line::select('id', 'code', 'total_persons', 'name')->paginate(10);
+        $lines = Line::select('id', 'code', 'name')->paginate(10);
 
         return LinesResource::collection($lines);
     }
@@ -58,7 +58,6 @@ class LinesController extends Controller
     {
         $data = $request->validate([
             'code' => 'required|unique:lines,code',
-            'total_persons' => 'required',
             'shift' => 'required',
             'name' => 'required'
         ]);
@@ -89,8 +88,7 @@ class LinesController extends Controller
     public function update(Request $request, string $id)
     {
         $data = $request->validate([
-            "code" => "required|unique:lines,code,{$id}",
-            "total_persons" => "required",
+            "code" => "required|unique:lines,code,".$id,
         ]);
 
 
@@ -103,18 +101,17 @@ class LinesController extends Controller
         }
 
         try {
-            if ($line->code != $data['code'] || $line->total_persons != $data['total_persons']) {
+            if ($line->code != $data['code']) {
                 BitacoraLines::create([
                     'line_id' => $line->id,
                     'old_code' => $line->code,
                     'new_code' => $data['code'],
-                    'old_total_persons' => $line->total_persons,
-                    'new_total_persons' => $data['total_persons']
+                    'old_total_persons' => 0,
+                    'new_total_persons' => 0
                 ]);
             }
 
             $line->code = $data['code'];
-            $line->total_persons = $data['total_persons'];
             $line->save();
 
             return response()->json('Linea Actualizada Correctamente', 200);
