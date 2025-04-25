@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateTaskWeeklyPlanRequest;
 use App\Http\Requests\EditTaskWeeklyPlanRequest;
 use App\Http\Resources\EditTaskWeeklyPlanResource;
-use App\Http\Resources\TaskLoteResource;
-use App\Http\Resources\TaskWeeklyPlanDetailsCollection;
 use App\Http\Resources\TaskWeeklyPlanDetailsResource;
 use App\Http\Resources\TaskWeeklyPlanResource;
 use App\Models\BinnacleTaskWeeklyPlan;
@@ -17,8 +15,8 @@ use App\Models\TaskInsumos;
 use App\Models\TaskWeeklyPlan;
 use App\Models\WeeklyPlan;
 use Carbon\Carbon;
-use Error;
 use Illuminate\Http\Request;
+use Error;
 
 class TasksLoteController extends Controller
 {
@@ -32,7 +30,19 @@ class TasksLoteController extends Controller
             'weekly_plan_id' => 'required|string'
         ]);
 
-        $tasks = TaskWeeklyPlan::where('lote_plantation_control_id', $data['id'])->where('weekly_plan_id', $data['weekly_plan_id'])->get();
+
+        $today = Carbon::today();
+
+        $tasks = TaskWeeklyPlan::where('lote_plantation_control_id', $data['id'])
+            ->where('weekly_plan_id', $data['weekly_plan_id'])
+            ->where(function ($query) use ($today) {
+                $query->whereDate('operation_date', $today)->where('end_date',null);
+                $query->OrwhereNot('start_date',null)->where('end_date', null)
+                    ->orWhereHas('closures', function ($q) {
+                        $q->where('end_date', null);
+                    });
+            })->get();
+
 
         return [
             'week' => $tasks->first()->plan->week,
@@ -70,6 +80,7 @@ class TasksLoteController extends Controller
                 'hours' => $data['data']['hours'],
                 'slots' => $data['data']['workers_quantity'],
                 'extraordinary' => $data['data']['extraordinary'],
+                'operation_date' => $data['data']['operation_date']
             ]);
 
             if (count($data['data']['insumos']) > 0) {
@@ -85,7 +96,7 @@ class TasksLoteController extends Controller
             return response()->json('Tarea Creada Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'msg' => $th->getMessage()
+                'errors' => $th->getMessage()
             ], 500);
         }
     }
@@ -366,5 +377,26 @@ class TasksLoteController extends Controller
         }
 
         return new EditTaskWeeklyPlanResource($task);
+    }
+
+    public function ChangeOperationDate(Request $request)
+    {
+        $data = $request->validate([
+            'date' => 'required',
+            'tasks' => 'required'
+        ]);
+
+        try {
+            foreach ($data['tasks'] as $id) {
+                $task_weekly_plan = TaskWeeklyPlan::find($id);
+                $task_weekly_plan->operation_date = $data['date'];
+                $task_weekly_plan->save();
+            }
+            return response()->json('Fecha de operación actualizada correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'errors' => $th->getMessage()
+            ], 500);
+        }
     }
 }

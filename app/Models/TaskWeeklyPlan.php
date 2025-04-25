@@ -16,12 +16,14 @@ class TaskWeeklyPlan extends Model
         'slots',
         'extraordinary',
         'start_date',
-        'end_date'
+        'end_date',
+        'operation_date',
     ];
 
     protected $casts = [
         'start_date' => 'datetime',
-        'end_date' => 'datetime'
+        'end_date' => 'datetime',
+        'operation_date' => 'datetime',
     ];
 
     public function task()

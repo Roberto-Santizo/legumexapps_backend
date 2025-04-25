@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\TasksNoOperationDateResource;
+use App\Http\Resources\TasksWeeklyPlanForCalendarResource;
 use Exception;
 use App\Models\WeeklyPlan;
 use Illuminate\Http\Request;
@@ -22,9 +24,9 @@ class WeeklyPlanController extends Controller
         $year = $request->input('year') ?? Carbon::now()->year;
 
         $role = $request->user()->getRoleNames();
-        $adminroles = ['admin','adminagricola','auxrrhh'];
+        $adminroles = ['admin', 'adminagricola', 'auxrrhh'];
 
-        if (!in_array($role,$adminroles)) {
+        if (!in_array($role[0], $adminroles)) {
             $permission = $request->user()->getRoleNames()->first();
             $weekly_plans = WeeklyPlan::whereHas('finca', function ($query) use ($permission) {
                 $query->where('name', 'LIKE', '%' . $permission . '%');
@@ -78,7 +80,20 @@ class WeeklyPlanController extends Controller
                 'errors' => ['El plan no existe']
             ], 404);
         }
-        $tasks_by_lote = $plan->tasks->groupBy('lote_plantation_control_id');
+
+        $today = Carbon::today();
+
+        $tasks_by_lote = $plan->tasks()
+            ->where(function ($query) use ($today) {
+                $query->whereDate('operation_date', $today)
+                    ->orWhereHas('closures', function ($q) {
+                        $q->where('end_date', null); 
+                    });
+            })
+            ->orderBy('lote_plantation_control_id', 'ASC')
+            ->get()
+            ->groupBy('lote_plantation_control_id');
+
         $tasks_crop_by_lote = $plan->tasks_crops->groupBy('lote_plantation_control_id');
 
         $summary_tasks = $tasks_by_lote->map(function ($group, $key) {
@@ -114,5 +129,29 @@ class WeeklyPlanController extends Controller
                 'summary_crops' => $summary_crops
             ]
         ]);
+    }
+
+    public function GetTasksWithNoPlanificationDate(string $id)
+    {
+        $weekly_plan = WeeklyPlan::find($id);
+        if (!$weekly_plan) {
+            return response()->json([
+                'errors' => 'El plan no existe'
+            ], 404);
+        }
+
+        return TasksNoOperationDateResource::collection($weekly_plan->tasks()->where('operation_date', null)->get());
+    }
+
+    public function GetTasksForCalendar(string $id)
+    {
+        $weekly_plan = WeeklyPlan::find($id);
+        if (!$weekly_plan) {
+            return response()->json([
+                'errors' => 'El plan no existe'
+            ], 404);
+        }
+
+        return TasksWeeklyPlanForCalendarResource::collection($weekly_plan->tasks()->whereNot('operation_date', null)->get());
     }
 }
