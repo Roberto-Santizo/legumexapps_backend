@@ -25,16 +25,12 @@ class TasksLoteController extends Controller
      */
     public function index(Request $request)
     {
-        $data = $request->validate([
-            'id' => 'required|string',
-            'weekly_plan_id' => 'required|string'
-        ]);
-
-
         $today = Carbon::today();
+        $role = $request->user()->getRoleNames()->first();
 
-        $tasks = TaskWeeklyPlan::where('lote_plantation_control_id', $data['id'])
-            ->where('weekly_plan_id', $data['weekly_plan_id'])
+        if($role !=='admin' && $role !== 'adminagricola') {
+            $tasks = TaskWeeklyPlan::where('lote_plantation_control_id', $request->query('cdp'))
+            ->where('weekly_plan_id', $request->query('weekly_plan'))
             ->where(function ($query) use ($today) {
                 $query->whereDate('operation_date', $today)->where('end_date',null);
                 $query->OrwhereNot('start_date',null)->where('end_date', null)
@@ -42,7 +38,9 @@ class TasksLoteController extends Controller
                         $q->where('end_date', null);
                     });
             })->get();
-
+        }else{
+            $tasks = TaskWeeklyPlan::where('lote_plantation_control_id', $request->query('cdp'))->where('weekly_plan_id', $request->query('weekly_plan'))->get();
+        }
 
         return [
             'week' => $tasks->first()->plan->week,
@@ -301,6 +299,7 @@ class TasksLoteController extends Controller
                     'to_plan' => $dest->id
                 ]);
                 $task->weekly_plan_id = $data['weekly_plan_id'];
+                $task->operation_date = null;
             }
 
             $task->save();

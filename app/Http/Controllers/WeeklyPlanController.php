@@ -11,6 +11,7 @@ use App\Imports\WeeklyPlanImport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Resources\WeeklyPlanCollection;
 use App\Models\LotePlantationControl;
+use App\Models\TaskWeeklyPlan;
 use Carbon\Carbon;
 
 class WeeklyPlanController extends Controller
@@ -72,27 +73,32 @@ class WeeklyPlanController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
         $plan = WeeklyPlan::find($id);
         if (!$plan) {
             return response()->json([
-                'errors' => ['El plan no existe']
+                'msg' => ['El plan no existe']
             ], 404);
         }
 
         $today = Carbon::today();
+        $role = $request->user()->getRoleNames()->first();
 
-        $tasks_by_lote = $plan->tasks()
-            ->where(function ($query) use ($today) {
-                $query->whereDate('operation_date', $today)
-                    ->orWhereHas('closures', function ($q) {
-                        $q->where('end_date', null); 
-                    });
-            })
-            ->orderBy('lote_plantation_control_id', 'ASC')
-            ->get()
-            ->groupBy('lote_plantation_control_id');
+        if ($role != 'admin' && $role != 'adminagricola') {
+            $tasks_by_lote = $plan->tasks()
+                ->where(function ($query) use ($today) {
+                    $query->whereDate('operation_date', $today)
+                        ->orWhereHas('closures', function ($q) {
+                            $q->where('end_date', null);
+                        });
+                })
+                ->orderBy('lote_plantation_control_id', 'ASC')
+                ->get()
+                ->groupBy('lote_plantation_control_id');
+        } else {
+            $tasks_by_lote = $plan->tasks->groupBy('lote_plantation_control_id');
+        }
 
         $tasks_crop_by_lote = $plan->tasks_crops->groupBy('lote_plantation_control_id');
 
@@ -131,7 +137,7 @@ class WeeklyPlanController extends Controller
         ]);
     }
 
-    public function GetTasksWithNoPlanificationDate(string $id)
+    public function GetTasksWithNoPlanificationDate(Request $request, string $id)
     {
         $weekly_plan = WeeklyPlan::find($id);
         if (!$weekly_plan) {
@@ -140,7 +146,23 @@ class WeeklyPlanController extends Controller
             ], 404);
         }
 
-        return TasksNoOperationDateResource::collection($weekly_plan->tasks()->where('operation_date', null)->get());
+        $query = TaskWeeklyPlan::query();
+        $query->where('weekly_plan_id', $id);
+
+        if ($request->query('lote')) {
+            $query->whereHas('lotePlantationControl', function ($query) {
+                $query->where('lote_id', request()->query('lote'));
+            });
+        }
+
+        if ($request->query('task')) {
+            $query->where('tarea_id', request()->query('task'));
+        }
+
+        $query->where('operation_date', null);
+
+
+        return TasksNoOperationDateResource::collection($query->get());
     }
 
     public function GetTasksForCalendar(string $id)
@@ -152,6 +174,16 @@ class WeeklyPlanController extends Controller
             ], 404);
         }
 
-        return TasksWeeklyPlanForCalendarResource::collection($weekly_plan->tasks()->whereNot('operation_date', null)->get());
+
+        $initial_date = Carbon::now()->setISODate($weekly_plan->year, $weekly_plan->week)->startOfWeek();
+        $tasks_with_operation_date = $weekly_plan->tasks()->whereNot('operation_date', null)->get()->count();
+        $tasks_without_operation_date = $weekly_plan->tasks()->where('operation_date', null)->get()->count();
+        $tasks = TasksWeeklyPlanForCalendarResource::collection($weekly_plan->tasks()->whereNot('operation_date', null)->get());
+        return response()->json([
+            'data' => $tasks,
+            'initial_date' => $initial_date->format('Y-m-d'),
+            'tasks_with_operation_date' => $tasks_with_operation_date,
+            'tasks_without_operation_date' => $tasks_without_operation_date,
+        ]);
     }
 }

@@ -39,6 +39,7 @@ class TasksWeeklyPlanForCalendarResource extends JsonResource
             'finca' => $this->plan->finca->name,
             'lote' => $this->lotePlantationControl->lote->name,
             'cdp' => $this->lotePlantationControl->cdp->name,
+            'end' => $this->end_date ? $this->end_date->addDay()->format('Y-m-d') :  '',
         ];
     }
 }

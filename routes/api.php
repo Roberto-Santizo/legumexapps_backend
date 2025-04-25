@@ -90,6 +90,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/recipes', RecipeController::class);
     Route::apiResource('/crops', CropController::class);
     Route::apiResource('/fincas', FincaController::class);
+    
     Route::apiResource('/tasks-lotes', TasksLoteController::class);
     Route::get('/tasks-lotes/edit/{id}', [TasksLoteController::class, 'GetTaskForEdit']);
     Route::patch('/tasks-lotes/change-operation-date/update', [TasksLoteController::class, 'ChangeOperationDate']);
