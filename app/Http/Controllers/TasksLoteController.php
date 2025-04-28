@@ -405,17 +405,24 @@ class TasksLoteController extends Controller
             'date' => 'required',
             'tasks' => 'required'
         ]);
-
+        $week = Carbon::now()->weekOfYear;
         try {
             foreach ($data['tasks'] as $id) {
                 $task_weekly_plan = TaskWeeklyPlan::find($id);
+
+                if($task_weekly_plan->plan->week < $week){
+                    return response()->json([
+                        'msg' => 'No se puede cambiar la fecha de operacion de una semana pasada'
+                    ],422);
+                }
+
                 $task_weekly_plan->operation_date = $data['date'];
                 $task_weekly_plan->save();
             }
             return response()->json('Fecha de operación actualizada correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'errors' => $th->getMessage()
+                'msg' => $th->getMessage()
             ], 500);
         }
     }
