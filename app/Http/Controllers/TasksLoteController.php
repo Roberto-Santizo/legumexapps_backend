@@ -28,24 +28,45 @@ class TasksLoteController extends Controller
         $today = Carbon::today();
         $role = $request->user()->getRoleNames()->first();
 
-        if($role !=='admin' && $role !== 'adminagricola') {
-            $tasks = TaskWeeklyPlan::where('lote_plantation_control_id', $request->query('cdp'))
-            ->where('weekly_plan_id', $request->query('weekly_plan'))
-            ->where(function ($query) use ($today) {
-                $query->whereDate('operation_date', $today)->where('end_date',null);
-                $query->OrwhereNot('start_date',null)->where('end_date', null)
+        $query = TaskWeeklyPlan::query();
+
+        $query->where('lote_plantation_control_id', $request->query('cdp'));
+        $query->where('weekly_plan_id', $request->query('weekly_plan'));
+
+        $task_without_filter = $query->get()->first();
+
+        if ($request->query('name')) {
+            $query->whereHas('task', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->query('name') . '%');
+            });
+        }
+
+        if ($request->query('code')) {
+            $query->whereHas('task', function ($q) use ($request) {
+                $q->where('code', $request->query('name'));
+            });
+        }
+
+        if ($request->query('task_type')) {
+            $query->where('extraordinary', $request->query('task_type'));
+        }
+
+        if ($role !== 'admin' && $role !== 'adminagricola') {
+            $query->where(function ($query) use ($today) {
+                $query->whereDate('operation_date', $today)->where('end_date', null);
+                $query->OrwhereNot('start_date', null)->where('end_date', null)
                     ->orWhereHas('closures', function ($q) {
                         $q->where('end_date', null);
                     });
             })->get();
-        }else{
-            $tasks = TaskWeeklyPlan::where('lote_plantation_control_id', $request->query('cdp'))->where('weekly_plan_id', $request->query('weekly_plan'))->get();
         }
 
+        $tasks = $query->get();
+        
         return [
-            'week' => $tasks->first()->plan->week,
-            'finca' => $tasks->first()->plan->finca->name,
-            'lote' => $tasks->first()->lotePlantationControl->lote->name,
+            'week' => $task_without_filter->plan->week,
+            'finca' => $task_without_filter->plan->finca->name,
+            'lote' => $task_without_filter->lotePlantationControl->lote->name,
             'data' => TaskWeeklyPlanResource::collection($tasks),
         ];
     }

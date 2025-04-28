@@ -15,9 +15,19 @@ class InsumosController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return new InsumoCollection(Insumo::paginate(10));
+        $query = Insumo::query();
+
+        if ($request->query('code')) {
+            $query->where('code', $request->query('code'));
+        };
+
+        if ($request->query('name')) {
+            $query->where('name', 'LIKE', '%' . $request->query('name') . '%');
+        };
+
+        return new InsumoCollection($query->paginate(10));
     }
 
     public function getAllInsumos()

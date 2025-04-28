@@ -17,9 +17,26 @@ class LoteController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return new LoteCollection(Lote::paginate(10));
+        $query = Lote::query();
+
+        if ($request->query('name')) {
+            $query->where('name', 'like', '%' . $request->query('name') . '%');
+        }
+
+        if ($request->query('finca_id')) {
+            $query->where('finca_id', $request->query('finca_id'));
+        }
+
+        if ($request->query('cdp')) {
+            $query->whereHas('cdp', function ($query) use ($request) {
+                $query->whereHas('cdp', function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->query('cdp') . '%');
+                });
+            });
+        }
+        return new LoteCollection($query->paginate(10));
     }
     public function GetAllLotes()
     {

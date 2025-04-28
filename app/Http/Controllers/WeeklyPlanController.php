@@ -21,24 +21,38 @@ class WeeklyPlanController extends Controller
      */
     public function index(Request $request)
     {
-        $week = $request->input('week') ?? Carbon::now()->weekOfYear;
-        $year = $request->input('year') ?? Carbon::now()->year;
+        $week = Carbon::now()->weekOfYear;
+        $year = Carbon::now()->year;
 
         $role = $request->user()->getRoleNames();
         $adminroles = ['admin', 'adminagricola', 'auxrrhh'];
 
+        $query = WeeklyPlan::query();
+
+        if ($request->query('week')) {
+            $query->where('week', $request->query('week'));
+        }
+
+        if ($request->query('year')) {
+            $query->where('year', $request->query('year'));
+        }
+
+        if ($request->query('finca_id')) {
+            $query->where('finca_id', $request->query('finca_id'));
+        }
+
         if (!in_array($role[0], $adminroles)) {
             $permission = $request->user()->getRoleNames()->first();
-            $weekly_plans = WeeklyPlan::whereHas('finca', function ($query) use ($permission) {
+            $query->whereHas('finca', function ($query) use ($permission) {
                 $query->where('name', 'LIKE', '%' . $permission . '%');
             })->where(function ($query) use ($week) {
                 $query->where('week', $week)->orWhere('week', $week - 1);
             })->where('year', $year)->orderBy('created_at', 'DESC')->paginate(10);
         } else {
-            $weekly_plans = WeeklyPlan::orderBy('created_at', 'DESC')->paginate(10);
+            $query->orderBy('created_at', 'DESC')->paginate(10);
         }
 
-        return new WeeklyPlanCollection($weekly_plans);
+        return new WeeklyPlanCollection($query->paginate(10));
     }
 
 

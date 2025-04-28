@@ -19,9 +19,23 @@ class CDPController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return new PlantationControlCollection(PlantationControl::paginate(10));
+        $query = PlantationControl::query();
+
+        if($request->query('cdp')){
+            $query->where('name',$request->query('cdp'));
+        }
+
+        if($request->query('end_date')){
+            $query->whereDate('end_date',$request->query('end_date'));
+        }
+
+        if($request->query('start_date')){
+            $query->whereDate('start_date',$request->query('start_date'));
+        }
+
+        return new PlantationControlCollection($query->paginate(10));
     }
 
     public function GetAllCDPS()
