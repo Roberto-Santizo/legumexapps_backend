@@ -14,6 +14,9 @@ class TasksWeeklyPlanForCalendarResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        
+        $permissions = $request->user()->permissions()->get()->pluck('name')->toArray();
+        
         $colors = [
             '1' => 'red',
             '2' => 'orange',
@@ -28,13 +31,12 @@ class TasksWeeklyPlanForCalendarResource extends JsonResource
 
         $flag = ($color !== '3' && $color !== '2');
 
-
         return [
             'id' => strval($this->id),
             'title' => $this->task->name . ' - ' . $this->plan->finca->name . ' - ' . $this->lotePlantationControl->lote->name,
             'start' => $this->operation_date->format('Y-m-d'),
             'backgroundColor' => $colors[$color],
-            'editable' => $flag,
+            'editable' => in_array('edit fincas planification',$permissions) ? $flag : false,
             'task' => $this->task->name,
             'finca' => $this->plan->finca->name,
             'lote' => $this->lotePlantationControl->lote->name,

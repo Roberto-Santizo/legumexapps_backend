@@ -82,8 +82,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('/plans', WeeklyPlanController::class);
     Route::get('/plans-list/all', [WeeklyPlanController::class, 'GetAllPlans']);
-    Route::get('/plans/tasks-no-planification-date/{id}', [WeeklyPlanController::class, 'GetTasksWithNoPlanificationDate']);
-    Route::get('/plans/tasks-for-calendar/{id}', [WeeklyPlanController::class, 'GetTasksForCalendar']);
+    Route::get('/plans/tasks-no-planification-date/finca', [WeeklyPlanController::class, 'GetTasksWithNoPlanificationDate']);
+    Route::get('/plans/tasks-for-calendar/finca', [WeeklyPlanController::class, 'GetTasksForCalendar']);
+    Route::get('/plans/tasks-planned-by-date/finca', [WeeklyPlanController::class, 'GetTasksPlannedByDate']);
     Route::post('/report/plans', [ReportController::class, 'DownloadReport']);
     Route::get('/report/insumos/{id}', [ReportController::class, 'DownloadReportInsumos']);
 
@@ -100,6 +101,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/tasks-lotes/close/{id}', [TasksLoteController::class, 'CloseTask']);
     Route::patch('/tasks-lotes/partial-close/close/{id}', [TasksLoteController::class, 'PartialClose']);
     Route::patch('/tasks-lotes/partial-close/open/{id}', [TasksLoteController::class, 'PartialCloseOpen']);
+    Route::patch('/tasks-lotes/prepared-insumos/{id}', [TasksLoteController::class, 'PreparedInsumos']);
     Route::delete('/tasks-lotes/erase/{id}', [TasksLoteController::class, 'EraseAssignationTask']);
 
 

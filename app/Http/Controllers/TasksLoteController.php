@@ -62,7 +62,7 @@ class TasksLoteController extends Controller
         }
 
         $tasks = $query->get();
-        
+
         return [
             'week' => $task_without_filter->plan->week,
             'finca' => $task_without_filter->plan->finca->name,
@@ -410,16 +410,43 @@ class TasksLoteController extends Controller
             foreach ($data['tasks'] as $id) {
                 $task_weekly_plan = TaskWeeklyPlan::find($id);
 
-                if($task_weekly_plan->plan->week < $week){
+                if ($task_weekly_plan->plan->week < $week) {
                     return response()->json([
                         'msg' => 'No se puede cambiar la fecha de operacion de una semana pasada'
-                    ],422);
+                    ], 422);
                 }
 
                 $task_weekly_plan->operation_date = $data['date'];
                 $task_weekly_plan->save();
             }
             return response()->json('Fecha de operación actualizada correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function PreparedInsumos(string $id)
+    {
+        $task = TaskWeeklyPlan::find($id);
+
+        if (!$task) {
+            return response()->json([
+                'msg' => 'Tarea no encontrada'
+            ], 404);
+        }
+
+        try {
+            if ($task->insumos->count() > 0) {
+                $task->prepared_insumos = true;
+                $task->save();
+            } else {
+                return response()->json([
+                    'msg' => 'La tarea no cuenta con insumos relacionados'
+                ], 422);
+            }
+            return response()->json('Información actualizada correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
