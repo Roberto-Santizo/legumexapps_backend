@@ -63,11 +63,22 @@ class TasksLoteController extends Controller
 
         $tasks = $query->get();
 
+        $tasks_filterd = $tasks->filter(function($task){
+            if($task->insumos->count() === 0){
+                return $task;
+            }else{
+                $flag = $task->prepared_insumos ? true : false;
+                if($flag){
+                   return $task; 
+                }
+            }
+        });
+
         return [
             'week' => $task_without_filter->plan->week,
             'finca' => $task_without_filter->plan->finca->name,
             'lote' => $task_without_filter->lotePlantationControl->lote->name,
-            'data' => TaskWeeklyPlanResource::collection($tasks),
+            'data' => TaskWeeklyPlanResource::collection($tasks_filterd),
         ];
     }
 

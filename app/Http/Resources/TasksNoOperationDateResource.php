@@ -17,7 +17,9 @@ class TasksNoOperationDateResource extends JsonResource
         $colors = [
             1 => 'bg-green-100',
             2 => 'bg-blue-100',
-            4 => 'bg-indigo-100',
+            4 => 'bg-red-100',
+            5 => 'bg-orange-100',
+            6 => 'bg-gray-100',
         ];
 
         return [
