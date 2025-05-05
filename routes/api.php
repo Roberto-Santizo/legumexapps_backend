@@ -17,6 +17,7 @@ use App\Http\Controllers\InsumosController;
 use App\Http\Controllers\LinesController;
 use App\Http\Controllers\LineStockKeepingUnitsController;
 use App\Http\Controllers\LoteController;
+use App\Http\Controllers\PackingMaterialsController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PlantasController;
 use App\Http\Controllers\PlatesController;
@@ -217,6 +218,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/employee-permissions', EmployeePermissionsController::class);
 
     Route::post('/report-production/{weekly_production_plan}/{line_id}', [ReportController::class, 'PlanillaProduccion']);
+    
+    //MATERIAL DE EMPAQUE
+    Route::apiResource('/packing-materials', PackingMaterialsController::class);
+
 });
 
 //Autenticación
