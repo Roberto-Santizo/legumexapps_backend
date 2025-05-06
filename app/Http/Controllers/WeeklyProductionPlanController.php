@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\TaskProductionForCalendarResource;
+use App\Http\Resources\TaskProductionOperationDateResource;
+use App\Http\Resources\TaskProductionPlanNoOperationDateResource;
 use App\Http\Resources\TaskProductionPlanResource;
 use App\Http\Resources\TaskProductionPlanSummaryResource;
 use App\Http\Resources\WeeklyPlanProductionResource;
@@ -30,6 +32,12 @@ class WeeklyProductionPlanController extends Controller
             return $plan;
         });
 
+        return WeeklyPlanProductionResource::collection($plans_production);
+    }
+
+    public function GetAllWeeklyPlans()
+    {
+        $plans_production = WeeklyProductionPlan::all();
         return WeeklyPlanProductionResource::collection($plans_production);
     }
 
@@ -88,7 +96,7 @@ class WeeklyProductionPlanController extends Controller
         try {
             Excel::import(new CreateAssignmentsProductionImport($id), $request->file('file'));
 
-            return response()->json('Asignaciones Cargadas Correctamente',200);
+            return response()->json('Asignaciones Cargadas Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
@@ -107,25 +115,8 @@ class WeeklyProductionPlanController extends Controller
             ], 404);
         }
 
-        $tasks = $weekly_plan->tasks()->where('line_id', $line_id)->whereDate('operation_date', $today)->orderBy('priority', 'ASC')->get();
-
-        $previousTask = null;
-
-        $tasks->each(function ($task) use (&$previousTask) {
-            if ($task->priority === 1) {
-                $task->available = true;
-            }
-
-            if ($previousTask) {
-                if ($previousTask->end_date) {
-                    $task->available = true;
-                } else {
-                    $task->available = false;
-                }
-            }
-            $previousTask = $task;
-        });
-
+        $tasks = $weekly_plan->tasks()->where('line_id', $line_id)->whereDate('operation_date', $today)->get();
+        
         return TaskProductionPlanResource::collection($tasks->sortBy('operation_date'));
     }
 
@@ -170,9 +161,9 @@ class WeeklyProductionPlanController extends Controller
             return [
                 'id' => strval($group->first()->line->id),
                 'line' => $group->first()->line->name,
-                'total_hours' => round($group->sum(fn($task) => $task->total_hours ?? 0),2)
+                'total_hours' => round($group->sum(fn($task) => $task->total_hours ?? 0), 2)
             ];
-        })->values(); 
+        })->values();
 
         return response()->json([
             'summary' => $summary,
@@ -212,5 +203,41 @@ class WeeklyProductionPlanController extends Controller
         return response()->json([
             'data' => $groupedTasks
         ], 200);
+    }
+
+    public function GetTasksNoOperationDate(string $id)
+    {
+        $weekly_plan = WeeklyProductionPlan::find($id);
+
+        if (!$weekly_plan) {
+            return response()->json([
+                'msg' => 'Plan Semanal No Encontrado'
+            ], 404);
+        }
+
+        try {
+            $tasks = $weekly_plan->tasks()->where('operation_date', null)->get();
+
+            return TaskProductionPlanNoOperationDateResource::collection($tasks);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function GetTasksOperationDate(Request $request)
+    {
+        $date = Carbon::parse($request->query('date'));
+
+        try {
+            $tasks = TaskProductionPlan::whereDate('operation_date', $date)->get();
+
+            return TaskProductionOperationDateResource::collection($tasks);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
     }
 }

@@ -23,20 +23,21 @@ class WeeklyProductionPlanImport implements ToCollection, WithHeadingRow
 
     public function collection(Collection $rows)
     {
-        $year = Carbon::now()->year;
-        $week = Carbon::now()->weekOfYear + 1;
-        $weekly_production_plan = WeeklyProductionPlan::firstOrCreate(
-            [
-                'week' => $week,
-                'year' => $year
-            ]
-        );
-
         foreach ($rows as $row) {
+
+            $year = $row['year'];
+            $week = $row['semana'];
+            $weekly_production_plan = WeeklyProductionPlan::firstOrCreate(
+                [
+                    'week' => $week,
+                    'year' => $year
+                ]
+            );
+
+
             if (empty($row['linea'])) {
                 return null;
             }
-            $date = Date::excelToDateTimeObject($row['fecha_de_operacion']);
             $line = Line::where('code', $row['linea'])->first();
             $sku = StockKeepingUnit::where('code', $row['sku'])->first();
             $sku_line = LineStockKeepingUnits::where('line_id', $line->id)->where('sku_id', $sku->id)->first();
@@ -54,15 +55,13 @@ class WeeklyProductionPlanImport implements ToCollection, WithHeadingRow
             }
 
             try {
-                $total_hours = $sku_line->lbs_performance ? $row['libras']/$sku_line->lbs_performance : null;
+                $total_hours = $sku_line->lbs_performance ? $row['libras'] / $sku_line->lbs_performance : null;
 
                 TaskProductionPlan::create([
                     'line_id' => $line->id,
                     'weekly_production_plan_id' => $weekly_production_plan->id,
-                    'operation_date' => $date,
                     'total_hours' => $total_hours,
                     'line_sku_id' => $sku_line->id,
-                    'priority' => $row['prioridad'],
                     'destination' => $row['destino'],
                     'total_lbs' => $row['libras'],
                     'status' => 0
