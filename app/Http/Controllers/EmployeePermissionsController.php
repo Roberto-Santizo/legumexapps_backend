@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Resources\EmployeeTransferResource;
 use App\Models\EmployeeTransfer;
 use App\Models\TaskProductionEmployee;
-use App\Models\TaskProductionEmployeesBitacora;
 use Illuminate\Http\Request;
 
 class EmployeePermissionsController extends Controller

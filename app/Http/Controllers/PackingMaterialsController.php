@@ -20,6 +20,13 @@ class PackingMaterialsController extends Controller
             $query->where('name', 'like', '%' . $request->query('name') . '%');
         }
 
+        if ($request->query('supplier')) {
+            $query->whereHas('supplier',function($q) use($request){
+                $q->where('name','like','%'. $request->query('supplier') .'%');
+            });
+        }
+
+
         if ($request->query('code')) {
             $query->where('code', $request->query('code'));
         }
@@ -32,6 +39,11 @@ class PackingMaterialsController extends Controller
         $data = $query->paginate(10);
 
         return PackingMaterialResource::collection($data);
+    }
+
+    public function GetAllPackingMaterials()
+    {
+        return PackingMaterialResource::collection(PackingMaterial::where('blocked',false)->get());
     }
 
     /**

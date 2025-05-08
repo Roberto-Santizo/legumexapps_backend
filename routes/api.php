@@ -30,6 +30,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RmReceptionsController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SKUController;
+use App\Http\Controllers\SuppliersPackingMaterialController;
 use App\Http\Controllers\TareaController;
 use App\Http\Controllers\TaskCropController;
 use App\Http\Controllers\TaskProductionController;
@@ -221,6 +222,9 @@ Route::middleware('auth:sanctum')->group(function () {
     
     //MATERIAL DE EMPAQUE
     Route::apiResource('/packing-materials', PackingMaterialsController::class);
+    Route::get('/packing-materials-all', [PackingMaterialsController::class,'GetAllPackingMaterials']);
+    Route::apiResource('/suppliers-packing-material', SuppliersPackingMaterialController::class);
+    Route::get('/suppliers-packing-material-all',[ SuppliersPackingMaterialController::class,'GetAllSuppliers']);
 
 });
 

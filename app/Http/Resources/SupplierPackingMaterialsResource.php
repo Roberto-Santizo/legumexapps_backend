@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class PackingMaterialResource extends JsonResource
+class SupplierPackingMaterialsResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,11 +16,8 @@ class PackingMaterialResource extends JsonResource
     {
         return [
             'id' => strval($this->id),
-            'name' => $this->name,
-            'description' => $this->description,
             'code' => $this->code,
-            'blocked' => $this->blocked ? true : false,
-            'supplier' => $this->supplier->name
+            'name' => $this->name
         ];
     }
 }

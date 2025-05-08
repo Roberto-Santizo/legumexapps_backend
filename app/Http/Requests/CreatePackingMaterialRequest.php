@@ -25,6 +25,7 @@ class CreatePackingMaterialRequest extends FormRequest
             'name' => 'required',
             'description' => 'required',
             'code' => 'required|unique:packing_materials,code',
+            'supplier_id' => 'required|exists:supplier_packing_materials,id'
         ];
     }
 
@@ -35,6 +36,8 @@ class CreatePackingMaterialRequest extends FormRequest
             'description.required' => 'La descripción del item es requerido',
             'code.required' => 'El código del item es requerido',
             'code.unique' => 'El código ingresado ya existe',
+            'supplier_id.required' => "El proveedor es requerido",
+            'supplier_id.exists' => "El proveedor no existe"
         ];
     }
 }
