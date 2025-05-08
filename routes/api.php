@@ -17,6 +17,7 @@ use App\Http\Controllers\InsumosController;
 use App\Http\Controllers\LinesController;
 use App\Http\Controllers\LineStockKeepingUnitsController;
 use App\Http\Controllers\LoteController;
+use App\Http\Controllers\PackingMaterialReceptionControlller;
 use App\Http\Controllers\PackingMaterialsController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PlantasController;
@@ -220,11 +221,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/report-production/{weekly_production_plan}/{line_id}', [ReportController::class, 'PlanillaProduccion']);
     
-    //MATERIAL DE EMPAQUE
+    //MATERIAL DE EMPAQUE Y PROVEEDORES
     Route::apiResource('/packing-materials', PackingMaterialsController::class);
     Route::get('/packing-materials-all', [PackingMaterialsController::class,'GetAllPackingMaterials']);
     Route::apiResource('/suppliers-packing-material', SuppliersPackingMaterialController::class);
     Route::get('/suppliers-packing-material-all',[ SuppliersPackingMaterialController::class,'GetAllSuppliers']);
+
+    //RECEPCIÓN MATERIAL DE EMPAQUE
+    Route::apiResource('/packing-material-reception', PackingMaterialReceptionControlller::class);
 
 });
 
