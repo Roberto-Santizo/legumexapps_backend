@@ -20,7 +20,9 @@ class PackingMaterialReceiptResource extends JsonResource
             'invoice_date' => $this->invoice_date->format('d-m-Y'),
             'observations' => $this->observations ?? '',
             'received_by' => $this->user->name,
+            'received_by_signature' => $this->user_signature,
             'supervisor_name' => $this->supervisor_name,
+            'supervisor_signature' => $this->supervisor_signature,
             'items' => PackingMaterialReceiptDetailsResource::collection($this->items)
         ];
     }
