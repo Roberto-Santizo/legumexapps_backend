@@ -14,6 +14,7 @@ use App\Http\Controllers\EmployeePermissionsController;
 use App\Http\Controllers\FincaController;
 use App\Http\Controllers\InspectorController;
 use App\Http\Controllers\InsumosController;
+use App\Http\Controllers\InsumosReceptionController;
 use App\Http\Controllers\LinesController;
 use App\Http\Controllers\LineStockKeepingUnitsController;
 use App\Http\Controllers\LoteController;
@@ -229,7 +230,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //RECEPCIÓN MATERIAL DE EMPAQUE
     Route::apiResource('/packing-material-reception', PackingMaterialReceptionControlller::class);
-
+    //RECEPCIÓN INSUMOS
+    Route::apiResource('/insumos-reception',InsumosReceptionController::class);
 });
 
 //Autenticación
