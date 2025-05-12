@@ -20,6 +20,8 @@ class InsumosReceiptDetailsResource extends JsonResource
             'invoice' => $this->invoice,
             'supplier' => $this->supplier->name,
             'invoice_date' => $this->invoice_date->format('d-m-Y'),
+            'supervisor_signature' => $this->supervisor_signature,
+            'user_signature' => $this->user_signature,
             'items' => InsumosReceiptItemsResource::collection($this->items)
         ];
     }

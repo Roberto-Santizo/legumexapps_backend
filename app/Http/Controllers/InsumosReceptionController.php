@@ -9,6 +9,7 @@ use App\Models\InsumosReceipt;
 use App\Models\InsumosReceiptsDetail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class InsumosReceptionController extends Controller
 {
@@ -46,8 +47,24 @@ class InsumosReceptionController extends Controller
     public function store(CreateInsumosReceptionRequest $request)
     {
         $data = $request->validated();
+        $signature1 = $data['supervisor_signature'];
+        $signature2 = $data['user_signature'];
+
 
         try {
+            //SUPERVISOR
+            list(, $signature1) = explode(',', $signature1);
+            $signature1 = base64_decode($signature1);
+            $filename1 = 'signatures/' . uniqid() . '.png';
+            Storage::disk('public')->put($filename1, $signature1);
+
+            //RECEPTOR
+            list(, $signature2) = explode(',', $signature2);
+            $signature2 = base64_decode($signature2);
+            $filename2 = 'signatures/' . uniqid() . '.png';
+            Storage::disk('public')->put($filename2, $signature2);
+
+
             $receipt = InsumosReceipt::create([
                 'user_id' => $request->user()->id,
                 'supplier_id' => $data['supplier_id'],
@@ -55,8 +72,8 @@ class InsumosReceptionController extends Controller
                 'invoice' => $data['invoice'],
                 'received_date' => Carbon::now(),
                 'invoice_date' => $data['invoice_date'],
-                'user_signature' => $data['user_signature'],
-                'supervisor_signature' => $data['supervisor_signature']
+                'user_signature' => $filename2,
+                'supervisor_signature' => $filename1
             ]);
 
             foreach ($data['items'] as $item) {
@@ -64,7 +81,7 @@ class InsumosReceptionController extends Controller
                     'insumo_id' => $item['insumo_id'],
                     'insumos_receipt_id' => $receipt->id,
                     'units' => $item['units'],
-                    'total' => $item['total']
+                    'total' => 100
                 ]);
             }
 
