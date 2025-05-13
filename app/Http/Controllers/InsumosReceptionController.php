@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateInsumosReceptionRequest;
 use App\Http\Resources\InsumosReceiptDetailsResource;
 use App\Http\Resources\InsumosReceptionPaginatedResource;
+use App\Models\Insumo;
 use App\Models\InsumosReceipt;
 use App\Models\InsumosReceiptsDetail;
 use Carbon\Carbon;
@@ -77,11 +78,17 @@ class InsumosReceptionController extends Controller
             ]);
 
             foreach ($data['items'] as $item) {
+                $insumo = Insumo::find($item['insumo_id']);
+                if (!$insumo) {
+                    return response()->json([
+                        'errors' => 'El insumo no existe'
+                    ], 404);
+                }
                 InsumosReceiptsDetail::create([
                     'insumo_id' => $item['insumo_id'],
                     'insumos_receipt_id' => $receipt->id,
                     'units' => $item['units'],
-                    'total' => 100
+                    'total' => $insumo->unit_value * $item['units']
                 ]);
             }
 
