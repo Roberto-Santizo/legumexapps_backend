@@ -19,7 +19,6 @@ class InsumoResource extends JsonResource
             'name' => $this->name,
             'code' => $this->code,
             'measure' => $this->measure,
-            'unit_value' => $this->unit_value
         ];
     }
 }

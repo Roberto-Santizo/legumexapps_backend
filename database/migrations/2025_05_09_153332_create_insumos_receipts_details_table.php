@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignId('insumos_receipt_id')->constrained();
             $table->foreignId('insumo_id')->constrained();
             $table->float('units');
-            $table->float('total');
             $table->timestamps();
         });
     }

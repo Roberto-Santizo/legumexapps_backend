@@ -10,7 +10,6 @@ class InsumosReceiptsDetail extends Model
         'insumo_id',
         'insumos_receipt_id',
         'units',
-        'total'
     ];
 
     public function insumo()

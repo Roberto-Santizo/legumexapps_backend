@@ -20,8 +20,6 @@ class InsumosReceiptItemsResource extends JsonResource
             'measure' => $this->insumo->measure,
             'name' => $this->insumo->name,
             'units' => $this->units,
-            'unit_value' => 100,
-            'total' => $this->total
         ];
     }
 }
