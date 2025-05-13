@@ -8,6 +8,7 @@ use App\Models\PackingMaterialReceipt;
 use App\Models\PackingMaterialReceiptDetail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PackingMaterialReceptionControlller extends Controller
 {
@@ -51,15 +52,30 @@ class PackingMaterialReceptionControlller extends Controller
     public function store(CreatePackingMaterialReceptionRequest $request)
     {
         $data = $request->validated();
+        $signature1 = $data['supervisor_signature'];
+        $signature2 = $data['user_signature'];
+
         try {
+            //SUPERVISOR
+            list(, $signature1) = explode(',', $signature1);
+            $signature1 = base64_decode($signature1);
+            $filename1 = 'signatures/' . uniqid() . '.png';
+            Storage::disk('public')->put($filename1, $signature1);
+
+            //RECEPTOR
+            list(, $signature2) = explode(',', $signature2);
+            $signature2 = base64_decode($signature2);
+            $filename2 = 'signatures/' . uniqid() . '.png';
+            Storage::disk('public')->put($filename2, $signature2);
+
             $receipt = PackingMaterialReceipt::create([
                 'user_id' => $request->user()->id,
                 'supervisor_name' => $data['supervisor_name'],
                 'invoice_date' => $data['invoice_date'],
                 'receipt_date' => Carbon::now(),
                 'observations' => $data['observations'] ?? null,
-                'user_signature' => $data['user_signature'],
-                'supervisor_signature' => $data['supervisor_signature']
+                'user_signature' => $filename2,
+                'supervisor_signature' => $filename1
             ]);
 
             foreach ($data['items'] as $item) {

@@ -51,7 +51,6 @@ class InsumosReceptionController extends Controller
         $signature1 = $data['supervisor_signature'];
         $signature2 = $data['user_signature'];
 
-
         try {
             //SUPERVISOR
             list(, $signature1) = explode(',', $signature1);
