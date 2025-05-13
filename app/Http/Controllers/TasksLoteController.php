@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateTaskWeeklyPlanRequest;
 use App\Http\Requests\EditTaskWeeklyPlanRequest;
 use App\Http\Resources\EditTaskWeeklyPlanResource;
-use App\Http\Resources\TaskLoteResource;
-use App\Http\Resources\TaskWeeklyPlanDetailsCollection;
 use App\Http\Resources\TaskWeeklyPlanDetailsResource;
 use App\Http\Resources\TaskWeeklyPlanResource;
 use App\Models\BinnacleTaskWeeklyPlan;
@@ -17,8 +15,8 @@ use App\Models\TaskInsumos;
 use App\Models\TaskWeeklyPlan;
 use App\Models\WeeklyPlan;
 use Carbon\Carbon;
-use Error;
 use Illuminate\Http\Request;
+use Error;
 
 class TasksLoteController extends Controller
 {
@@ -27,17 +25,48 @@ class TasksLoteController extends Controller
      */
     public function index(Request $request)
     {
-        $data = $request->validate([
-            'id' => 'required|string',
-            'weekly_plan_id' => 'required|string'
-        ]);
+        $today = Carbon::today();
+        $role = $request->user()->getRoleNames()->first();
 
-        $tasks = TaskWeeklyPlan::where('lote_plantation_control_id', $data['id'])->where('weekly_plan_id', $data['weekly_plan_id'])->get();
+        $query = TaskWeeklyPlan::query();
 
+        $query->where('lote_plantation_control_id', $request->query('cdp'));
+        $query->where('weekly_plan_id', $request->query('weekly_plan'));
+
+        $task_without_filter = $query->get()->first();
+
+        if ($request->query('name')) {
+            $query->whereHas('task', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->query('name') . '%');
+            });
+        }
+
+        if ($request->query('code')) {
+            $query->whereHas('task', function ($q) use ($request) {
+                $q->where('code', $request->query('name'));
+            });
+        }
+
+        if ($request->query('task_type')) {
+            $query->where('extraordinary', $request->query('task_type'));
+        }
+
+        if ($role !== 'admin' && $role !== 'adminagricola') {
+            $query->where(function ($query) use ($today) {
+                $query->whereDate('operation_date', $today)->where('end_date', null);
+                $query->OrwhereNot('start_date', null)->where('end_date', null)
+                    ->orWhereHas('closures', function ($q) {
+                        $q->where('end_date', null);
+                    });
+            })->get();
+        }
+
+        $tasks = $query->get();
+        
         return [
-            'week' => $tasks->first()->plan->week,
-            'finca' => $tasks->first()->plan->finca->name,
-            'lote' => $tasks->first()->lotePlantationControl->lote->name,
+            'week' => $task_without_filter->plan->week,
+            'finca' => $task_without_filter->plan->finca->name,
+            'lote' => $task_without_filter->lotePlantationControl->lote->name,
             'data' => TaskWeeklyPlanResource::collection($tasks),
         ];
     }
@@ -70,6 +99,7 @@ class TasksLoteController extends Controller
                 'hours' => $data['data']['hours'],
                 'slots' => $data['data']['workers_quantity'],
                 'extraordinary' => $data['data']['extraordinary'],
+                'operation_date' => $data['data']['operation_date']
             ]);
 
             if (count($data['data']['insumos']) > 0) {
@@ -85,7 +115,7 @@ class TasksLoteController extends Controller
             return response()->json('Tarea Creada Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'msg' => $th->getMessage()
+                'errors' => $th->getMessage()
             ], 500);
         }
     }
@@ -290,6 +320,7 @@ class TasksLoteController extends Controller
                     'to_plan' => $dest->id
                 ]);
                 $task->weekly_plan_id = $data['weekly_plan_id'];
+                $task->operation_date = null;
             }
 
             $task->save();
@@ -366,5 +397,33 @@ class TasksLoteController extends Controller
         }
 
         return new EditTaskWeeklyPlanResource($task);
+    }
+
+    public function ChangeOperationDate(Request $request)
+    {
+        $data = $request->validate([
+            'date' => 'required',
+            'tasks' => 'required'
+        ]);
+        $week = Carbon::now()->weekOfYear;
+        try {
+            foreach ($data['tasks'] as $id) {
+                $task_weekly_plan = TaskWeeklyPlan::find($id);
+
+                if($task_weekly_plan->plan->week < $week){
+                    return response()->json([
+                        'msg' => 'No se puede cambiar la fecha de operacion de una semana pasada'
+                    ],422);
+                }
+
+                $task_weekly_plan->operation_date = $data['date'];
+                $task_weekly_plan->save();
+            }
+            return response()->json('Fecha de operación actualizada correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
     }
 }

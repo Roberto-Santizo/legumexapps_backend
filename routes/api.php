@@ -61,12 +61,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/users', UsersController::class);
     Route::get('/users-info/{user}/info', [UsersController::class, 'UsersInfo']);
     Route::patch('/users/{user}/status', [UsersController::class, 'updateStatus']);
-    
+
     Route::apiResource('/user', UserController::class);
-    
+
     Route::get('/permissions/user', [PermissionController::class, 'userPermissions']);
     Route::apiResource('/permissions', PermissionController::class);
-    
+
     Route::get('/roles/user', [RoleController::class, 'userRoles']);
     Route::apiResource('/roles', RoleController::class);
     Route::apiResource('/tareas', TareaController::class);
@@ -83,17 +83,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/lotes-all', [LoteController::class, 'GetAllLotes']);
     Route::get('/lotes/finca/{finca}', [LoteController::class, 'GetLotesByFincaId']);
     Route::post('/lotes-all/update', [LoteController::class, 'UpdateLotes']);
-    
+
     Route::apiResource('/plans', WeeklyPlanController::class);
     Route::get('/plans-list/all', [WeeklyPlanController::class, 'GetAllPlans']);
+    Route::get('/plans/tasks-no-planification-date/{id}', [WeeklyPlanController::class, 'GetTasksWithNoPlanificationDate']);
+    Route::get('/plans/tasks-for-calendar/{id}', [WeeklyPlanController::class, 'GetTasksForCalendar']);
     Route::post('/report/plans', [ReportController::class, 'DownloadReport']);
     Route::get('/report/insumos/{id}', [ReportController::class, 'DownloadReportInsumos']);
 
     Route::apiResource('/recipes', RecipeController::class);
     Route::apiResource('/crops', CropController::class);
     Route::apiResource('/fincas', FincaController::class);
+
     Route::apiResource('/tasks-lotes', TasksLoteController::class);
-    Route::get('/tasks-lotes/edit/{id}',[TasksLoteController::class,'GetTaskForEdit']);
+    Route::get('/tasks-lotes/edit/{id}', [TasksLoteController::class, 'GetTaskForEdit']);
+    Route::patch('/tasks-lotes/change-operation-date/update', [TasksLoteController::class, 'ChangeOperationDate']);
     Route::get('/tasks-lotes/{id}/details', [TasksLoteController::class, 'TaskDetail']);
     Route::post('/tasks-lotes/register-insumos', [TasksLoteController::class, 'RegisterInsumos']);
     Route::post('/tasks-lotes/close-assignment/{id}', [TasksLoteController::class, 'CloseAssigment']);
@@ -101,6 +105,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/tasks-lotes/partial-close/close/{id}', [TasksLoteController::class, 'PartialClose']);
     Route::patch('/tasks-lotes/partial-close/open/{id}', [TasksLoteController::class, 'PartialCloseOpen']);
     Route::delete('/tasks-lotes/erase/{id}', [TasksLoteController::class, 'EraseAssignationTask']);
+
+
     Route::apiResource('/tasks-crops-lotes', TasksCropController::class);
     Route::get('/tasks-crops-lotes/employees/{id}', [TasksCropController::class, 'EmployeesAssignment']);
     Route::get('/tasks-crops-lotes/daily-employees/{id}', [TasksCropController::class, 'EmployeesAssignment']);
@@ -193,10 +199,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/notes', TaskProductionPlanNotesController::class);
 
     Route::apiResource('/weekly_production_plan', WeeklyProductionPlanController::class);
+    Route::get('/weekly_production_plan-all', [WeeklyProductionPlanController::class,'GetAllWeeklyPlans']);
     Route::get('/weekly_production_plan/details/{weekly_plan_id}/{line_id}', [WeeklyProductionPlanController::class, 'GetTasksByLineId']);
-    Route::get('/weekly_production_plan/details/{weekly_plan_id}', [WeeklyProductionPlanController::class, 'GetTasksForCalendar']);
-    Route::get('/weekly_production_plan/details-by-date/{weekly_plan_id}', [WeeklyProductionPlanController::class, 'GetTasksByDate']);
-    Route::get('/weekly_production_plan/hours-by-date/{weekly_plan_id}', [WeeklyProductionPlanController::class, 'GetHoursByDate']);
+    
+    Route::get('/weekly_production_plan/tasks-no-operation-date/{weekly_plan_id}', [WeeklyProductionPlanController::class, 'GetTasksNoOperationDate']);
+    Route::get('/weekly_production_plan/tasks/programed', [WeeklyProductionPlanController::class, 'GetTasksOperationDate']);
 
     Route::post('/weekly_production_plan/assign/{id}', [WeeklyProductionPlanController::class, 'createAssigments']);
 
@@ -216,6 +223,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/tasks_production_plan/change-priority', [TaskProductionController::class, 'ChangePriority']);
     Route::patch('/tasks_production_plan/{id}/start', [TaskProductionController::class, 'StartTaskProduction']);
     Route::patch('/tasks_production_plan/change-operation-date/{id}', [TaskProductionController::class, 'ChangeOperationDate']);
+    Route::patch('/tasks_production_plan/assign-operation-date/{id}', [TaskProductionController::class, 'AssignOperationDate']);
     Route::patch('/tasks_production_plan/{id}/end', [TaskProductionController::class, 'EndTaskProduction']);
 
     Route::apiResource('/employee-permissions', EmployeePermissionsController::class);

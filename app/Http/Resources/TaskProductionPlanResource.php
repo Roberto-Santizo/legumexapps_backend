@@ -45,7 +45,6 @@ class TaskProductionPlanResource extends JsonResource
             'total_in_employees' => ($this->employees->count() - $total_in_employees->count()),
             'total_employees' => $this->employees->count(),
             'priority' => $this->priority,
-            'available' => $this->available === null ? false : $this->available,
             'paused' => $paused,
             'is_minimum_requrire' => $this->is_minimum_require ? true : false,
             'is_justified' => $this->is_justified ? true : false

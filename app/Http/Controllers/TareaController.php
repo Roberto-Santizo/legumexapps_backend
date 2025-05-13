@@ -17,9 +17,19 @@ class TareaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return new TareaCollection(Tarea::paginate(15));
+        $query = Tarea::query();
+
+        if ($request->query('name')) {
+            $query->where('name', 'like', '%' . $request->query('name') . '%');
+        }
+
+        if ($request->query('code')) {
+            $query->where('code', $request->query('code'));
+        }
+
+        return new TareaCollection($query->paginate(10));
     }
 
     public function GetAllTareas()
@@ -40,12 +50,12 @@ class TareaController extends Controller
                 'code' => $data['code'],
                 'description' => $data['description'] ?? '',
             ]);
-    
-            return response()->json('Tarea Creada Correctamente',200);
+
+            return response()->json('Tarea Creada Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'errors' => 'Hubo un error al crear la tarea'
-            ],500);
+            ], 500);
         }
     }
 
