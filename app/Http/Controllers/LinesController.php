@@ -31,7 +31,7 @@ class LinesController extends Controller
 
     public function GetAllLines()
     {
-        $lines = Line::select('id', 'code', 'total_persons', 'shift', 'name')->get();
+        $lines = Line::select('id', 'code', 'shift', 'name')->get();
 
         return LinesSelectResource::collection($lines);
     }
@@ -88,7 +88,7 @@ class LinesController extends Controller
     public function update(Request $request, string $id)
     {
         $data = $request->validate([
-            "code" => "required|unique:lines,code,".$id,
+            "code" => "required|unique:lines,code," . $id,
         ]);
 
 
@@ -179,7 +179,7 @@ class LinesController extends Controller
                     $total_boxes = $task->line_sku->sku->boxes_pallet * $task->finished_tarimas;
                     $lbs_teoricas = $task->line_sku->sku->presentation * $total_boxes;
                     $performance_hours = $lbs_teoricas / $task->line_sku->lbs_performance;
-                }else{
+                } else {
                     $performance_hours = $task->start_date->diffInHours($task->end_date);
                 }
             });

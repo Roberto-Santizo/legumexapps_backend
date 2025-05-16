@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateStockKeepingUnitRequest;
 use App\Http\Resources\SKUResource;
 use App\Http\Resources\SKUSelectResource;
 use App\Models\StockKeepingUnit;
@@ -29,20 +30,9 @@ class SKUController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CreateStockKeepingUnitRequest $request)
     {
-        $data = $request->validate([
-            'code' => 'required|unique:stock_keeping_units,code',
-            'product_name' => 'required',
-            'presentation' => 'sometimes',
-            'boxes_pallet' => 'sometimes',
-            'config_box' => 'sometimes',
-            'config_bag' => 'sometimes',
-            'config_inner_bag' => 'sometimes',
-            'pallets_container' => 'sometimes',
-            'hours_container' => 'sometimes',
-            'client_name' => 'required'
-        ]);
+        $data = $request->validated();
 
         try {
             StockKeepingUnit::create($data);

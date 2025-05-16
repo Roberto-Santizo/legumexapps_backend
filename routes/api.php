@@ -18,6 +18,7 @@ use App\Http\Controllers\InsumosReceptionController;
 use App\Http\Controllers\LinesController;
 use App\Http\Controllers\LineStockKeepingUnitsController;
 use App\Http\Controllers\LoteController;
+use App\Http\Controllers\PackingMaterialDispatchController;
 use App\Http\Controllers\PackingMaterialReceptionControlller;
 use App\Http\Controllers\PackingMaterialsController;
 use App\Http\Controllers\PermissionController;
@@ -199,9 +200,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/notes', TaskProductionPlanNotesController::class);
 
     Route::apiResource('/weekly_production_plan', WeeklyProductionPlanController::class);
-    Route::get('/weekly_production_plan-all', [WeeklyProductionPlanController::class,'GetAllWeeklyPlans']);
+    Route::get('/weekly_production_plan-all', [WeeklyProductionPlanController::class, 'GetAllWeeklyPlans']);
     Route::get('/weekly_production_plan/details/{weekly_plan_id}/{line_id}', [WeeklyProductionPlanController::class, 'GetTasksByLineId']);
-    
+
     Route::get('/weekly_production_plan/tasks-no-operation-date/{weekly_plan_id}', [WeeklyProductionPlanController::class, 'GetTasksNoOperationDate']);
     Route::get('/weekly_production_plan/tasks/programed', [WeeklyProductionPlanController::class, 'GetTasksOperationDate']);
 
@@ -219,7 +220,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tasks_production_plan/{id}/performance', [TaskProductionController::class, 'TakePerformance']);
     Route::post('/tasks_production_plan/{id}/unassign', [TaskProductionController::class, 'Unassign']);
 
-
     Route::put('/tasks_production_plan/change-priority', [TaskProductionController::class, 'ChangePriority']);
     Route::patch('/tasks_production_plan/{id}/start', [TaskProductionController::class, 'StartTaskProduction']);
     Route::patch('/tasks_production_plan/change-operation-date/{id}', [TaskProductionController::class, 'ChangeOperationDate']);
@@ -229,17 +229,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/employee-permissions', EmployeePermissionsController::class);
 
     Route::post('/report-production/{weekly_production_plan}/{line_id}', [ReportController::class, 'PlanillaProduccion']);
-    
+
     //MATERIAL DE EMPAQUE Y PROVEEDORES
     Route::apiResource('/packing-materials', PackingMaterialsController::class);
-    Route::get('/packing-materials-all', [PackingMaterialsController::class,'GetAllPackingMaterials']);
+    Route::get('/packing-materials-all', [PackingMaterialsController::class, 'GetAllPackingMaterials']);
     Route::apiResource('/suppliers-packing-material', SuppliersPackingMaterialController::class);
-    Route::get('/suppliers-packing-material-all',[ SuppliersPackingMaterialController::class,'GetAllSuppliers']);
+    Route::get('/suppliers-packing-material-all', [SuppliersPackingMaterialController::class, 'GetAllSuppliers']);
+
+    //SALIDA MATERIAL DE EMPAQUE
+    Route::apiResource('/dispatch-material-reception', PackingMaterialDispatchController::class);
 
     //RECEPCIÓN MATERIAL DE EMPAQUE
     Route::apiResource('/packing-material-reception', PackingMaterialReceptionControlller::class);
+
     //RECEPCIÓN INSUMOS
-    Route::apiResource('/insumos-reception',InsumosReceptionController::class);
+    Route::apiResource('/insumos-reception', InsumosReceptionController::class);
 });
 
 //Autenticación

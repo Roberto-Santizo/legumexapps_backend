@@ -21,8 +21,8 @@ class PackingMaterialsController extends Controller
         }
 
         if ($request->query('supplier')) {
-            $query->whereHas('supplier',function($q) use($request){
-                $q->where('name','like','%'. $request->query('supplier') .'%');
+            $query->whereHas('supplier', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->query('supplier') . '%');
             });
         }
 
@@ -41,9 +41,17 @@ class PackingMaterialsController extends Controller
         return PackingMaterialResource::collection($data);
     }
 
-    public function GetAllPackingMaterials()
+    public function GetAllPackingMaterials(Request $request)
     {
-        return PackingMaterialResource::collection(PackingMaterial::where('blocked',false)->get());
+        $query = PackingMaterial::query();
+
+        if ($request->query('name')) {
+            $query->where('name', 'like', '%' . $request->query('name') . '%');
+        }
+
+        $query->where('blocked', false);
+
+        return PackingMaterialResource::collection($query->get());
     }
 
     /**
@@ -71,21 +79,21 @@ class PackingMaterialsController extends Controller
     {
         $item = PackingMaterial::find($id);
 
-        if(!$item){
+        if (!$item) {
             return response()->json([
-                'msg' => 'El item no existe' 
-            ],404);
+                'msg' => 'El item no existe'
+            ], 404);
         }
 
         try {
             $item->blocked = !$item->blocked;
             $item->save();
-            
-            return response()->json('Item actualizado correctamente',200);
+
+            return response()->json('Item actualizado correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
-            ],500);
+            ], 500);
         }
     }
 }

@@ -751,4 +751,29 @@ class TaskProductionController extends Controller
             ], 500);
         }
     }
+
+    public function ChangeStatus(Request $request, string $id)
+    {
+        $data = $request->validate([
+            'status' => 'required'
+        ]);
+
+        try {
+            $task = TaskProductionPlan::find($id);
+            if (!$task) {
+                return response()->json([
+                    'msg' => 'Tarea no Encontrada'
+                ], 404);
+            }
+
+            $task->status = $data['status'];
+            $task->save();
+
+            return response()->json('Tarea Actualizada Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => 'Hubo un error al actualizar'
+            ], 500);
+        }
+    }
 }
