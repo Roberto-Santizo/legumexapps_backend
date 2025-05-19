@@ -23,6 +23,9 @@ class TaskProductionOperationDateResource extends JsonResource
         ];
 
         $working = ($this->start_date && !$this->end_date) ? true : false;
+        $boxes = round($this->total_lbs / $this->line_sku->sku->presentation, 2);
+        $bags = $boxes * $this->line_sku->sku->config_bag;
+        $inner_bags = $bags * $this->line_sku->sku->config_inner_bag;
 
         return [
             'id' => strval($this->id),
@@ -38,7 +41,23 @@ class TaskProductionOperationDateResource extends JsonResource
             'box' => $this->line_sku->sku->box->name,
             'bag' => $this->line_sku->sku->bag->name,
             'bag_inner'  => $this->line_sku->sku->bag_inner->name,
-            'recipe' => new RecipePackingMaterialResource($this)
+            'recipe' => [
+                [
+                    "packing_material_id" => strval($this->line_sku->sku->box_id),
+                    "quantity" => $boxes,
+                    "lote" => ""
+                ],
+                [
+                    "packing_material_id" => strval($this->line_sku->sku->bag_id),
+                    "quantity" => $bags,
+                    "lote" => ""
+                ],
+                [
+                    "packing_material_id" => strval($this->line_sku->sku->bag_inner_id),
+                    "quantity" => $inner_bags,
+                    "lote" => ""
+                ]
+            ]
         ];
     }
 }

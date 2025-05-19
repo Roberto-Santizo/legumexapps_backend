@@ -22,35 +22,34 @@ class CreatePackingMaterialDispatchResource extends FormRequest
     public function rules(): array
     {
         return [
-            'observations' => ['sometimes'],
-            'received_by_boxes' => ['required'],
-            'received_by_signature_boxes' => ['required'],
-            'received_by_bags' => ['required'],
-            'received_by_signature_bags' => ['required'],
+            'task_production_plan_id' => ['sometimes', 'exists:task_production_plans,id'],
+            'reference' => ['required', 'unique:packing_material_dispatches,reference'],
+            'responsable_bags' => ['sometimes', 'string'],
+            'responsable_boxes' => ['sometimes', 'string'],
+            'signature_responsable_bags' => ['sometimes'],
+            'signature_responsable_boxes' => ['sometimes'],
             'user_signature' => ['required'],
-            'task_production_plan_id' => ['required', 'exists:task_production_plans,id'],
-            'reference' => ['required'],
-            'quantity_boxes' => ['required'],
-            "quantity_bags" => ['required'],
-            "quantity_inner_bags" => ['required']
+            'observations' => ['sometimes'],
+            'items' => ['required', 'array'],
+            'items.*.packing_material_id' => ['required', 'exists:packing_materials,id'],
+            'items.*.quantity' => ['required', 'numeric'],
+            'items.*.lote' => ['required', 'string'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'received_by_boxes.required' => 'El nombre del receptor de cajas es obligatorio',
-            'received_by_signature_boxes.required' => 'La firma del receptor de cajas es obligatoria',
-            'received_by_bags.required' => 'El nombre del receptor de bolsas es obligatoria',
-            'received_by_signature_bags.required' => 'La firma del receptor de bolsas es obligatoria',
-            'user_signature.required' => 'La firma es requerida',
-            'task_production_plan_id.required' => 'La referencia de producción es requerida',
             'task_production_plan_id.exists' => 'La tarea de producción no existe',
-            'reference.required' => 'La referencia es obligatoria',
-            'quantity_boxes' => 'La cantidad de cajas es obligatoria',
-            "quantity_bags" => 'La cantidad de bolsas es obligatoria',
-            "quantity_inner_bags" => 'La cantidad de bolsas inner es obligatoria'
-
+            'reference.required' => 'El campo referencia es obligatorio',
+            'reference.unique' => 'La referencia ya tiene relacionado un registro',
+            'user_signature.required' => 'La firma de la persona que despacha es obligatoria',
+            'items.required' => 'Debe relacionar al menos un item',
+            'items.*.packing_material_id.required' => 'El item de referencia es obligatoria',
+            'items.*.packing_material_id.exists' => 'El item seleccionado no existe',
+            'items.*.quantity.required' => 'La cantidad es obligatoria',
+            'items.*.quantity.numeric' => 'La cantidad debe ser un número',
+            'items.*.lote.required' => 'El lote es obligatorio',
         ];
     }
 }

@@ -13,18 +13,15 @@ return new class extends Migration
     {
         Schema::create('packing_material_dispatches', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('task_production_plan_id')->constrained();
+            $table->foreignId('task_production_plan_id')->nullable()->constrained();
             $table->foreignId('user_id')->constrained();
             $table->string('reference');
-            $table->string('received_by_boxes');
-            $table->string('received_by_signature_boxes');
-            $table->string('received_by_bags');
-            $table->string('received_by_signature_bags');
-            $table->integer('quantity_boxes')->nullable();
-            $table->integer('quantity_bags')->nullable();
-            $table->integer('quantity_inner_bags')->nullable();
-            $table->string('observations')->nullable();
+            $table->string('responsable_bags')->nullable();
+            $table->string('responsable_boxes')->nullable();
+            $table->string('signature_responsable_bags')->nullable();
+            $table->string('signature_responsable_boxes')->nullable();
             $table->string('user_signature');
+            $table->string('observations')->nullable();
             $table->timestamps();
         });
     }

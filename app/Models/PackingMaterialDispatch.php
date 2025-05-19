@@ -7,18 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class PackingMaterialDispatch extends Model
 {
     protected $fillable = [
-        "observations",
-        "received_by_boxes",
-        "received_by_signature_boxes",
-        "received_by_bags",
-        "received_by_signature_bags",
-        "user_signature",
-        "task_production_plan_id",
-        "reference",
-        "quantity_boxes",
-        "quantity_bags",
-        "quantity_inner_bags",
-        "user_id"
+        'task_production_plan_id',
+        'user_id',
+        'reference',
+        'responsable_bags',
+        'responsable_boxes',
+        'signature_responsable_bags',
+        'signature_responsable_boxes',
+        'user_signature',
+        'observations',
     ];
 
     public function user()
@@ -29,5 +26,10 @@ class PackingMaterialDispatch extends Model
     public function task()
     {
         return $this->belongsTo(TaskProductionPlan::class,'task_production_plan_id','id');
+    }
+
+    public function items()
+    {
+        return $this->hasMany(PackingMaterialDispatchDetails::class, 'pm_dispatch_id', 'id');
     }
 }

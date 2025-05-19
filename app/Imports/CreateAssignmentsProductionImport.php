@@ -42,7 +42,6 @@ class CreateAssignmentsProductionImport implements ToCollection, WithHeadingRow
                         'code' => $row['codigo'],
                         'position' => $row['posicion']
                     ]);
-                    $task->status = 1;
                     $task->save();
                 } catch (\Throwable $th) {
                     throw $th;

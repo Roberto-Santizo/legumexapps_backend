@@ -53,7 +53,7 @@ class WeeklyProductionPlanController extends Controller
             $line = Line::where('code', $linea)->first();
             $tasks = TaskProductionPlan::where('line_id', $line->id)->get();
 
-            $allCompleted = $tasks->every(fn($task) => $task->status == 1);
+            $allCompleted = $tasks->every(fn($task) => $task->employees->count() > 0);
 
             return [
                 'id' => strval($line->id),
@@ -115,7 +115,7 @@ class WeeklyProductionPlanController extends Controller
             ], 404);
         }
 
-        $tasks = $weekly_plan->tasks()->where('line_id', $line_id)->whereDate('operation_date', $today)->get();
+        $tasks = $weekly_plan->tasks()->where('line_id', $line_id)->whereDate('operation_date', $today)->whereNot('status',0)->get();
         
         return TaskProductionPlanResource::collection($tasks->sortBy('operation_date'));
     }

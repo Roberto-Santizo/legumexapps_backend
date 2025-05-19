@@ -17,36 +17,14 @@ class PackingMaterialDispatchDetailsResource extends JsonResource
         return [
             'id' => strval($this->id),
             'dispatch_date' => $this->created_at->format('d-m-Y h:i:s A'),
-            'items' => [
-                [
-                    'code' => $this->task->line_sku->sku->box->code,
-                    'description' => $this->task->line_sku->sku->box->name,
-                    'destination' => 'DESTINATION',
-                    'lote' => 'LOTE',
-                    'quantity' => $this->quantity_boxes,
-                ],
-                [
-                    'code' => $this->task->line_sku->sku->bag->code,
-                    'description' => $this->task->line_sku->sku->bag->name,
-                    'destination' => 'DESTINATION',
-                    'lote' => 'LOTE',
-                    'quantity' => $this->quantity_bags,
-                ],
-                [
-                    'code' => $this->task->line_sku->sku->bag_inner->code,
-                    'description' => $this->task->line_sku->sku->bag_inner->name,
-                    'destination' => 'DESTINATION',
-                    'lote' => 'LOTE',
-                    'quantity' => $this->quantity_inner_bags,
-                ]
-            ],
+            'items' => PackingMaterialDispatchItemResource::collection($this->items),
             'observations' => $this->observations ?? '',
             'delivered_by' => $this->user->name,
             'delivered_by_signature' => $this->user_signature,
-            'received_boxes_by' => $this->received_by_boxes,
-            'received_boxes_by_signature' => $this->received_by_signature_boxes,
-            'received_bags_by' => $this->received_by_bags,
-            'received_bags_by_signature' => $this->received_by_signature_bags,
+            'responsable_boxes' => $this->responsable_boxes,
+            'signature_responsable_boxes' => $this->signature_responsable_boxes,
+            'responsable_bags' => $this->responsable_bags,
+            'signature_responsable_bags' => $this->signature_responsable_bags,
         ];
     }
 }

@@ -329,11 +329,10 @@ class TaskProductionController extends Controller
 
         try {
             $task_production->start_date = Carbon::now();
+            $task_production->status = 2;
             $task_production->save();
 
-            return response()->json([
-                'msg' => 'Task Production SKU Updated Successfully'
-            ], 200);
+            return response()->json('Tarea Iniciada', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
@@ -384,6 +383,7 @@ class TaskProductionController extends Controller
             $task_production->total_lbs_bascula = $data['total_lbs_bascula'];
             $task_production->total_lbs_produced = $lbs_produced;
             $task_production->end_date = Carbon::now();
+            $task_production->status = 3;
             $task_production->save();
 
 

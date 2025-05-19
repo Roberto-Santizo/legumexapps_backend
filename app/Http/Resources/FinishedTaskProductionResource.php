@@ -30,17 +30,18 @@ class FinishedTaskProductionResource extends JsonResource
 
         $summary = [
             'HLinea' => $line_hours,
-            'HPlan' => round($this->total_hours ?? $line_hours,2),
+            'HPlan' => round($this->total_hours ?? $line_hours, 2),
             'HRendimiento' => round($performance_hours, 2),
             'HTiemposMuertos' => round($hours_timeout, 2),
         ];
-        
+
 
         $note = $this->note ? [
             'reason' => $this->note->reason,
             'action' => $this->note->action,
             'user' => $this->note->user->name
         ] : null;
+
         return [
             'id' => strval($this->id),
             'line' => $this->line->name,
@@ -59,7 +60,8 @@ class FinishedTaskProductionResource extends JsonResource
             'note' => $note,
             'timeouts' => TaskProductionTimeoutResource::collection($this->timeouts),
             'employees' => EmployeeTaskProductionDetailResource::collection($this->employees),
-            'history_operation_date' => TaskOperationDateBitacoraResource::collection($this->operationDateChanges)
+            'history_operation_date' => TaskOperationDateBitacoraResource::collection($this->operationDateChanges),
+            'dispatch' => new PackingMaterialDispatchDetailsResource($this->dispatch)
         ];
     }
 }
