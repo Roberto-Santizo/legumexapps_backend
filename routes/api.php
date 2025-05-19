@@ -203,7 +203,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/weekly_production_plan-all', [WeeklyProductionPlanController::class, 'GetAllWeeklyPlans']);
     Route::get('/weekly_production_plan/details/{weekly_plan_id}/{line_id}', [WeeklyProductionPlanController::class, 'GetTasksByLineId']);
 
-    Route::get('/weekly_production_plan/tasks-no-operation-date/{weekly_plan_id}', [WeeklyProductionPlanController::class, 'GetTasksNoOperationDate']);
+    Route::get('/weekly_production_plan/all-tasks/{id}', [WeeklyProductionPlanController::class, 'GetAllTasksWeeklyPlan']);
     Route::get('/weekly_production_plan/tasks/programed', [WeeklyProductionPlanController::class, 'GetTasksOperationDate']);
 
     Route::post('/weekly_production_plan/assign/{id}', [WeeklyProductionPlanController::class, 'createAssigments']);

@@ -115,8 +115,8 @@ class WeeklyProductionPlanController extends Controller
             ], 404);
         }
 
-        $tasks = $weekly_plan->tasks()->where('line_id', $line_id)->whereDate('operation_date', $today)->whereNot('status',0)->get();
-        
+        $tasks = $weekly_plan->tasks()->where('line_id', $line_id)->whereDate('operation_date', $today)->whereNot('status', 0)->get();
+
         return TaskProductionPlanResource::collection($tasks->sortBy('operation_date'));
     }
 
@@ -205,7 +205,7 @@ class WeeklyProductionPlanController extends Controller
         ], 200);
     }
 
-    public function GetTasksNoOperationDate(string $id)
+    public function GetAllTasksWeeklyPlan(string $id)
     {
         $weekly_plan = WeeklyProductionPlan::find($id);
 
@@ -216,9 +216,26 @@ class WeeklyProductionPlanController extends Controller
         }
 
         try {
-            $tasks = $weekly_plan->tasks()->where('operation_date', null)->get();
+            $tasks_no_operation_date = $weekly_plan->tasks()->where('operation_date', null)->get();
+            $tasks = $weekly_plan->tasks()->whereNot('operation_date', null)->get();
 
-            return TaskProductionPlanNoOperationDateResource::collection($tasks);
+            $events = $tasks->groupBy(function ($item) {
+                return $item->operation_date->format('Y-m-d') . '_' . $item->line_id;
+            })->map(function ($items, $key) {
+                $first = $items->first();
+                $lbs = $items->sum('total_lbs');
+                return [
+                    'id' => strval($first->line_id),
+                    'title' => $first->line->name . ' | ' . $lbs . ' LBS',
+                    'start' => $first->operation_date->format('Y-m-d'),
+                ];
+            })->values();
+
+
+            return response()->json([
+                'tasks' => TaskProductionPlanNoOperationDateResource::collection($tasks_no_operation_date),
+                'events' => $events
+            ]);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
