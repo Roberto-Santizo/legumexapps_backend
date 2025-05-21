@@ -12,15 +12,13 @@ class DriversController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $drivers = Driver::paginate(10);
-        return DriversResource::collection($drivers);
-    }
-
-    public function getAllPlatesByCarrier(string $id)
-    {
-        $drivers = Driver::where('carrier_id',$id)->get();
+        if ($request->query('paginated')) {
+            $drivers = Driver::paginate(10);
+        } else {
+            $drivers = Driver::all();
+        }
         return DriversResource::collection($drivers);
     }
 

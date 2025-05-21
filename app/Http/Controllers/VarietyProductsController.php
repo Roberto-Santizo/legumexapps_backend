@@ -11,17 +11,16 @@ class VarietyProductsController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $varieties = VarietyProduct::paginate(10);
+        if ($request->query('paginated')) {
+            $varieties = VarietyProduct::paginate(10);
+        } else {
+            $varieties = VarietyProduct::get();
+        }
         return VarietyProductResource::collection($varieties);
     }
 
-    public function GetAllVarieties()
-    {
-        $varieties = VarietyProduct::all();
-        return VarietyProductResource::collection($varieties);
-    }
     /**
      * Store a newly created resource in storage.
      */
@@ -37,38 +36,12 @@ class VarietyProductsController extends Controller
             ]);
 
             return response()->json([
-                'msg' => 'Created Successfully' 
+                'msg' => 'Created Successfully'
             ]);
         } catch (\Throwable $th) {
             return response()->json([
-                'msg' => $th->getMessage() 
-            ],500);
+                'msg' => $th->getMessage()
+            ], 500);
         }
-
-        
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

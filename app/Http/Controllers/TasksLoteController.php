@@ -62,7 +62,7 @@ class TasksLoteController extends Controller
         }
 
         $tasks = $query->get();
-        
+
         return [
             'week' => $task_without_filter->plan->week,
             'finca' => $task_without_filter->plan->finca->name,
@@ -410,10 +410,10 @@ class TasksLoteController extends Controller
             foreach ($data['tasks'] as $id) {
                 $task_weekly_plan = TaskWeeklyPlan::find($id);
 
-                if($task_weekly_plan->plan->week < $week){
+                if ($task_weekly_plan->plan->week < $week) {
                     return response()->json([
                         'msg' => 'No se puede cambiar la fecha de operacion de una semana pasada'
-                    ],422);
+                    ], 422);
                 }
 
                 $task_weekly_plan->operation_date = $data['date'];

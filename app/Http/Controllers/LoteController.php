@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateLoteRequest;
 use App\Http\Resources\FincaLotesResource;
 use App\Http\Resources\LoteCollection;
+use App\Http\Resources\LotePlantationControlResource;
 use App\Imports\UpdateLotesImport;
 use App\Models\Lote;
 use App\Models\LotePlantationControl;
@@ -36,12 +37,14 @@ class LoteController extends Controller
                 });
             });
         }
-        return new LoteCollection($query->paginate(10));
+
+        if ($request->query('paginated')) {
+            return new LoteCollection($query->paginate(10));
+        } else {
+            return new LoteCollection($query->get());
+        }
     }
-    public function GetAllLotes()
-    {
-        return new LoteCollection(Lote::all());
-    }
+
 
     /**
      * Store a newly created resource in storage.
@@ -70,16 +73,16 @@ class LoteController extends Controller
         }
     }
 
+
     /**
      * Display the specified resource.
      */
-    public function show(string $id) {}
-
-
-    public function GetLotesByFincaId(string $id)
+    public function show(string $id)
     {
-        $lotes = Lote::where('finca_id', $id)->get();
-        return new LoteCollection($lotes);
+        $lote = Lote::find($id);
+        return response()->json([
+            'data' => LotePlantationControlResource::collection($lote->lote_cdps)
+        ]);
     }
 
     public function UpdateLotes(Request $request)

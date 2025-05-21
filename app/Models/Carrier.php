@@ -10,4 +10,14 @@ class Carrier extends Model
         'code',
         'name'
     ];
+
+    public function plates()
+    {
+        return $this->hasMany(Plate::class);
+    }
+
+    public function drivers()
+    {
+        return $this->hasMany(Driver::class);
+    }
 }

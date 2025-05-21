@@ -11,19 +11,16 @@ class PlatesController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $plates = Plate::paginate(10);
+        if ($request->query('paginated')) {
+            $plates = Plate::paginate(10);
+        } else {
+            $plates = Plate::all();
+        }
 
         return PlatesResource::collection($plates);
     }
-
-    public function getAllPlatesByCarrierId(string $id)
-    {
-        $plates = Plate::where('carrier_id',$id)->get();
-        return PlatesResource::collection($plates);
-    }
-
 
     /**
      * Store a newly created resource in storage.
@@ -44,29 +41,5 @@ class PlatesController extends Controller
                 'errors' => $th->getMessage()
             ], 500);
         }
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

@@ -17,7 +17,9 @@ class CarriersResource extends JsonResource
         return [
             'id' => strval($this->id),
             'name' => $this->name,
-            'code' => $this->code
+            'code' => $this->code,
+            'plates' => PlatesResource::collection($this->plates),
+            'drivers' => $this->drivers
         ];
     }
 }

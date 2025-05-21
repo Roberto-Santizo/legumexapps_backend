@@ -11,16 +11,13 @@ class CarriersController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $carriers = Carrier::paginate(10);
-        return CarriersResource::collection($carriers);
-    }
-
-    public function GetAllCarriers()
-    {
-        $carriers = Carrier::all();
-
+        if ($request->query('paginated')) {
+            $carriers = Carrier::paginate(10);
+        } else {
+            $carriers = Carrier::all();
+        }
         return CarriersResource::collection($carriers);
     }
 
@@ -33,7 +30,7 @@ class CarriersController extends Controller
             'name' => 'required',
             'code' => 'required|unique:carriers,code'
         ]);
-        
+
         try {
             Carrier::create($data);
 
@@ -47,27 +44,16 @@ class CarriersController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show($id)
     {
-        //
-    }
+        $carrier = Carrier::find($id);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+        if (!$carrier) {
+            return response()->json([
+                'msg' => 'Carrier Not Found'
+            ], 404);
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return new CarriersResource($carrier);
     }
 }

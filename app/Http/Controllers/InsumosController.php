@@ -27,12 +27,12 @@ class InsumosController extends Controller
             $query->where('name', 'LIKE', '%' . $request->query('name') . '%');
         };
 
-        return new InsumoCollection($query->paginate(10));
-    }
+        if($request->query('paginated')){
+            return new InsumoCollection($query->paginate(10));
+        }else{
+            return new InsumoCollection($query->get());
+        }
 
-    public function getAllInsumos()
-    {
-        return new InsumoCollection(Insumo::all());
     }
 
     /**
@@ -57,13 +57,6 @@ class InsumosController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
 
     public function UploadInsumos(Request $request)
     {

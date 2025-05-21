@@ -73,13 +73,11 @@ class RmReceptionsController extends Controller
             });
         }
 
-        return RmReceptionsResource::collection($query->paginate(10));
-    }
-
-    public function GetAllBoletas()
-    {
-        $boletas = RmReception::whereDoesntHave('transport_doc_data')->get();
-        return RmReceptionsResource::collection($boletas);
+        if($request->query('paginated')){
+            return RmReceptionsResource::collection($query->paginate(10));
+        }else{
+            return RmReceptionsResource::collection($query->get());
+        }
     }
 
     /**
