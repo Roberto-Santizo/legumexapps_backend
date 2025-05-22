@@ -53,7 +53,7 @@ class EmployeeController extends Controller
         return new EmployeeCollection($filter_employees);
     }
 
-    public function getAllComodines()
+    public function getComodines()
     {
         $comodines = BiometricEmployee::where('auth_dept_id', '3eef8d8594bd4fa80194f5ccac7b1d5c')
             ->orWhere('auth_dept_id', '3eef8d8594bd4fa80194f5ccac7b1d5b')

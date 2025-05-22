@@ -19,9 +19,15 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class WeeklyProductionPlanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $plans_production = WeeklyProductionPlan::paginate(10);
+
+        if ($request->query('paginated')) {
+            $plans_production = WeeklyProductionPlan::paginate(10);
+        } else {
+            $plans_production = WeeklyProductionPlan::get();
+        }
+
         $plans_production->map(function ($plan) {
             if ($plan->tasks->every(fn($task) => $task->end_date !== null)) {
                 $plan->completed = true;
@@ -32,12 +38,6 @@ class WeeklyProductionPlanController extends Controller
             return $plan;
         });
 
-        return WeeklyPlanProductionResource::collection($plans_production);
-    }
-
-    public function GetAllWeeklyPlans()
-    {
-        $plans_production = WeeklyProductionPlan::all();
         return WeeklyPlanProductionResource::collection($plans_production);
     }
 

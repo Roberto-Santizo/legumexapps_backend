@@ -1,0 +1,52 @@
+<?php
+
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\EmployeePermissionsController;
+use App\Http\Controllers\LinesController;
+use App\Http\Controllers\LineStockKeepingUnitsController;
+use App\Http\Controllers\SKUController;
+use App\Http\Controllers\TaskProductionController;
+use App\Http\Controllers\TaskProductionPlanNotesController;
+use App\Http\Controllers\TimeOutController;
+use App\Http\Controllers\WeeklyProductionPlanController;
+use Illuminate\Support\Facades\Route;
+
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::get('/employees-comodines', [EmployeeController::class, 'getComodines']);
+
+    Route::apiResource('/lines-skus', LineStockKeepingUnitsController::class);
+    Route::apiResource('/timeouts', TimeOutController::class);
+    Route::apiResource('/notes', TaskProductionPlanNotesController::class);
+    Route::apiResource('/skus', SKUController::class);
+
+    Route::apiResource('/lines', LinesController::class);
+    Route::get('/lines/performances-per-day/{id}', [LinesController::class, 'GetPerformanceByLine']);
+    Route::get('/lines-by-sku/{id}', [LinesController::class, 'GetAllLinesBySku']);
+    Route::post('/lines/update-positions/{id}', [LinesController::class, 'UpdatePositions']);
+
+    Route::apiResource('/weekly-production-plans', WeeklyProductionPlanController::class);
+    Route::get('/weekly-production-plans/details/{weekly_plan_id}/{line_id}', [WeeklyProductionPlanController::class, 'GetTasksByLineId']);
+    Route::get('/weekly-production-plans/all-tasks/{weekly_plan_id}', [WeeklyProductionPlanController::class, 'GetAllTasksWeeklyPlan']);
+    Route::get('/weekly-production-plans/tasks/programed', [WeeklyProductionPlanController::class, 'GetTasksOperationDate']);
+    Route::post('/weekly-production-plans/assign/{id}', [WeeklyProductionPlanController::class, 'createAssigments']);
+
+    Route::apiResource('/tasks-production', TaskProductionController::class);
+    Route::get('/tasks-production/finished/details/{id}', [TaskProductionController::class, 'FinishedTaskDetails']);
+    Route::get('/tasks-production/details/{id}', [TaskProductionController::class, 'TaskDetails']);
+    Route::post('/tasks-production/new-task', [TaskProductionController::class, 'CreateNewTaskProduction']);
+    Route::post('/tasks-production/create-assignee/{id}', [TaskProductionController::class, 'CreateAssignee']);
+    Route::post('/tasks-production/{id}/add-timeout/open', [TaskProductionController::class, 'AddTimeOutOpen']);
+    Route::post('/tasks-production/{id}/add-timeout/close', [TaskProductionController::class, 'AddTimeOutClose']);
+    Route::post('/tasks-production/{id}/assign', [TaskProductionController::class, 'Assign']);
+    Route::post('/tasks-production/change-assignment', [TaskProductionController::class, 'ChangeAssignment']);
+    Route::post('/tasks-production/{id}/performance', [TaskProductionController::class, 'TakePerformance']);
+    Route::post('/tasks-production/{id}/unassign', [TaskProductionController::class, 'Unassign']);
+    Route::put('/tasks-production/change-priority', [TaskProductionController::class, 'ChangePriority']);
+    Route::patch('/tasks-production/{id}/start', [TaskProductionController::class, 'StartTaskProduction']);
+    Route::patch('/tasks-production/change-operation-date/{id}', [TaskProductionController::class, 'ChangeOperationDate']);
+    Route::patch('/tasks-production/assign-operation-date/{id}', [TaskProductionController::class, 'AssignOperationDate']);
+    Route::patch('/tasks-production/{id}/end', [TaskProductionController::class, 'EndTaskProduction']);
+
+    Route::apiResource('/employee-permissions', EmployeePermissionsController::class);
+});

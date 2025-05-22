@@ -11,9 +11,13 @@ class TransportConditionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $conditions = TransportCondition::paginate(10);
+        if($request->query('paginated')){
+            $conditions = TransportCondition::paginate(10);
+        }else{
+            $conditions = TransportCondition::get();
+        }
 
         return TransportConditionsResource::collection($conditions);
     }
@@ -48,29 +52,5 @@ class TransportConditionController extends Controller
                 'msg' => $th->getMessage()
             ],500);
         }
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

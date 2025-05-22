@@ -80,19 +80,8 @@ class UsersController extends Controller
         }
     }
 
-    public function updateStatus(User $user)
-    {
-        $user->status = ($user->status === 0) ? 1 : 0;
-        $user->save();
-
-        return new UserCollection(User::with('roles')->with('permissions')->get());
-    }
-
     public function UsersInfo(string $id)
     {
-        $user = User::find($id);
-        return response()->json([
-            'data' => new UserInfoResource($user)
-        ]);
+       
     }
 }

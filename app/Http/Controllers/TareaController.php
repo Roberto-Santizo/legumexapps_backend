@@ -29,12 +29,11 @@ class TareaController extends Controller
             $query->where('code', $request->query('code'));
         }
 
-        return new TareaCollection($query->paginate(10));
-    }
-
-    public function GetAllTareas()
-    {
-        return new TareaCollection(Tarea::all());
+        if ($request->query('paginated')) {
+            return new TareaCollection($query->paginate(10));
+        } else {
+            return new TareaCollection($query->get());
+        }
     }
 
     /**
@@ -62,12 +61,13 @@ class TareaController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Tarea $tarea)
+    public function show(string $id)
     {
+        $tarea = Tarea::find($id);
 
         if (!$tarea) {
             return response()->json([
-                'message' => 'Tarea no encontrada :('
+                'message' => 'Tarea no encontrada'
             ], 404);
         }
         return new TareaResource($tarea);
@@ -112,13 +112,5 @@ class TareaController extends Controller
                 'errors' => $th->getMessage()
             ], 500);
         }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

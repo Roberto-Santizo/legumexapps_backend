@@ -12,21 +12,16 @@ class ProductorPlantationControlController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $cdps = ProductorPlantationControl::paginate(10);
+        if ($request->query('paginated')) {
+            $cdps = ProductorPlantationControl::paginate(10);
+        } else {
+            $cdps = ProductorPlantationControl::all();
+        }
         return ProductorCDPResource::collection($cdps);
     }
 
-    public function GetAllProductorsCDPS()
-    {
-        $cdps = ProductorPlantationControl::all();
-        return ProductorCDPResource::collection($cdps);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $data = $request->validate([

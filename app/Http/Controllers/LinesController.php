@@ -6,34 +6,27 @@ use App\Http\Resources\LineDetailsByDayResource;
 use App\Http\Resources\LinesResource;
 use App\Http\Resources\LinesSelectResource;
 use App\Imports\UpdatePositionsImport;
-use App\Models\BiometricEmployee;
 use App\Models\BiometricTransaction;
 use App\Models\BitacoraLines;
 use App\Models\Line;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
-use PhpOffice\PhpSpreadsheet\Reader\Xls\RC4;
-
-use function PHPUnit\Framework\isEmpty;
 
 class LinesController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $lines = Line::select('id', 'code', 'name')->paginate(10);
+        if ($request->query('paginated')) {
+            $lines = Line::select('id', 'code', 'name')->paginate(10);
+        } else {
+            $lines = Line::select('id', 'code', 'name')->get();
+        }
 
         return LinesResource::collection($lines);
-    }
-
-    public function GetAllLines()
-    {
-        $lines = Line::select('id', 'code', 'shift', 'name')->get();
-
-        return LinesSelectResource::collection($lines);
     }
 
     public function GetAllLinesBySku(string $id)

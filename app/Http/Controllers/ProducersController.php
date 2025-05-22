@@ -12,15 +12,13 @@ class ProducersController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $producers = Producer::paginate(10);
-        return ProducerResource::collection($producers);
-    }
-
-    public function GetAllProducers()
-    {
-        $producers = Producer::all();
+        if($request->query('paginated')){
+            $producers = Producer::paginate(10);
+        }else{
+            $producers = Producer::get();
+        }
         return ProducerResource::collection($producers);
     }
 
