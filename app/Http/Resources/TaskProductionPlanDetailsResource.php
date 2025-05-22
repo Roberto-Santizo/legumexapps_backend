@@ -33,6 +33,7 @@ class TaskProductionPlanDetailsResource extends JsonResource
             'id' => strval($this->id),
             'line' => $this->line_sku->line->code,
             'operation_date' => $this->operation_date,
+            'start_date' => $this->start_date,
             'assigned_employees' => $this->employees->count(),
             'flag' => $this->employees->count() < $this->line_sku->line->positions->count(),
             'total_lbs' => $this->total_lbs,
