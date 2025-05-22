@@ -31,51 +31,42 @@ class RmReceptionsController extends Controller
     {
         $query = RmReception::query();
 
-        if ($request->has('quality_status_id')) {
-            $query->where('quality_status_id', $request->quality_status_id);
+        if ($request->query('quality_status_id')) {
+            $query->where('quality_status_id', $request->query('quality_status_id'));
         }
 
-        if ($request->has('finca_id')) {
+        if ($request->query('finca_id')) {
             $query->where('finca_id', $request->finca_id);
         }
 
-        if ($request->has('ref_doc')) {
+        if ($request->query('ref_doc')) {
             $query->whereHas('field_data', function ($query) use ($request) {
-                $query->where('ref_doc', $request->ref_doc);
+                $query->where('ref_doc', $request->query('ref_doc'));
             });
         }
-        if ($request->has('grn')) {
-            $query->where('grn', $request->grn);
+        if ($request->query('grn')) {
+            $query->where('grn', $request->query('grn'));
         }
 
-        if ($request->has('date')) {
-            $query->whereDate('doc_date', $request->date);
+        if ($request->query('date')) {
+            $query->whereDate('doc_date', $request->query('date'));
         }
 
-        if ($request->has('plate')) {
+        if ($request->query('plate')) {
             $query->whereHas('field_data', function ($query) use ($request) {
                 $query->whereHas('plate', function ($query) use ($request) {
-                    $query->where('name', 'LIKE', "%{$request->plate}%");
+                    $query->where('name', 'LIKE', "%" . $request->query('plate') . "%");
                 });
             });
         }
 
-
-        if ($request->has('producer_id')) {
-            $query->whereHas('field_data', function ($query) use ($request) {
-                $query->where('producer_id', $request->producer_id);
-            });
+        if($request->query('transport_doc_create')){
+            $query->whereDoesntHave('transport_doc_data');
         }
 
-        if ($request->has('product_id')) {
-            $query->whereHas('field_data', function ($query) use ($request) {
-                $query->where('product_id', $request->product_id);
-            });
-        }
-
-        if($request->query('paginated')){
+        if ($request->query('paginated')) {
             return RmReceptionsResource::collection($query->paginate(10));
-        }else{
+        } else {
             return RmReceptionsResource::collection($query->get());
         }
     }

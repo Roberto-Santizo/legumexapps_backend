@@ -20,19 +20,18 @@ class InsumosController extends Controller
         $query = Insumo::query();
 
         if ($request->query('code')) {
-            $query->where('code', $request->query('code'));
+            $query->where('code', 'LIKE' . '%' . $request->query('code') . '%');
         };
 
         if ($request->query('name')) {
             $query->where('name', 'LIKE', '%' . $request->query('name') . '%');
         };
 
-        if($request->query('paginated')){
+        if ($request->query('paginated')) {
             return new InsumoCollection($query->paginate(10));
-        }else{
+        } else {
             return new InsumoCollection($query->get());
         }
-
     }
 
     /**

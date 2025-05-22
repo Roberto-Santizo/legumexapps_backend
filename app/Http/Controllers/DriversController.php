@@ -50,9 +50,7 @@ class DriversController extends Controller
                 'carrier_id' => $carrier->id
             ]);
 
-            return response()->json([
-                'msg' => 'Created Successfully'
-            ], 200);
+            return response()->json('Piloto Creado Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()

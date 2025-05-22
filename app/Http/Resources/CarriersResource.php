@@ -19,7 +19,7 @@ class CarriersResource extends JsonResource
             'name' => $this->name,
             'code' => $this->code,
             'plates' => PlatesResource::collection($this->plates),
-            'drivers' => $this->drivers
+            'drivers' => DriversResource::collection($this->drivers)
         ];
     }
 }

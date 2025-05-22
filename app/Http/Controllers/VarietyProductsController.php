@@ -35,9 +35,7 @@ class VarietyProductsController extends Controller
                 'name' => $data['name']
             ]);
 
-            return response()->json([
-                'msg' => 'Created Successfully'
-            ]);
+            return response()->json('Variedad creada correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
