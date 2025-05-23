@@ -36,10 +36,10 @@ class PackingMaterialDispatchController extends Controller
         $data = $request->validated();
 
         try {
-            $task = TaskProductionPlan::find($data['task_production_plan_id']);
-            $signature1 = $data['signature_responsable_bags'];
-            $signature2 = $data['signature_responsable_boxes'];
-            $signature3 = $data['user_signature'];
+            $task = TaskProductionPlan::find($data['task_production_plan_id'] ?? null);
+
+            $signature1 = $data['responsable_signature'];
+            $signature2 = $data['user_signature'];
 
             list(, $signature1) = explode(',', $signature1);
             $signature1 = base64_decode($signature1);
@@ -51,21 +51,14 @@ class PackingMaterialDispatchController extends Controller
             $filename2 = 'signatures/' . uniqid() . '.png';
             Storage::disk('public')->put($filename2, $signature2);
 
-            list(, $signature3) = explode(',', $signature3);
-            $signature3 = base64_decode($signature3);
-            $filename3 = 'signatures/' . uniqid() . '.png';
-            Storage::disk('public')->put($filename3, $signature3);
-
 
             $dispatch = PackingMaterialDispatch::create([
                 'task_production_plan_id' => $data['task_production_plan_id'] ?? null,
                 'user_id' => $request->user()->id,
                 'reference' => $data['reference'],
-                'responsable_bags' => $data['responsable_bags'],
-                'responsable_boxes' => $data['responsable_boxes'],
-                'signature_responsable_bags' => $filename1,
-                'signature_responsable_boxes' => $filename2,
-                'user_signature' => $filename3,
+                'responsable' => $data['responsable'],
+                'responsable_signature' => $filename1,
+                'user_signature' => $filename2,
                 'observations' => $data['observations'],
             ]);
 
@@ -75,6 +68,7 @@ class PackingMaterialDispatchController extends Controller
                     'packing_material_id' => $item['packing_material_id'],
                     'quantity' => $item['quantity'],
                     'lote' => $item['lote'],
+                    'destination' => $item['destination'] ?? null
                 ]);
             }
 

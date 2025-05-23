@@ -44,18 +44,24 @@ class TaskProductionOperationDateResource extends JsonResource
             'recipe' => [
                 [
                     "packing_material_id" => strval($this->line_sku->sku->box_id),
+                    "name" => $this->line_sku->sku->box->name,
                     "quantity" => $boxes,
-                    "lote" => ""
+                    "lote" => "",
+                    "destination" => null
                 ],
                 [
                     "packing_material_id" => strval($this->line_sku->sku->bag_id),
+                    "name" => $this->line_sku->sku->bag->name,
                     "quantity" => $bags,
-                    "lote" => ""
+                    "lote" => "",
+                    "destination" => null
                 ],
                 [
                     "packing_material_id" => strval($this->line_sku->sku->bag_inner_id),
+                    "name" => $this->line_sku->sku->bag_inner->name,
                     "quantity" => $inner_bags,
-                    "lote" => ""
+                    "lote" => "",
+                    "destination" => null
                 ]
             ]
         ];

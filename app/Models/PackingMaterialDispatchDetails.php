@@ -11,6 +11,7 @@ class PackingMaterialDispatchDetails extends Model
         'packing_material_id',
         'quantity',
         'lote',
+        'destination'
     ];
 
     public function item()

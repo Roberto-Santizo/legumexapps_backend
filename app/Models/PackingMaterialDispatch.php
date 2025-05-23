@@ -10,10 +10,8 @@ class PackingMaterialDispatch extends Model
         'task_production_plan_id',
         'user_id',
         'reference',
-        'responsable_bags',
-        'responsable_boxes',
-        'signature_responsable_bags',
-        'signature_responsable_boxes',
+        'responsable',
+        'responsable_signature',
         'user_signature',
         'observations',
     ];
@@ -25,7 +23,7 @@ class PackingMaterialDispatch extends Model
 
     public function task()
     {
-        return $this->belongsTo(TaskProductionPlan::class,'task_production_plan_id','id');
+        return $this->belongsTo(TaskProductionPlan::class, 'task_production_plan_id', 'id');
     }
 
     public function items()

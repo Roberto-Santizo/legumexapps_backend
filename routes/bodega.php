@@ -8,15 +8,11 @@ use App\Http\Controllers\SuppliersPackingMaterialController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function () {
-   
+
     Route::apiResource('/packing-materials', PackingMaterialsController::class);
-    Route::get('/packing-materials-all', [PackingMaterialsController::class, 'GetAllPackingMaterials']);
     Route::apiResource('/suppliers-packing-material', SuppliersPackingMaterialController::class);
-    Route::get('/suppliers-packing-material-all', [SuppliersPackingMaterialController::class, 'GetAllSuppliers']);
 
-    Route::apiResource('/dispatch-material-reception', PackingMaterialDispatchController::class);
-
+    Route::apiResource('/packing-material-dispatch', PackingMaterialDispatchController::class);
     Route::apiResource('/packing-material-reception', PackingMaterialReceptionControlller::class);
-
     Route::apiResource('/insumos-reception', InsumosReceptionController::class);
 });

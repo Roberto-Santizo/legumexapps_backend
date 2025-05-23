@@ -16,10 +16,8 @@ return new class extends Migration
             $table->foreignId('task_production_plan_id')->nullable()->constrained();
             $table->foreignId('user_id')->constrained();
             $table->string('reference');
-            $table->string('responsable_bags')->nullable();
-            $table->string('responsable_boxes')->nullable();
-            $table->string('signature_responsable_bags')->nullable();
-            $table->string('signature_responsable_boxes')->nullable();
+            $table->string('responsable');
+            $table->string('responsable_signature');
             $table->string('user_signature');
             $table->string('observations')->nullable();
             $table->timestamps();

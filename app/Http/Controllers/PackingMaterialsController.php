@@ -36,22 +36,11 @@ class PackingMaterialsController extends Controller
             $query->where('blocked', $status);
         }
 
-        $data = $query->paginate(10);
-
-        return PackingMaterialResource::collection($data);
-    }
-
-    public function GetAllPackingMaterials(Request $request)
-    {
-        $query = PackingMaterial::query();
-
-        if ($request->query('name')) {
-            $query->where('name', 'like', '%' . $request->query('name') . '%');
+        if($request->query('paginated')){
+            return PackingMaterialResource::collection($query->paginate(10));
+        }else{
+            return PackingMaterialResource::collection($query->get());
         }
-
-        $query->where('blocked', false);
-
-        return PackingMaterialResource::collection($query->get());
     }
 
     /**

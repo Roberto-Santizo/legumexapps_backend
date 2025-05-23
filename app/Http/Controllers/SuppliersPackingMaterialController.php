@@ -23,12 +23,12 @@ class SuppliersPackingMaterialController extends Controller
             $query->where('name','like','%'.$request->query('name').'%');
         }
 
-        return SupplierPackingMaterialsResource::collection($query->paginate(10));
-    }
-
-    public function GetAllSuppliers()
-    {
-        return SupplierPackingMaterialsResource::collection(SupplierPackingMaterial::all());     
+        if($request->query('paginated')){
+            return SupplierPackingMaterialsResource::collection($query->paginate(10));
+        }else{
+            return SupplierPackingMaterialsResource::collection($query->get());
+        }
+        
     }
 
     /**

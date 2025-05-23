@@ -21,10 +21,8 @@ class PackingMaterialDispatchDetailsResource extends JsonResource
             'observations' => $this->observations ?? '',
             'delivered_by' => $this->user->name,
             'delivered_by_signature' => $this->user_signature,
-            'responsable_boxes' => $this->responsable_boxes,
-            'signature_responsable_boxes' => $this->signature_responsable_boxes,
-            'responsable_bags' => $this->responsable_bags,
-            'signature_responsable_bags' => $this->signature_responsable_bags,
+            'responsable' => $this->responsable,
+            'responsable_signature' => $this->responsable_signature,
         ];
     }
 }

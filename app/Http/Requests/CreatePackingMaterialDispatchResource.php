@@ -24,16 +24,15 @@ class CreatePackingMaterialDispatchResource extends FormRequest
         return [
             'task_production_plan_id' => ['sometimes', 'exists:task_production_plans,id'],
             'reference' => ['required', 'unique:packing_material_dispatches,reference'],
-            'responsable_bags' => ['sometimes', 'string'],
-            'responsable_boxes' => ['sometimes', 'string'],
-            'signature_responsable_bags' => ['sometimes'],
-            'signature_responsable_boxes' => ['sometimes'],
+            'responsable' => ['required', 'string'],
+            'responsable_signature' => ['required'],
             'user_signature' => ['required'],
             'observations' => ['sometimes'],
             'items' => ['required', 'array'],
             'items.*.packing_material_id' => ['required', 'exists:packing_materials,id'],
             'items.*.quantity' => ['required', 'numeric'],
             'items.*.lote' => ['required', 'string'],
+            'items.*.destination' => ['sometimes'],
         ];
     }
 
@@ -44,6 +43,8 @@ class CreatePackingMaterialDispatchResource extends FormRequest
             'reference.required' => 'El campo referencia es obligatorio',
             'reference.unique' => 'La referencia ya tiene relacionado un registro',
             'user_signature.required' => 'La firma de la persona que despacha es obligatoria',
+            'responsable.required' => 'El nombre del resposable de recepción es requerido',
+            'responsable_signature.required' => 'La firma del resposable es requerida',
             'items.required' => 'Debe relacionar al menos un item',
             'items.*.packing_material_id.required' => 'El item de referencia es obligatoria',
             'items.*.packing_material_id.exists' => 'El item seleccionado no existe',
