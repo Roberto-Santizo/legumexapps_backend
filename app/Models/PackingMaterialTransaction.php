@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PackingMaterialDispatch extends Model
+class PackingMaterialTransaction extends Model
 {
     protected $fillable = [
         'task_production_plan_id',
@@ -14,6 +14,7 @@ class PackingMaterialDispatch extends Model
         'responsable_signature',
         'user_signature',
         'observations',
+        'type'
     ];
 
     public function user()
@@ -28,6 +29,6 @@ class PackingMaterialDispatch extends Model
 
     public function items()
     {
-        return $this->hasMany(PackingMaterialDispatchDetails::class, 'pm_dispatch_id', 'id');
+        return $this->hasMany(PackingMaterialTransactionDetail::class, 'pm_transaction_id', 'id');
     }
 }

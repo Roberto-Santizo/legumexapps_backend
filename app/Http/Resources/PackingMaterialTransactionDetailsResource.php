@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class PackingMaterialDispatchDetailsResource extends JsonResource
+class PackingMaterialTransactionDetailsResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,8 +16,9 @@ class PackingMaterialDispatchDetailsResource extends JsonResource
     {
         return [
             'id' => strval($this->id),
-            'dispatch_date' => $this->created_at->format('d-m-Y h:i:s A'),
-            'items' => PackingMaterialDispatchItemResource::collection($this->items),
+            'type' => $this->type,
+            'transaction_date' => $this->created_at->format('d-m-Y h:i:s A'),
+            'items' => PackingMaterialTransactionItemResource::collection($this->items),
             'observations' => $this->observations ?? '',
             'delivered_by' => $this->user->name,
             'delivered_by_signature' => $this->user_signature,

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('packing_material_dispatches', function (Blueprint $table) {
+        Schema::create('packing_material_transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('task_production_plan_id')->nullable()->constrained();
             $table->foreignId('user_id')->constrained();
@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('responsable_signature');
             $table->string('user_signature');
             $table->string('observations')->nullable();
+            $table->integer('type');
             $table->timestamps();
         });
     }
@@ -29,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('packing_material_dispatches');
+        Schema::dropIfExists('packing_material_transactions');
     }
 };

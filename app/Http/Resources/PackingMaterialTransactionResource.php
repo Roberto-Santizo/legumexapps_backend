@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class PackingMaterialDispatchResource extends JsonResource
+class PackingMaterialTransactionResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,12 +14,19 @@ class PackingMaterialDispatchResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $types = [
+            0 => 'Entrada',
+            1 => 'Salida',
+            2 => 'Devoluición',
+        ];
+
         return [
             'id' => strval($this->id),
             'reference' => $this->reference,
             'responsable' => $this->responsable,
             'user' => $this->user->name,
-            'dispatch_date' => $this->created_at->format('d-m-Y h:i:s A')
+            'transaction_date' => $this->created_at->format('d-m-Y h:i:s A'),
+            'type' => $types[$this->type],
         ];
     }
-}
+}   

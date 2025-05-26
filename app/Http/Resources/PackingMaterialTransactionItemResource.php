@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class PackingMaterialDispatchItemResource extends JsonResource
+class PackingMaterialTransactionItemResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -19,7 +19,7 @@ class PackingMaterialDispatchItemResource extends JsonResource
             'code' => $this->item->code,
             'description' => $this->item->name,
             'quantity' => $this->quantity,
-            'destination' => $this->dispatch->task->line_sku->line->name,
+            'destination' => $this->destination ?? $this->transaction->task->line_sku->line->name,
             'lote' => $this->lote,
         ];
     }

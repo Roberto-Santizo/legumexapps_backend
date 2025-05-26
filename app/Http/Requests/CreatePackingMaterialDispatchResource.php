@@ -23,7 +23,7 @@ class CreatePackingMaterialDispatchResource extends FormRequest
     {
         return [
             'task_production_plan_id' => ['sometimes', 'exists:task_production_plans,id'],
-            'reference' => ['required', 'unique:packing_material_dispatches,reference'],
+            'reference' => ['required', 'unique:packing_material_transactions,reference'],
             'responsable' => ['required', 'string'],
             'responsable_signature' => ['required'],
             'user_signature' => ['required'],
@@ -33,6 +33,7 @@ class CreatePackingMaterialDispatchResource extends FormRequest
             'items.*.quantity' => ['required', 'numeric'],
             'items.*.lote' => ['required', 'string'],
             'items.*.destination' => ['sometimes'],
+            'type' => ['required']
         ];
     }
 

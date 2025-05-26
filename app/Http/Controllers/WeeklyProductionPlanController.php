@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\TaskProductionForCalendarResource;
 use App\Http\Resources\TaskProductionOperationDateResource;
 use App\Http\Resources\TaskProductionPlanNoOperationDateResource;
-use App\Http\Resources\TaskProductionPlanResource;
+use App\Http\Resources\TaskProductionPlanByLineResource;
 use App\Http\Resources\TaskProductionPlanSummaryResource;
 use App\Http\Resources\WeeklyPlanProductionResource;
 use App\Imports\CreateAssignmentsProductionImport;
@@ -117,7 +117,7 @@ class WeeklyProductionPlanController extends Controller
 
         $tasks = $weekly_plan->tasks()->where('line_id', $line_id)->whereDate('operation_date', $today)->whereNot('status', 0)->get();
 
-        return TaskProductionPlanResource::collection($tasks->sortBy('operation_date'));
+        return TaskProductionPlanByLineResource::collection($tasks->sortBy('operation_date'));
     }
 
     public function GetTasksForCalendar(string $weekly_plan_id)

@@ -67,9 +67,9 @@ class TaskProductionPlan extends Model
         return $this->hasMany(TaskOperationDateBitacora::class);
     }
 
-    public function dispatch()
+    public function transactions()
     {
-        return $this->hasOne(PackingMaterialDispatch::class);
+        return $this->hasMany(PackingMaterialTransaction::class);
     }
 
 }

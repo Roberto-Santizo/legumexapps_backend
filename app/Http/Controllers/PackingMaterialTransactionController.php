@@ -3,29 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreatePackingMaterialDispatchResource;
-use App\Http\Resources\PackingMaterialDispatchDetailsResource;
-use App\Http\Resources\PackingMaterialDispatchResource;
-use App\Http\Resources\PackingMaterialResource;
-use App\Models\PackingMaterialDispatch;
-use App\Models\PackingMaterialDispatchDetails;
+use App\Http\Resources\PackingMaterialTransactionDetailsResource;
+use App\Http\Resources\PackingMaterialTransactionResource;
+use App\Models\PackingMaterialTransaction;
+use App\Models\PackingMaterialTransactionDetail;
 use App\Models\TaskProductionPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class PackingMaterialDispatchController extends Controller
+class PackingMaterialTransactionController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $query = PackingMaterialDispatch::query();
+        $query = PackingMaterialTransaction::query();
 
         if ($request->query('paginated')) {
-            return PackingMaterialDispatchResource::collection($query->paginate(10));
+            return PackingMaterialTransactionResource::collection($query->paginate(10));
         }
 
-        return PackingMaterialDispatchResource::collection($query->get());
+        return PackingMaterialTransactionResource::collection($query->get());
     }
 
     /**
@@ -52,7 +51,7 @@ class PackingMaterialDispatchController extends Controller
             Storage::disk('public')->put($filename2, $signature2);
 
 
-            $dispatch = PackingMaterialDispatch::create([
+            $dispatch = PackingMaterialTransaction::create([
                 'task_production_plan_id' => $data['task_production_plan_id'] ?? null,
                 'user_id' => $request->user()->id,
                 'reference' => $data['reference'],
@@ -60,11 +59,12 @@ class PackingMaterialDispatchController extends Controller
                 'responsable_signature' => $filename1,
                 'user_signature' => $filename2,
                 'observations' => $data['observations'],
+                'type' => $data['type'],
             ]);
 
             foreach ($data['items'] as $item) {
-                PackingMaterialDispatchDetails::create([
-                    'pm_dispatch_id' => $dispatch->id,
+                PackingMaterialTransactionDetail::create([
+                    'pm_transaction_id' => $dispatch->id,
                     'packing_material_id' => $item['packing_material_id'],
                     'quantity' => $item['quantity'],
                     'lote' => $item['lote'],
@@ -72,7 +72,7 @@ class PackingMaterialDispatchController extends Controller
                 ]);
             }
 
-            if ($task) {
+            if ($task && !$task->status > 1) {
                 $task->status = 1;
                 $task->save();
             }
@@ -90,7 +90,7 @@ class PackingMaterialDispatchController extends Controller
      */
     public function show(string $id)
     {
-        $dispatch = PackingMaterialDispatch::find($id);
+        $dispatch = PackingMaterialTransaction::find($id);
 
         if (!$dispatch) {
             return response()->json([
@@ -98,6 +98,6 @@ class PackingMaterialDispatchController extends Controller
             ], 404);
         }
 
-        return new PackingMaterialDispatchDetailsResource($dispatch);
+        return new PackingMaterialTransactionDetailsResource($dispatch);
     }
 }

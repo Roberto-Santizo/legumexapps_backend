@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('stock_keeping_units', function (Blueprint $table) {
-            $table->foreignId('box_id')->constrained()->on('packing_materials');
-            $table->foreignId('bag_id')->constrained()->on('packing_materials');;
-            $table->foreignId('bag_inner_id')->constrained()->on('packing_materials');;
+            $table->foreignId('box_id')->nullable()->constrained()->on('packing_materials');
+            $table->foreignId('bag_id')->nullable()->constrained()->on('packing_materials');;
+            $table->foreignId('bag_inner_id')->nullable()->constrained()->on('packing_materials');;
         });
     }
 

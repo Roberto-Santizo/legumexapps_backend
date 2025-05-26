@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('packing_material_dispatch_details', function (Blueprint $table) {
+        Schema::create('packing_material_transaction_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pm_dispatch_id')->constrained('packing_material_dispatches');
+            $table->foreignId('pm_transaction_id')->constrained('packing_material_transactions');
             $table->foreignId('packing_material_id')->constrained('packing_materials');
             $table->float('quantity');
             $table->string('lote');
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('packing_material_dispatch_details');
+        Schema::dropIfExists('packing_material_transaction_details');
     }
 };
