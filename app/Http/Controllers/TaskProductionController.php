@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ChangeAssignmentRequest;
 use App\Http\Resources\FinishedTaskProductionResource;
+use App\Http\Resources\TaskPackingMaterialReturnDetailsResource;
 use App\Http\Resources\TaskProductionPlanDetailResource;
 use App\Http\Resources\TaskProductionPlanDetailsResource;
 use App\Http\Resources\TaskProductionPlanResource;
@@ -24,6 +25,7 @@ use App\Models\Timeout;
 use App\Models\WeeklyProductionPlan;
 use App\Services\AssignEmployeeNotificationService;
 use App\Services\ChangeEmployeeNotificationService;
+use App\Services\ReturnPackingMaterialNotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -31,11 +33,13 @@ class TaskProductionController extends Controller
 {
     protected $emailService;
     protected $emailCreateAssigneeService;
+    protected $emailReturnPackingMaterialService;
 
-    public function __construct(ChangeEmployeeNotificationService $emailService, AssignEmployeeNotificationService $emailCreateAssigneeService)
+    public function __construct(ChangeEmployeeNotificationService $emailService, AssignEmployeeNotificationService $emailCreateAssigneeService, ReturnPackingMaterialNotificationService $emailReturnPackingMaterialService)
     {
         $this->emailService = $emailService;
         $this->emailCreateAssigneeService = $emailCreateAssigneeService;
+        $this->emailReturnPackingMaterialService = $emailReturnPackingMaterialService;
     }
 
 
@@ -385,6 +389,10 @@ class TaskProductionController extends Controller
             $task_production->end_date = Carbon::now();
             $task_production->status = 3;
             $task_production->save();
+
+            if ($task_production->total_lbs_bascula < $task_production->total_lbs) {
+                $this->emailReturnPackingMaterialService->sendNotification($task_production);
+            }
 
 
             return response()->json('Tarea Cerrada Correctamente', 200);
@@ -775,5 +783,24 @@ class TaskProductionController extends Controller
                 'msg' => 'Hubo un error al actualizar'
             ], 500);
         }
+    }
+
+    public function TaskDevolutionDetails(string $id)
+    {
+        $task = TaskProductionPlan::find($id);
+
+        if (!$task) {
+            return response()->json([
+                'msg' => 'Tarea No Encontrada'
+            ], 200);
+        }
+
+        if (!$task->end_date) {
+            return response()->json([
+                'msg' => 'La tarea no ha sido terminada'
+            ], 200);
+        }
+
+        return new TaskPackingMaterialReturnDetailsResource($task);
     }
 }

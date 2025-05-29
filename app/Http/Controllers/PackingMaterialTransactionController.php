@@ -7,6 +7,7 @@ use App\Http\Resources\PackingMaterialTransactionDetailsResource;
 use App\Http\Resources\PackingMaterialTransactionResource;
 use App\Models\PackingMaterialTransaction;
 use App\Models\PackingMaterialTransactionDetail;
+use App\Models\PackingMaterialWastage;
 use App\Models\TaskProductionPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -72,7 +73,16 @@ class PackingMaterialTransactionController extends Controller
                 ]);
             }
 
-            if ($task && !$task->status > 1) {
+            foreach ($data['wastages'] as $wastage) {
+                PackingMaterialWastage::create([
+                    'task_p_id' => $task->id,
+                    'packing_material_id' => $wastage['packing_material_id'],
+                    'quantity' => $wastage['quantity'],
+                    'lote' => $wastage['lote']
+                ]);
+            }
+
+            if ($task && !($task->status > 1)) {
                 $task->status = 1;
                 $task->save();
             }

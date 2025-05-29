@@ -34,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/tasks-production', TaskProductionController::class);
     Route::get('/tasks-production/finished/details/{id}', [TaskProductionController::class, 'FinishedTaskDetails']);
     Route::get('/tasks-production/details/{id}', [TaskProductionController::class, 'TaskDetails']);
+    Route::get('/tasks-production/devolution-details/{id}', [TaskProductionController::class, 'TaskDevolutionDetails']);
     Route::post('/tasks-production/new-task', [TaskProductionController::class, 'CreateNewTaskProduction']);
     Route::post('/tasks-production/create-assignee/{id}', [TaskProductionController::class, 'CreateAssignee']);
     Route::post('/tasks-production/{id}/add-timeout/open', [TaskProductionController::class, 'AddTimeOutOpen']);

@@ -33,6 +33,10 @@ class CreatePackingMaterialDispatchResource extends FormRequest
             'items.*.quantity' => ['required', 'numeric'],
             'items.*.lote' => ['required', 'string'],
             'items.*.destination' => ['sometimes'],
+            'wastages' => ['sometimes', 'array'],
+            'wastages.*.packing_material_id' => ['required', 'exists:packing_materials,id'],
+            'wastages.*.quantity' => ['required'],
+            'wastages.*.lote' => ['required'],
             'type' => ['required']
         ];
     }

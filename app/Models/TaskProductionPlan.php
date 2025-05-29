@@ -72,4 +72,9 @@ class TaskProductionPlan extends Model
         return $this->hasMany(PackingMaterialTransaction::class);
     }
 
+    public function wastages()
+    {
+        return $this->hasMany(PackingMaterialWastage::class,'task_p_id','id');
+    }
+
 }

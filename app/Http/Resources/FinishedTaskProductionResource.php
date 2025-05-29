@@ -42,7 +42,6 @@ class FinishedTaskProductionResource extends JsonResource
             'user' => $this->note->user->name
         ] : null;
 
-
         return [
             'id' => strval($this->id),
             'line' => $this->line->name,
@@ -62,7 +61,8 @@ class FinishedTaskProductionResource extends JsonResource
             'timeouts' => TaskProductionTimeoutResource::collection($this->timeouts),
             'employees' => EmployeeTaskProductionDetailResource::collection($this->employees),
             'history_operation_date' => TaskOperationDateBitacoraResource::collection($this->operationDateChanges),
-            'transactions' => PackingMaterialTransactionDetailsResource::collection($this->transactions)
+            'transactions' => PackingMaterialTransactionDetailsResource::collection($this->transactions),
+            'wastages' => PackingMaterialWastageResource::collection($this->wastages) 
         ];
     }
 }
