@@ -14,8 +14,8 @@ use App\Models\PartialClosure;
 use App\Models\TaskInsumos;
 use App\Models\TaskWeeklyPlan;
 use App\Models\WeeklyPlan;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Error;
 
 class TasksLoteController extends Controller
@@ -63,13 +63,13 @@ class TasksLoteController extends Controller
 
         $tasks = $query->get();
 
-        $tasks_filterd = $tasks->filter(function($task){
-            if($task->insumos->count() === 0){
+        $tasks_filterd = $tasks->filter(function ($task) {
+            if ($task->insumos->count() === 0) {
                 return $task;
-            }else{
+            } else {
                 $flag = $task->prepared_insumos ? true : false;
-                if($flag){
-                   return $task; 
+                if ($flag) {
+                    return $task;
                 }
             }
         });
@@ -416,17 +416,19 @@ class TasksLoteController extends Controller
             'date' => 'required',
             'tasks' => 'required'
         ]);
-        $week = Carbon::now()->weekOfYear;
+
         try {
+            $week = Carbon::parse($data['date'])->weekOfYear;
+            $now_week = Carbon::now()->weekOfYear;
+
+            if ($week < $now_week || $week > $now_week) {
+                return response()->json([
+                    'msg' => 'La fecha no se encuentra dentro de la semana de la tarea'
+                ], 500);
+            }
+
             foreach ($data['tasks'] as $id) {
                 $task_weekly_plan = TaskWeeklyPlan::find($id);
-
-                if ($task_weekly_plan->plan->week < $week) {
-                    return response()->json([
-                        'msg' => 'No se puede cambiar la fecha de operacion de una semana pasada'
-                    ], 422);
-                }
-
                 $task_weekly_plan->operation_date = $data['date'];
                 $task_weekly_plan->save();
             }

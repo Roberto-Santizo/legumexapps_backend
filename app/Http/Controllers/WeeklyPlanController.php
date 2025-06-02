@@ -75,12 +75,10 @@ class WeeklyPlanController extends Controller
         try {
             Excel::import(new WeeklyPlanImport, $request->file('file'));
 
-            return response()->json([
-                'message' => 'Plan Creado Correctamente'
-            ]);
+            return response()->json('Plan Creado Correctamente', 200);
         } catch (\Throwable  $th) {
             return response()->json([
-                'message' => $th->getMessage()
+                'msg' => $th->getMessage()
             ], 500);
         }
     }
@@ -183,12 +181,12 @@ class WeeklyPlanController extends Controller
             });
         }
 
-        if($request->query('finca')){
+        if ($request->query('finca')) {
             $all_tasks = $all_tasks->filter(function ($task) use ($request) {
                 return $task->plan && $task->plan->finca->id == $request->query('finca');
             });
         }
-        
+
         if ($request->query('task')) {
             $all_tasks = $all_tasks->where('tarea_id', $request->query('task'));
         }
@@ -220,19 +218,12 @@ class WeeklyPlanController extends Controller
 
         $weekly_plan = $query->get();
 
-        if (!$weekly_plan) {
-            return response()->json([
-                'errors' => 'El plan no existe'
-            ], 404);
-        }
-
-        $weekly_plan = $query->get();
-
         if ($weekly_plan->isEmpty()) {
             return response()->json([
-                'errors' => 'El plan no existe'
+                'msg' => 'No se encontraron datos de la semana actual',
             ], 404);
         }
+
 
         $initial_date = Carbon::now()->setISODate($weekly_plan->first()->year, $weekly_plan->first()->week)->startOfWeek();
 
