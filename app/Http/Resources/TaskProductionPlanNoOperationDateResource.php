@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CarriersResource extends JsonResource
+class TaskProductionPlanNoOperationDateResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,10 +16,10 @@ class CarriersResource extends JsonResource
     {
         return [
             'id' => strval($this->id),
-            'name' => $this->name,
-            'code' => $this->code,
-            'plates' => PlatesResource::collection($this->plates),
-            'drivers' => DriversResource::collection($this->drivers)
+            'sku' => $this->line_sku->sku->code,  
+            'line' => $this->line->name,
+            'total_lbs' => $this->total_lbs,
+            'destination' => $this->destination
         ];
     }
 }

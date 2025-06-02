@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\SKUResource;
-use App\Http\Resources\SKUSelectResource;
 use App\Models\StockKeepingUnit;
 use Illuminate\Http\Request;
 
@@ -12,18 +11,14 @@ class SKUController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $skus = StockKeepingUnit::paginate(10);
-
+        if ($request->query('paginated')) {
+            $skus = StockKeepingUnit::paginate(10);
+        } else {
+            $skus = StockKeepingUnit::get();
+        }
         return SKUResource::collection($skus);
-    }
-
-    public function GetAllSKU()
-    {
-        $skus = StockKeepingUnit::select('id', 'code')->get();
-
-        return SKUSelectResource::collection($skus);
     }
 
     /**

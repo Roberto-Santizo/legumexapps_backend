@@ -7,7 +7,7 @@ use App\Models\TaskCrop;
 
 class TaskCropController extends Controller
 {
-    public function GetAllTasksCrop()
+    public function Index()
     {
         return TareaCropResource::collection(TaskCrop::all());
     }

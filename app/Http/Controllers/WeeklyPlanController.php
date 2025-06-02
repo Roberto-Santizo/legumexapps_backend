@@ -48,19 +48,16 @@ class WeeklyPlanController extends Controller
                 $query->where('name', 'LIKE', '%' . $permission . '%');
             })->where(function ($query) use ($week) {
                 $query->where('week', $week)->orWhere('week', $week - 1);
-            })->where('year', $year)->orderBy('created_at', 'DESC')->paginate(10);
+            })->where('year', $year)->orderBy('created_at', 'DESC');
         } else {
-            $query->orderBy('created_at', 'DESC')->paginate(10);
+            $query->orderBy('created_at', 'DESC');
         }
 
-        return new WeeklyPlanCollection($query->paginate(10));
-    }
-
-
-
-    public function GetAllPlans()
-    {
-        return new WeeklyPlanCollection(WeeklyPlan::all());
+        if ($request->query('paginated')) {
+            return new WeeklyPlanCollection($query->paginate(10));
+        } else {
+            return new WeeklyPlanCollection($query->get());
+        }
     }
 
     /**

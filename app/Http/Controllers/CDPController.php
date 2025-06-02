@@ -23,24 +23,48 @@ class CDPController extends Controller
     {
         $query = PlantationControl::query();
 
-        if($request->query('cdp')){
-            $query->where('name',$request->query('cdp'));
+        if ($request->query('cdp')) {
+            $query->where('name', $request->query('cdp'));
         }
 
-        if($request->query('end_date')){
-            $query->whereDate('end_date',$request->query('end_date'));
+        if ($request->query('end_date')) {
+            $query->whereDate('end_date', $request->query('end_date'));
         }
 
-        if($request->query('start_date')){
-            $query->whereDate('start_date',$request->query('start_date'));
+        if ($request->query('start_date')) {
+            $query->whereDate('start_date', $request->query('start_date'));
         }
 
-        return new PlantationControlCollection($query->paginate(10));
+        if ($request->query('paginated')) {
+            return new PlantationControlCollection($query->paginate(10));
+        } else {
+            return new PlantationControlCollection($query->get());
+        }
     }
 
-    public function GetAllCDPS()
+    public function show(string $id)
     {
-        return new PlantationControlCollection(PlantationControl::all());
+        $lote_plantation_control = LotePlantationControl::find($id);
+
+        if (!$lote_plantation_control) {
+            return response()->json([
+                'msg' => 'No se encontró el CDP'
+            ], 404);
+        }
+
+        $data_lote = [
+            'lote' => $lote_plantation_control->lote->name,
+            'cdp' => $lote_plantation_control->cdp->name,
+            'start_date_cdp' => $lote_plantation_control->cdp->start_date,
+            'end_date_cdp' => $lote_plantation_control->cdp->end_date ?? null,
+        ];
+
+        $data = TaskCDPDetailResource::collection($lote_plantation_control->tasks)->groupBy(fn($task) => $task->plan->week);
+
+        return response()->json([
+            'data_lote' => $data_lote,
+            'data' => $data
+        ]);
     }
 
     /**
@@ -66,35 +90,6 @@ class CDPController extends Controller
                 'errors' => 'Hubo un error al crear el cdp'
             ], 500);
         }
-    }
-
-    public function GetCDPSByLoteId(string $id)
-    {
-        $lote = Lote::find($id);
-        return response()->json([
-            'data' => LotePlantationControlResource::collection($lote->lote_cdps)
-        ]);
-    }
-
-    public function GetCDPInfo(Request $request)
-    {
-        $data = $request->validate([
-            'lote_plantation_control_id' => 'required'
-        ]);
-        $lote_plantation_control = LotePlantationControl::find($data['lote_plantation_control_id']);
-        $data_lote = [
-            'lote' => $lote_plantation_control->lote->name,
-            'cdp' => $lote_plantation_control->cdp->name,
-            'start_date_cdp' => $lote_plantation_control->cdp->start_date,
-            'end_date_cdp' => $lote_plantation_control->cdp->end_date ?? null,
-        ];
-
-        $data = TaskCDPDetailResource::collection($lote_plantation_control->tasks)->groupBy(fn($task) => $task->plan->week);
-
-        return response()->json([
-            'data_lote' => $data_lote,
-            'data' => $data
-        ]);
     }
 
     public function UploadCDPS(Request $request)

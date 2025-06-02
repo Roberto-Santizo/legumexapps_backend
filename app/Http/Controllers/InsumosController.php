@@ -20,19 +20,18 @@ class InsumosController extends Controller
         $query = Insumo::query();
 
         if ($request->query('code')) {
-            $query->where('code', $request->query('code'));
+            $query->where('code', 'LIKE' . '%' . $request->query('code') . '%');
         };
 
         if ($request->query('name')) {
             $query->where('name', 'LIKE', '%' . $request->query('name') . '%');
         };
 
-        return new InsumoCollection($query->paginate(10));
-    }
-
-    public function getAllInsumos()
-    {
-        return new InsumoCollection(Insumo::all());
+        if ($request->query('paginated')) {
+            return new InsumoCollection($query->paginate(10));
+        } else {
+            return new InsumoCollection($query->get());
+        }
     }
 
     /**
@@ -57,13 +56,6 @@ class InsumosController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
 
     public function UploadInsumos(Request $request)
     {

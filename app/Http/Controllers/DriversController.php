@@ -12,15 +12,13 @@ class DriversController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $drivers = Driver::paginate(10);
-        return DriversResource::collection($drivers);
-    }
-
-    public function getAllPlatesByCarrier(string $id)
-    {
-        $drivers = Driver::where('carrier_id',$id)->get();
+        if ($request->query('paginated')) {
+            $drivers = Driver::paginate(10);
+        } else {
+            $drivers = Driver::all();
+        }
         return DriversResource::collection($drivers);
     }
 
@@ -52,9 +50,7 @@ class DriversController extends Controller
                 'carrier_id' => $carrier->id
             ]);
 
-            return response()->json([
-                'msg' => 'Created Successfully'
-            ], 200);
+            return response()->json('Piloto Creado Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()

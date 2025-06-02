@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\TimeoutResource;
-use App\Http\Resources\TimeoutSelectResource;
 use App\Models\Timeout;
 use Illuminate\Http\Request;
 
@@ -12,16 +11,14 @@ class TimeOutController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $timeouts = Timeout::paginate(10);
+        if($request->query('paginated')) {
+            $timeouts = Timeout::paginate(10);
+        } else {
+            $timeouts = Timeout::all();
+        }
         return TimeoutResource::collection($timeouts);
-    }
-
-    public function GetAllTimeouts()
-    {
-        $timeouts = Timeout::all();
-        return TimeoutSelectResource::collection($timeouts);
     }
 
     /**

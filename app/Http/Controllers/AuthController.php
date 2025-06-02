@@ -10,47 +10,42 @@ class AuthController extends Controller
 {
     public function store(LoginRequest $request)
     {
-        $data = $request->validate([
-            'username' => ['required', 'exists:users,username'],
-            'password' => ['required'],
-        ]);
+        $data = $request->validated();
 
-        if (!Auth::attempt($data)) {
+        try {
+            if (!Auth::attempt($data)) {
+                return response()->json([
+                    'errors' => ['Credenciales Incorrectas']
+                ], 422);
+            }
+
+            $user = Auth::user();
             return response()->json([
-                'errors' => ['Credenciales Incorrectas']
-            ], 422);
+                'token' => $user->createToken('token')->plainTextToken,
+                'user' => [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'username' => $user->username,
+                ]
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
         }
-
-        $user = Auth::user()->load(['roles:id,name', 'permissions:id,name']); 
-
-        $role = $user->getRoleNames()->first();
-        return response()->json([
-            'token' => $user->createToken('token')->plainTextToken,
-            'user' => [
-                'id' => strval($user->id),
-                'name' => $user->name,
-                'email' => $user->email,
-                'username' => $user->username,
-                'status' => $user->status,
-                'roles' => $role,
-                'permissions' => $user->permissions->map(function($permission){
-                    return [
-                        'id' => $permission->id,
-                        'name' => $permission->name,
-                    ];
-                }),
-            ]
-        ]);
     }
 
 
     public function logout(Request $request)
     {
-        $user = $request->user();
-        $user->currentAccessToken()->delete();
-
-        return [
-            'user' => null
-        ];
+        try {
+            $user = $request->user();
+            $user->currentAccessToken()->delete();
+            return response()->json('Sesión Cerrada Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
     }
 }

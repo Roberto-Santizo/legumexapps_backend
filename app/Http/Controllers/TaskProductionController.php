@@ -13,7 +13,6 @@ use App\Models\LinePosition;
 use App\Models\LineStockKeepingUnits;
 use App\Models\StockKeepingUnit;
 use App\Models\TaskOperationDateBitacora;
-use App\Models\TaskOperationDateBitacoras;
 use App\Models\TaskProductionEmployee;
 use App\Models\TaskProductionEmployeesBitacora;
 use App\Models\TaskProductionPerformance;
@@ -27,7 +26,6 @@ use App\Services\AssignEmployeeNotificationService;
 use App\Services\ChangeEmployeeNotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class TaskProductionController extends Controller
 {
@@ -495,32 +493,19 @@ class TaskProductionController extends Controller
         }
 
         try {
-            $last_task = TaskProductionPlan::whereDate('operation_date', $data['date'])->orderBy('priority', 'DESC')->where('line_id', $task_production->line_id)->get()->first();
+            $last_task = TaskProductionPlan::whereDate('operation_date', $data['date'])->where('line_id', $task_production->line_id)->get()->first();
 
             TaskOperationDateBitacora::create([
                 'task_production_plan_id' => $task_production->id,
-                'original_date' => $task_production->operation_date,
+                'original_date' => $old_date,
                 'new_date' => $data['date'],
                 'reason' => $data['reason'],
                 'user_id' => $user->id
             ]);
 
-            if ($last_task) {
-                $task_production->priority = $last_task->priority + 1;
-            } else {
-                $task_production->priority = 1;
-            }
+
             $task_production->operation_date = $data['date'];
             $task_production->save();
-
-            $tasks_old_date = TaskProductionPlan::whereDate('operation_date', $old_date)->orderBy('priority', 'ASC')->where('line_id', $task_production->line_id)->get();
-
-            if ($tasks_old_date) {
-                foreach ($tasks_old_date as $key => $value) {
-                    $value->priority = $key + 1;
-                    $value->save();
-                }
-            }
 
             if ($last_task) {
                 if ($task_production->employees->count() > 0) {
@@ -546,6 +531,31 @@ class TaskProductionController extends Controller
         } catch (\Throwable $th) {
             return response()->json([
                 'errors' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function AssignOperationDate(Request $request, string $id)
+    {
+        $data = $request->validate([
+            'date' => 'required'
+        ]);
+
+        $task = TaskProductionPlan::find($id);
+        if (!$task) {
+            return response()->json([
+                'msg' => 'Tarea no encontrada'
+            ], 404);
+        }
+
+        try {
+            $task->operation_date = $data['date'];
+            $task->save();
+
+            return response()->json('Tarea Actualizada Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => 'Hubo un error'
             ], 500);
         }
     }

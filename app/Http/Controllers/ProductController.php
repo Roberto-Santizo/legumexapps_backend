@@ -13,15 +13,13 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::paginate(10);
-        return ProductResource::collection($products);
-    }
-
-    public function GetAllProducts()
-    {
-        $products = Product::all();
+        if($request->query('paginated')){
+            $products = Product::paginate(10);
+        }else{
+            $products = Product::all();
+        }
         return ProductResource::collection($products);
     }
 
@@ -124,16 +122,5 @@ class ProductController extends Controller
                 'msg' => $th->getMessage()
             ], 500);
         }
-    }
-
-
-
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }
