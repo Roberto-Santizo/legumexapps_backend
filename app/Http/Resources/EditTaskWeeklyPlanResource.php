@@ -23,6 +23,7 @@ class EditTaskWeeklyPlanResource extends JsonResource
             'end_time' => $this->end_date ? $this->end_date->format('H:i:s') : null,
             'start_date' => $this->start_date ? $this->start_date->format('Y-m-d') : null,
             'start_time' => $this->start_date ? $this->start_date->format('H:i:s') : null,
+            'insumos' => TaskInsumosResource::collection($this->insumos)
         ];
     }
 }

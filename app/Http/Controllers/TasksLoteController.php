@@ -14,8 +14,8 @@ use App\Models\PartialClosure;
 use App\Models\TaskInsumos;
 use App\Models\TaskWeeklyPlan;
 use App\Models\WeeklyPlan;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Error;
 
 class TasksLoteController extends Controller
@@ -63,11 +63,22 @@ class TasksLoteController extends Controller
 
         $tasks = $query->get();
 
+        $tasks_filterd = $tasks->filter(function ($task) {
+            if ($task->insumos->count() === 0) {
+                return $task;
+            } else {
+                $flag = $task->prepared_insumos ? true : false;
+                if ($flag) {
+                    return $task;
+                }
+            }
+        });
+
         return [
             'week' => $task_without_filter->plan->week,
             'finca' => $task_without_filter->plan->finca->name,
             'lote' => $task_without_filter->lotePlantationControl->lote->name,
-            'data' => TaskWeeklyPlanResource::collection($tasks),
+            'data' => TaskWeeklyPlanResource::collection($tasks_filterd),
         ];
     }
 
@@ -405,21 +416,50 @@ class TasksLoteController extends Controller
             'date' => 'required',
             'tasks' => 'required'
         ]);
-        $week = Carbon::now()->weekOfYear;
+
         try {
+            $week = Carbon::parse($data['date'])->weekOfYear;
+            $now_week = Carbon::now()->weekOfYear;
+
+            if ($week < $now_week || $week > $now_week) {
+                return response()->json([
+                    'msg' => 'La fecha no se encuentra dentro de la semana de la tarea'
+                ], 500);
+            }
+
             foreach ($data['tasks'] as $id) {
                 $task_weekly_plan = TaskWeeklyPlan::find($id);
-
-                if ($task_weekly_plan->plan->week < $week) {
-                    return response()->json([
-                        'msg' => 'No se puede cambiar la fecha de operacion de una semana pasada'
-                    ], 422);
-                }
-
                 $task_weekly_plan->operation_date = $data['date'];
                 $task_weekly_plan->save();
             }
             return response()->json('Fecha de operación actualizada correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function PreparedInsumos(string $id)
+    {
+        $task = TaskWeeklyPlan::find($id);
+
+        if (!$task) {
+            return response()->json([
+                'msg' => 'Tarea no encontrada'
+            ], 404);
+        }
+
+        try {
+            if ($task->insumos->count() > 0) {
+                $task->prepared_insumos = true;
+                $task->save();
+            } else {
+                return response()->json([
+                    'msg' => 'La tarea no cuenta con insumos relacionados'
+                ], 422);
+            }
+            return response()->json('Información actualizada correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()

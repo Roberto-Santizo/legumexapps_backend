@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\TasksNoOperationDateResource;
 use App\Http\Resources\TasksWeeklyPlanForCalendarResource;
+use App\Http\Resources\TaskWeeklyPlanByDateResource;
+use Exception;
 use App\Models\WeeklyPlan;
 use Illuminate\Http\Request;
 use App\Imports\WeeklyPlanImport;
@@ -70,12 +72,10 @@ class WeeklyPlanController extends Controller
         try {
             Excel::import(new WeeklyPlanImport, $request->file('file'));
 
-            return response()->json([
-                'message' => 'Plan Creado Correctamente'
-            ]);
+            return response()->json('Plan Creado Correctamente', 200);
         } catch (\Throwable  $th) {
             return response()->json([
-                'message' => $th->getMessage()
+                'msg' => $th->getMessage()
             ], 500);
         }
     }
@@ -147,53 +147,131 @@ class WeeklyPlanController extends Controller
         ]);
     }
 
-    public function GetTasksWithNoPlanificationDate(Request $request, string $id)
+    public function GetTasksWithNoPlanificationDate(Request $request)
     {
-        $weekly_plan = WeeklyPlan::find($id);
+        $query = WeeklyPlan::query();
+
+        if ($request->query('weekly_plan')) {
+            $query->where('id', $request->query('weekly_plan'));
+        } else {
+            $week = Carbon::now()->weekOfYear;
+            $year = Carbon::now()->year;
+            $query->where('week', $week)->where('year', $year);
+        }
+
+        $weekly_plan = $query->get();
+
         if (!$weekly_plan) {
             return response()->json([
                 'errors' => 'El plan no existe'
             ], 404);
         }
 
-        $query = TaskWeeklyPlan::query();
-        $query->where('weekly_plan_id', $id);
+        $all_tasks = $weekly_plan->flatMap(function ($plan) {
+            $tasks = $plan->tasks()->where('operation_date', null)->get();
+            return $tasks;
+        });
 
         if ($request->query('lote')) {
-            $query->whereHas('lotePlantationControl', function ($query) {
-                $query->where('lote_id', request()->query('lote'));
+            $all_tasks = $all_tasks->filter(function ($task) use ($request) {
+                return $task->lotePlantationControl && $task->lotePlantationControl->lote_id == $request->query('lote');
+            });
+        }
+
+        if ($request->query('finca')) {
+            $all_tasks = $all_tasks->filter(function ($task) use ($request) {
+                return $task->plan && $task->plan->finca->id == $request->query('finca');
             });
         }
 
         if ($request->query('task')) {
-            $query->where('tarea_id', request()->query('task'));
+            $all_tasks = $all_tasks->where('tarea_id', $request->query('task'));
         }
 
-        $query->where('operation_date', null);
 
-
-        return TasksNoOperationDateResource::collection($query->get());
+        return TasksNoOperationDateResource::collection($all_tasks);
     }
 
-    public function GetTasksForCalendar(string $id)
+    public function GetTasksForCalendar(Request $request)
     {
-        $weekly_plan = WeeklyPlan::find($id);
-        if (!$weekly_plan) {
+        $query = WeeklyPlan::query();
+        $adminroles = ['admin', 'adminagricola'];
+        $role = $request->user()->getRoleNames();
+
+        if ($request->query('weekly_plan')) {
+            $query->where('id', $request->query('weekly_plan'));
+        } else {
+            $week = Carbon::now()->weekOfYear;
+            $year = Carbon::now()->year;
+            $query->where('week', $week)->where('year', $year);
+        }
+
+
+        if (!in_array($role[0], $adminroles)) {
+            $query->whereHas('finca', function ($q) use ($role) {
+                $q->where('name', 'like', '%' . $role[0] . '%');
+            });
+        }
+
+        $weekly_plan = $query->get();
+
+        if ($weekly_plan->isEmpty()) {
             return response()->json([
-                'errors' => 'El plan no existe'
+                'msg' => 'No se encontraron datos de la semana actual',
             ], 404);
         }
 
 
-        $initial_date = Carbon::now()->setISODate($weekly_plan->year, $weekly_plan->week)->startOfWeek();
-        $tasks_with_operation_date = $weekly_plan->tasks()->whereNot('operation_date', null)->get()->count();
-        $tasks_without_operation_date = $weekly_plan->tasks()->where('operation_date', null)->get()->count();
-        $tasks = TasksWeeklyPlanForCalendarResource::collection($weekly_plan->tasks()->whereNot('operation_date', null)->get());
+        $initial_date = Carbon::now()->setISODate($weekly_plan->first()->year, $weekly_plan->first()->week)->startOfWeek();
+
+        $all_tasks = $weekly_plan->flatMap(function ($plan) {
+            $tasks = $plan->tasks()->whereNot('operation_date', null)->get();
+            return $tasks;
+        });
+
+        $tasks_with_operation_date = $all_tasks->whereNotNull('operation_date')->count();
+        $tasks_without_operation_date = $all_tasks->whereNull('operation_date')->count();
+
+        $tasks = TasksWeeklyPlanForCalendarResource::collection($all_tasks);
+
+
         return response()->json([
             'data' => $tasks,
             'initial_date' => $initial_date->format('Y-m-d'),
             'tasks_with_operation_date' => $tasks_with_operation_date,
             'tasks_without_operation_date' => $tasks_without_operation_date,
         ]);
+    }
+
+    public function GetTasksPlannedByDate(Request $request)
+    {
+        $query = WeeklyPlan::query();
+        if ($request->query('weekly_plan')) {
+            $query->where('id', $request->query('weekly_plan'));
+        } else {
+            $week = Carbon::now()->weekOfYear;
+            $year = Carbon::now()->year;
+            $query->where('week', $week)->where('year', $year);
+        }
+
+        $weekly_plan = $query->first();
+        $tasks = TaskWeeklyPlan::query();
+
+        $tasks->where('weekly_plan_id', $weekly_plan->id);
+
+        if ($request->query('lote')) {
+            $tasks->whereHas('lotePlantationControl', function ($query) use ($request) {
+                $query->where('lote_id', $request->query('lote'));
+            });
+        }
+
+        if ($request->query('task')) {
+            $tasks->where('tarea_id', $request->query('task'));
+        }
+
+        $tasks->whereDate('operation_date', $request->query('date'));
+
+        $tasks->whereHas('insumos');
+        return TaskWeeklyPlanByDateResource::collection($tasks->get());
     }
 }
