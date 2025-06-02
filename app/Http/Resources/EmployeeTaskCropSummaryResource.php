@@ -19,7 +19,7 @@ class EmployeeTaskCropSummaryResource extends JsonResource
             'daily_assignment_id' => $this->daily_assignment_id,
             'name' => $this->name,
             'code' => $this->code,
-            'lbs' => $this->lbs,
+            'lbs' => $this->lbs ?? 0,
             'date' => $this->assignment->start_date
         ];
     }

@@ -183,7 +183,8 @@ class TasksCropController extends Controller
 
     public function TaskCropDetail(string $id)
     {
-        $task = TaskCropWeeklyPlan::find($id);
+        $assigment = DailyAssignments::find($id);
+        $task = $assigment->TaskCropWeeklyPlan;
         $plan = $task->plan;
         return response()->json([
             'finca' => $plan->finca->name,
