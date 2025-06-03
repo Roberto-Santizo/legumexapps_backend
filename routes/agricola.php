@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/plans', WeeklyPlanController::class);
     Route::get('/plans/tasks-no-planification-date/{id}', [WeeklyPlanController::class, 'GetTasksWithNoPlanificationDate']);
     Route::get('/plans/tasks-for-calendar/{id}', [WeeklyPlanController::class, 'GetTasksForCalendar']);
+    Route::get('/plans/tasks-planned-by-date/finca', [WeeklyPlanController::class, 'GetTasksPlannedByDate']);
 
     Route::apiResource('/tasks-lotes', TasksLoteController::class);
     Route::get('/tasks-lotes/edit/{id}', [TasksLoteController::class, 'GetTaskForEdit']);

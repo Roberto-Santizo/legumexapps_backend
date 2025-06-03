@@ -27,7 +27,7 @@ class TaskPackingMaterialReturnDetailsResource extends JsonResource
             $this->line_sku->sku->bag_inner_id => $inner_bags,
         ];
 
-        $flag = $this->transactions()->where('type',2)->exists() ? true : false;
+        $flag = $this->transactions()->where('type', 2)->exists() ? true : false;
         return [
             'available' => !$flag,
             'items' => $first_transaction->items->map(function ($item) use ($new_quantity) {
