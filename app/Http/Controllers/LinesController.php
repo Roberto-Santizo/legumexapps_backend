@@ -31,7 +31,7 @@ class LinesController extends Controller
 
     public function GetAllLinesBySku(string $id)
     {
-        $lines = Line::select('id', 'code', 'total_persons', 'shift', 'name')
+        $lines = Line::select('id', 'code', 'shift', 'name')
             ->whereHas('skus', function ($query) use ($id) {
                 $query->where('sku_id', $id);
             })
