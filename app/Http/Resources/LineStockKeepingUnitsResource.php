@@ -21,8 +21,9 @@ class LineStockKeepingUnitsResource extends JsonResource
             'sku' => $this->sku->code,
             'client' => $this->sku->client_name,
             'product' => $this->sku->product_name,
+            'payment_method' => $this->payment_method,
             'shift' => $shift,
-            'performance' => $this->lbs_performance ? strval($this->lbs_performance) : 'SIN RENDIMIENTO REGISTRADO',
+            'performance' => $this->lbs_performance ? $this->lbs_performance : null,
             'accepted_percentage' => $this->accepted_percentage
         ];
     }

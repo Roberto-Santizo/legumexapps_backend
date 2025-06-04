@@ -40,7 +40,8 @@ class LineStockKeepingUnitsController extends Controller
     {
         $data = $request->validate([
             'performance' => 'sometimes',
-            'accepted_percentage' => 'required'
+            'accepted_percentage' => 'required',
+            'payment_method' => 'required'
         ]);
 
         $line_sku = LineStockKeepingUnits::find($id);
@@ -54,6 +55,7 @@ class LineStockKeepingUnitsController extends Controller
         try {
             $line_sku->lbs_performance = $data['performance'];
             $line_sku->accepted_percentage = $data['accepted_percentage'];
+            $line_sku->payment_method = $data['payment_method'];
 
             $line_sku->save();
 
