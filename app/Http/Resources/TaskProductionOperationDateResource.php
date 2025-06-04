@@ -23,13 +23,11 @@ class TaskProductionOperationDateResource extends JsonResource
         ];
 
         $working = ($this->start_date && !$this->end_date) ? true : false;
-        $boxes = round($this->total_lbs / $this->line_sku->sku->presentation, 2);
-        $bags = $boxes * $this->line_sku->sku->config_bag;
-        $inner_bags = $bags * $this->line_sku->sku->config_inner_bag;
-
+        $total_lbs =  $this->total_lbs;
         return [
             'id' => strval($this->id),
             'sku' => $this->line_sku->sku->code,
+            'product' => $this->line_sku->sku->product_name,
             'line' => $this->line->name,
             'total_lbs' => $this->total_lbs,
             'finished' => $this->end_date ? true : false,
@@ -38,32 +36,9 @@ class TaskProductionOperationDateResource extends JsonResource
             'status' => $status[$this->status][0],
             'status_id' => strval($this->status),
             'color' => $status[$this->status][1],
-            'box' => $this->line_sku->sku->box->name,
-            'bag' => $this->line_sku->sku->bag->name,
-            'bag_inner'  => $this->line_sku->sku->bag_inner->name,
-            'recipe' => [
-                [
-                    "packing_material_id" => strval($this->line_sku->sku->box_id),
-                    "name" => $this->line_sku->sku->box->name,
-                    "quantity" => $boxes,
-                    "lote" => "",
-                    "destination" => null
-                ],
-                [
-                    "packing_material_id" => strval($this->line_sku->sku->bag_id),
-                    "name" => $this->line_sku->sku->bag->name,
-                    "quantity" => $bags,
-                    "lote" => "",
-                    "destination" => null
-                ],
-                [
-                    "packing_material_id" => strval($this->line_sku->sku->bag_inner_id),
-                    "name" => $this->line_sku->sku->bag_inner->name,
-                    "quantity" => $inner_bags,
-                    "lote" => "",
-                    "destination" => null
-                ]
-            ]
+            'recipe' => $this->line_sku->sku->items->map(function ($item) use ($total_lbs) {
+                return new TaskProductionRecipeResource($item, $total_lbs);
+            })
         ];
     }
 }

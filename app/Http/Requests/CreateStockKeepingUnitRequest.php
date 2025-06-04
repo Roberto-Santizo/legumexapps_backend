@@ -25,16 +25,13 @@ class CreateStockKeepingUnitRequest extends FormRequest
             'code' => ['required', 'unique:stock_keeping_units,code'],
             'product_name' => ['required'],
             'client_name' => ['required'],
-            'box_id' => ['required', 'exists:packing_materials,id'],
-            'bag_id' => ['required', 'exists:packing_materials,id'],
-            'bag_inner_id' => ['required', 'exists:packing_materials,id'],
             'presentation' => ['sometimes'],
             'boxes_pallet' => ['sometimes'],
-            'config_box' => ['sometimes'],
-            'config_bag' => ['sometimes'],
-            'config_inner_bag' => ['sometimes'],
             'pallets_container' => ['sometimes'],
             'hours_container' => ['sometimes'],
+            'recipe' => ['array', 'sometimes'],
+            'recipe.*.packing_material_id' => ['required', 'exists:packing_materials,id'],
+            'recipe.*.lbs_per_item' => ['required'],
         ];
     }
 
@@ -45,12 +42,6 @@ class CreateStockKeepingUnitRequest extends FormRequest
             'code.unique' => 'El código ya existe',
             'product_name.required' => 'El nombre del producto es requerido',
             'client_name.required' => 'El nombre del cliente es requerido',
-            'box_id.required' => 'La referencia de la caja es obligatoria',
-            'box_id.exists' => 'La referencia de la caja no existe',
-            'bag_id.required' => 'La referencia de la bolsa es obligatoria',
-            'bag_id.exists' => 'La referencia de la bolsa no existe',
-            'bag_inner_id.required' => 'La referencia de la bolsa inner es obligatoria',
-            'bag_inner_id.exists' => 'La referencia de la bolsa inner no existe',
         ];
     }
 }

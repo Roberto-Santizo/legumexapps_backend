@@ -48,7 +48,7 @@ class TaskProductionController extends Controller
      */
     public function index()
     {
-        $tasks_production_plan = TaskProductionPlan::all();
+        $tasks_production_plan = TaskProductionPlan::whereNull('end_date')->get();
         return TaskProductionPlanResource::collection($tasks_production_plan);
     }
 
