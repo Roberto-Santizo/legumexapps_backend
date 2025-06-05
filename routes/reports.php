@@ -8,5 +8,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/report/insumos/{id}', [ReportController::class, 'DownloadReportInsumos']);
     Route::get('/report/planilla/{id}', [ReportController::class, 'DownloadReportPlanilla']);
     
-    Route::post('/report-production/{weekly_production_plan}/{line_id}', [ReportController::class, 'PlanillaProduccion']);
+    Route::get('/report-production/{weekly_production_plan}/{line_id}', [ReportController::class, 'PlanillaProduccion']);
 });

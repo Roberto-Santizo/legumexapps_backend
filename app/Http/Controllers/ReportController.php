@@ -97,7 +97,7 @@ class ReportController extends Controller
         }
 
         try {
-            $tasks = TaskProductionPlan::where('weekly_production_plan_id', $weekly_plan_production->id)->where('line_id', $line->id)->whereNot('end_date', null)->get();
+            $tasks = TaskProductionPlan::where('weekly_production_plan_id', $weekly_plan_production->id)->where('line_id', $line->id)->whereNotNull('end_date')->get();
             $file = Excel::raw(new PlanillaProductionExport($tasks, $line), \Maatwebsite\Excel\Excel::XLSX);
             $fileName = 'PLANILLA' . ' ' . $line->code . ' S' . $weekly_plan_production->week;
             return response()->json([
