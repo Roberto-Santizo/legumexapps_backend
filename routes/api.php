@@ -7,3 +7,4 @@ require_once __DIR__ . '/reports.php';
 require_once __DIR__ . '/calidad.php';
 require_once __DIR__ . '/production.php';
 require_once __DIR__ . '/bodega.php';
+require_once __DIR__ . '/reports.php';

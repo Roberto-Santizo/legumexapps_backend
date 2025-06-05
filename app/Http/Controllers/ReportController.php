@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\FincaPlanillaExport;
 use App\Exports\InsumosExport;
 use App\Exports\PlanillaProductionExport;
 use App\Exports\WeeklyPlanExport;
@@ -21,6 +22,7 @@ class ReportController extends Controller
         ]);
 
         $fileName = 'Reporte Plan Semanal.xlsx';
+
         try {
             $file = Excel::raw(new WeeklyPlanExport($data['data']), \Maatwebsite\Excel\Excel::XLSX);
             return response()->json([
@@ -40,6 +42,32 @@ class ReportController extends Controller
         $fileName = 'Reporte Insumo.xlsx';
         try {
             $file = Excel::raw(new InsumosExport($weekly_plan), \Maatwebsite\Excel\Excel::XLSX);
+            return response()->json([
+                'fileName' => $fileName,
+                'file' => base64_encode($file)
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function DownloadReportPlanilla(string $id)
+    {
+        $weekly_plan = WeeklyPlan::find($id);
+
+        if (!$weekly_plan) {
+            return response()->json([
+                'msg' => 'El Plan Semana no Existe'
+            ], 404);
+        }
+
+        try {
+            $file = Excel::raw(new FincaPlanillaExport($weekly_plan), \Maatwebsite\Excel\Excel::XLSX);
+
+            $fileName = 'Planilla Semana ' . $weekly_plan->week . '.xlsx';
+
             return response()->json([
                 'fileName' => $fileName,
                 'file' => base64_encode($file)
