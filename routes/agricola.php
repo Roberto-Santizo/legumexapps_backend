@@ -8,7 +8,6 @@ use App\Http\Controllers\FincaController;
 use App\Http\Controllers\InsumosController;
 use App\Http\Controllers\LoteController;
 use App\Http\Controllers\RecipeController;
-use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TareaController;
 use App\Http\Controllers\TaskCropController;
 use App\Http\Controllers\TasksCropController;

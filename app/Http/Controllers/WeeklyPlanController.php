@@ -147,23 +147,16 @@ class WeeklyPlanController extends Controller
         ]);
     }
 
-    public function GetTasksWithNoPlanificationDate(Request $request)
+    public function GetTasksWithNoPlanificationDate(Request $request, string $id)
     {
         $query = WeeklyPlan::query();
-
-        if ($request->query('weekly_plan')) {
-            $query->where('id', $request->query('weekly_plan'));
-        } else {
-            $week = Carbon::now()->weekOfYear;
-            $year = Carbon::now()->year;
-            $query->where('week', $week)->where('year', $year);
-        }
+        $query->where('id', $id);
 
         $weekly_plan = $query->get();
 
-        if (!$weekly_plan) {
+        if ($weekly_plan->isEmpty()) {
             return response()->json([
-                'errors' => 'El plan no existe'
+                'msg' => 'El plan no existe'
             ], 404);
         }
 
@@ -192,20 +185,12 @@ class WeeklyPlanController extends Controller
         return TasksNoOperationDateResource::collection($all_tasks);
     }
 
-    public function GetTasksForCalendar(Request $request)
+    public function GetTasksForCalendar(Request $request, string $id)
     {
         $query = WeeklyPlan::query();
+        $query->where('id', $id);
         $adminroles = ['admin', 'adminagricola'];
         $role = $request->user()->getRoleNames();
-
-        if ($request->query('weekly_plan')) {
-            $query->where('id', $request->query('weekly_plan'));
-        } else {
-            $week = Carbon::now()->weekOfYear;
-            $year = Carbon::now()->year;
-            $query->where('week', $week)->where('year', $year);
-        }
-
 
         if (!in_array($role[0], $adminroles)) {
             $query->whereHas('finca', function ($q) use ($role) {
