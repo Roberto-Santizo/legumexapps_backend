@@ -32,6 +32,7 @@ class WeeklyPlanResource extends JsonResource
             'year' => $this->year,
             'week' => $this->week,
             'finca' => $this->finca->name,
+            'finca_id' => strval($this->finca_id),
             'created_at' => $this->created_at->format('d-m-Y'),
             'total_budget' => round($total_budget,2),
             'used_budget' => round($used_budget,2),

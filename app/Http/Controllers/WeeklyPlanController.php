@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Imports\WeeklyPlanImport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Resources\WeeklyPlanCollection;
+use App\Http\Resources\WeeklyPlanResource;
 use App\Models\LotePlantationControl;
 use App\Models\TaskWeeklyPlan;
 use Carbon\Carbon;
@@ -54,9 +55,9 @@ class WeeklyPlanController extends Controller
         }
 
         if ($request->query('paginated')) {
-            return new WeeklyPlanCollection($query->paginate(10));
+            return WeeklyPlanResource::collection($query->paginate(10));
         } else {
-            return new WeeklyPlanCollection($query->get());
+            return WeeklyPlanResource::collection($query->get());
         }
     }
 
