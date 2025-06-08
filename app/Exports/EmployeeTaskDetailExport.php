@@ -5,6 +5,7 @@ namespace App\Exports;
 use App\Models\Employee;
 use App\Models\WeeklyPlan;
 use Carbon\Carbon;
+use Error;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -98,7 +99,7 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
             });
 
 
-            $task->employees->map(function ($employeeAssignment) use ($rows, $task) {
+            $task->employees->map(function ($employeeAssignment) use ($groupedByDay, $rows, $task) {
                 foreach ($employeeAssignment->dates as $day => $hours) {
                     $total_hours = $task->employees->reduce(function ($carry, $task) {
                         return $carry + array_sum(array_merge(...array_values($task->dates ?? [])));
@@ -118,8 +119,8 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                         'TAREA REALIZADA' => $task->task->name,
                         'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
                         'MONTO' => $percentage * $task->budget,
-                        'HORAS REALES' => $total_hours * $percentage,
-                        'HORAS TEORICAS' => $hours_teoricas_employee * $percentage,
+                        'HORAS REALES' => $total_hours*$percentage,
+                        'HORAS TEORICAS' => $hours_teoricas_employee*$percentage,
                         'HORAS BIOMETRICO' => $entrance->diffInHours($exit),
                         'ENTRADA' => $registrations['entrance'] ?? '',
                         'SALIDA' => $registrations['exit'] ?? '',
@@ -146,16 +147,15 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
 
                     $entrance = Carbon::parse($registrations['entrance']);
                     $exit = Carbon::parse($registrations['exit']);
-                    
                     $rows->push([
                         'CODIGO' => $employeeAssignment->code,
                         'EMPLEADO' => $employeeAssignment->name,
                         'LOTE' => $task->lotePlantationControl->lote->name,
                         'TAREA REALIZADA' => $task->task->name,
                         'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
-                        'MONTO GANADO' => $budget,
-                        'HORAS REALES' => $hours,
-                        'HORAS TEORICAS' => $hours,
+                        'MONTO' => $budget,
+                        'HORAS TOTALES' => $hours,
+                        'HORAS REALES' => '',
                         'HORAS BIOMETRICO' =>  $entrance->diffInHours($exit),
                         'ENTRADA' => $registrations['entrance'] ?? '',
                         'SALIDA' => $registrations['exit'] ?? '',
@@ -190,25 +190,30 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
     {
         $day = $task->end_date ? $task->start_date->isoFormat('dddd') : '';
 
-        foreach ($task->employees as $employeeAssignment) {
-            $registrations = $this->getEmployeeRegistration($employeeAssignment->employee_id, $task->start_date);
-            $entrance = Carbon::parse($registrations['entrance']);
-            $exit = Carbon::parse($registrations['exit']);
-            $rows->push([
-                'CODIGO' => $employeeAssignment->code,
-                'EMPLEADO' => $employeeAssignment->name,
-                'LOTE' => $task->lotePlantationControl->lote->name,
-                'TAREA REALIZADA' => $task->task->name,
-                'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
-                'MONTO' => $task->end_date ? ($task->budget / $task->employees->count()) : 0,
-                'HORAS REALES' => $task->end_date ? ($task->start_date->diffInHours($task->end_date)) : '',
-                'HORAS TEORICAS' => $task->end_date ? ($task->hours / $task->employees->count()) : 0,
-                'HORAS BIOMETRICO' => $entrance->diffInHours($exit),
-                'ENTRADA' => $registrations['entrance'] ?? '',
-                'SALIDA' => $registrations['exit'] ?? '',
-                'DIA' => $day
-            ]);
+        try {
+            foreach ($task->employees as $employeeAssignment) {
+                $registrations = $this->getEmployeeRegistration($employeeAssignment->employee_id, $task->start_date);
+                $entrance = Carbon::parse($registrations['entrance'] ?? $task->start_date);
+                $exit = Carbon::parse($registrations['exit'] ?? $task->end_date);
+                $rows->push([
+                    'CODIGO' => $employeeAssignment->code,
+                    'EMPLEADO' => $employeeAssignment->name,
+                    'LOTE' => $task->lotePlantationControl->lote->name,
+                    'TAREA REALIZADA' => $task->task->name,
+                    'PLAN' => $task->extraordinary ? 'EXTRAORDINARIA' : 'PLANIFICADA',
+                    'MONTO' => $task->end_date ? ($task->budget / $task->employees->count()) : 0,
+                    'HORAS REALES' => $task->end_date ? ($task->start_date->diffInHours($task->end_date)) : '',
+                    'HORAS TEORICAS' => $task->end_date ? ($task->hours / $task->employees->count()) : 0,
+                    'HORAS BIOMETRICO' => $entrance->diffInHours($exit),
+                    'ENTRADA' => $registrations['entrance'] ?? '',
+                    'SALIDA' => $registrations['exit'] ?? '',
+                    'DIA' => $day
+                ]);
+            }
+        } catch (\Throwable $th) {
+            throw $th;
         }
+       
     }
 
     public function getEmployeeRegistration($emp_id, $date)

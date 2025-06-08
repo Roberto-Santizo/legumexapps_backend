@@ -64,7 +64,9 @@ class TasksCropController extends Controller
                 'task_crop_id' => $data['task_crop_id']
             ]);
 
-            return response()->json('Cosecha Creada Correctamente',200);
+            return response()->json([
+                'msg' => 'Task Crop Weekly Plan Created Successfully'
+            ]);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
@@ -183,8 +185,8 @@ class TasksCropController extends Controller
 
     public function TaskCropDetail(string $id)
     {
-        $assigment = DailyAssignments::find($id);
-        $task = $assigment->TaskCropWeeklyPlan;
+        $task = TaskCropWeeklyPlan::find($id);
+        // $task = $assigment->TaskCropWeeklyPlan;
         $plan = $task->plan;
         return response()->json([
             'finca' => $plan->finca->name,

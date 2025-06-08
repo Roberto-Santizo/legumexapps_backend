@@ -38,7 +38,7 @@ class WeeklyInsumosTasksImport implements ToCollection, WithHeadingRow
                     'assigned_quantity' => $row['cantidad']
                 ]);
             } catch (Exception $th) {
-                throw new Error('Hubo un error en la creación de insumos, verifique la información he intentelo de nuevo');
+                throw new Error($row['insumo']);
             }
         }
     }
