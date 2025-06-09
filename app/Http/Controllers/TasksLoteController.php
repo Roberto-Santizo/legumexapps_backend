@@ -17,6 +17,7 @@ use App\Models\WeeklyPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Error;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class TasksLoteController extends Controller
 {
@@ -26,7 +27,8 @@ class TasksLoteController extends Controller
     public function index(Request $request)
     {
         $today = Carbon::today();
-        $role = $request->user()->getRoleNames()->first();
+        $payload = JWTAuth::getPayload();
+        $role = $payload->get('role');
 
         $query = TaskWeeklyPlan::query();
 

@@ -11,7 +11,7 @@ use App\Http\Controllers\TimeOutController;
 use App\Http\Controllers\WeeklyProductionPlanController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('jwt.auth')->group(function () {
 
     Route::get('/employees-comodines', [EmployeeController::class, 'getComodines']);
 

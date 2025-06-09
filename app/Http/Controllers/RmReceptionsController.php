@@ -21,6 +21,7 @@ use App\Models\RmReception;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class RmReceptionsController extends Controller
 {
@@ -60,7 +61,7 @@ class RmReceptionsController extends Controller
             });
         }
 
-        if($request->query('transport_doc_create')){
+        if ($request->query('transport_doc_create')) {
             $query->whereDoesntHave('transport_doc_data');
         }
 
@@ -211,6 +212,9 @@ class RmReceptionsController extends Controller
         $signature1 = $data['data']['inspector_signature'];
 
         try {
+            $payload = JWTAuth::getPayload();
+            $user_id = $payload->get('id');
+
             if (!$data['data']['isMinimunRequire']) {
                 $rm_reception->consignacion = 1;
             }
@@ -232,7 +236,7 @@ class RmReceptionsController extends Controller
                 'brix' => $data['data']['brix'] ?? null,
                 'percentage' => $data['data']['percentage'],
                 'valid_pounds' => $data['data']['valid_pounds'],
-                'user_id' => $request->user()->id,
+                'user_id' => $user_id,
                 'doc_date' => Carbon::now(),
                 'observations' => $data['data']['observations'],
                 'inspector_signature' => $filename1

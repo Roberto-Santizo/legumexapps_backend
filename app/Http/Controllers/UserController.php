@@ -4,21 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\UserInfoResource;
 use App\Models\User;
-use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        $user = $request->user();
+        $payload = JWTAuth::getPayload();
+        $role = $payload->get('role');
 
-        return response()->json($user->getRoleNames()->first(), 200);
+        return response()->json($role);
     }
 
-    public function show(Request $request, string $id)
+    public function show(string $id)
     {
         $user = User::find($id);
 
@@ -33,7 +34,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(Request $request, string $id)
+    public function update(string $id)
     {
         $user = User::find($id);
 

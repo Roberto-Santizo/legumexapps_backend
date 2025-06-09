@@ -15,7 +15,7 @@ use App\Http\Controllers\TasksLoteController;
 use App\Http\Controllers\WeeklyPlanController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('jwt.auth')->group(function () {
     Route::apiResource('/employees', EmployeeController::class);
 
     Route::get('/recipes', [RecipeController::class, 'index']);

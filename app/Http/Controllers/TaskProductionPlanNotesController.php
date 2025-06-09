@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\TaskProductionPlan;
 use App\Models\TaskProductionPlanNote;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class TaskProductionPlanNotesController extends Controller
 {
@@ -16,7 +17,9 @@ class TaskProductionPlanNotesController extends Controller
             'task_p_id' => 'required|exists:task_production_plans,id'
         ]);
 
-        $user = $request->user();
+        $payload = JWTAuth::getPayload();
+        $user_id = $payload->get('id');
+
 
         $task_production = TaskProductionPlan::find($data['task_p_id']);
 
@@ -25,7 +28,7 @@ class TaskProductionPlanNotesController extends Controller
                 'task_p_id' => $data['task_p_id'],
                 'reason' => $data['reason'],
                 'action' => $data['action'],
-                'user_id' => $user->id,
+                'user_id' => $user_id,
             ]);
             $task_production->is_justified = true;
             $task_production->save();

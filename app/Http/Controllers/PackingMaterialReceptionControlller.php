@@ -9,6 +9,7 @@ use App\Models\PackingMaterialReceiptDetail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class PackingMaterialReceptionControlller extends Controller
 {
@@ -56,6 +57,9 @@ class PackingMaterialReceptionControlller extends Controller
         $signature2 = $data['user_signature'];
 
         try {
+            $payload = JWTAuth::getPayload();
+            $user_id = $payload->get('id');
+
             //SUPERVISOR
             list(, $signature1) = explode(',', $signature1);
             $signature1 = base64_decode($signature1);
@@ -69,7 +73,7 @@ class PackingMaterialReceptionControlller extends Controller
             Storage::disk('public')->put($filename2, $signature2);
 
             $receipt = PackingMaterialReceipt::create([
-                'user_id' => $request->user()->id,
+                'user_id' => $user_id,
                 'supervisor_name' => $data['supervisor_name'],
                 'invoice_date' => $data['invoice_date'],
                 'receipt_date' => Carbon::now(),

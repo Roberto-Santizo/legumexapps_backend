@@ -15,6 +15,7 @@ use App\Http\Resources\WeeklyPlanResource;
 use App\Models\LotePlantationControl;
 use App\Models\TaskWeeklyPlan;
 use Carbon\Carbon;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class WeeklyPlanController extends Controller
 {
@@ -84,9 +85,11 @@ class WeeklyPlanController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Request $request, string $id)
+    public function show(string $id)
     {
         $plan = WeeklyPlan::find($id);
+        $payload = JWTAuth::getPayload();
+
         if (!$plan) {
             return response()->json([
                 'msg' => ['El plan no existe']
@@ -94,7 +97,7 @@ class WeeklyPlanController extends Controller
         }
 
         $today = Carbon::today();
-        $role = $request->user()->getRoleNames()->first();
+        $role = $payload->get('role');
 
         if ($role != 'admin' && $role != 'adminagricola') {
             $tasks_by_lote = $plan->tasks()
@@ -186,12 +189,14 @@ class WeeklyPlanController extends Controller
         return TasksNoOperationDateResource::collection($all_tasks);
     }
 
-    public function GetTasksForCalendar(Request $request, string $id)
+    public function GetTasksForCalendar(string $id)
     {
         $query = WeeklyPlan::query();
         $query->where('id', $id);
         $adminroles = ['admin', 'adminagricola'];
-        $role = $request->user()->getRoleNames();
+
+        $payload = JWTAuth::getPayload();
+        $role = $payload->get('role');
 
         if (!in_array($role[0], $adminroles)) {
             $query->whereHas('finca', function ($q) use ($role) {

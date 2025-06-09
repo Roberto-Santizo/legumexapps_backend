@@ -28,6 +28,7 @@ use App\Services\ChangeEmployeeNotificationService;
 use App\Services\ReturnPackingMaterialNotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class TaskProductionController extends Controller
 {
@@ -468,8 +469,12 @@ class TaskProductionController extends Controller
             'reason' => 'required'
         ]);
 
-        $user = $request->user();
-        $role = $user->getRoleNames()->first();
+
+        $payload = JWTAuth::getPayload();
+        $role = $payload->get('role');
+        $user_id = $payload->get('id');
+
+
 
         $task_production = TaskProductionPlan::find($id);
 
@@ -508,7 +513,7 @@ class TaskProductionController extends Controller
                 'original_date' => $old_date,
                 'new_date' => $data['date'],
                 'reason' => $data['reason'],
-                'user_id' => $user->id
+                'user_id' => $user_id
             ]);
 
 
@@ -578,7 +583,10 @@ class TaskProductionController extends Controller
             'destination' => 'required'
         ]);
 
-        $role = $request->user()->getRoleNames()->first();
+        $payload = JWTAuth::getPayload();
+        $role = $payload->get('role');
+
+
         $line = Line::find($data['line_id']);
         $sku = StockKeepingUnit::find($data['sku_id']);
         $line_sku = LineStockKeepingUnits::where('line_id', $line->id)->where('sku_id', $sku->id)->get()->first();
@@ -713,11 +721,13 @@ class TaskProductionController extends Controller
         }
 
         try {
-            $user = $request->user();
+            $payload = JWTAuth::getPayload();
+            $user_id = $payload->get('id');
+
 
             $unassign_note = TaskProductionUnassign::create([
                 'task_p_id' => $task_production->id,
-                'user_id' => $user->id,
+                'user_id' => $user_id,
                 'reason' => $data['reason'],
             ]);
 

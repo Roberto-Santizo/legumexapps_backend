@@ -11,6 +11,7 @@ use App\Models\InsumosReceiptsDetail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class InsumosReceptionController extends Controller
 {
@@ -52,6 +53,10 @@ class InsumosReceptionController extends Controller
         $signature2 = $data['user_signature'];
 
         try {
+            $payload = JWTAuth::getPayload();
+            $user_id = $payload->get('id');
+
+
             //SUPERVISOR
             list(, $signature1) = explode(',', $signature1);
             $signature1 = base64_decode($signature1);
@@ -66,7 +71,7 @@ class InsumosReceptionController extends Controller
 
 
             $receipt = InsumosReceipt::create([
-                'user_id' => $request->user()->id,
+                'user_id' => $user_id,
                 'supplier_id' => $data['supplier_id'],
                 'supervisor_name' => $data['supervisor_name'],
                 'invoice' => $data['invoice'],

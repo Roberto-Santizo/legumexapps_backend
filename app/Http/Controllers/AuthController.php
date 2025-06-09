@@ -3,31 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Routing\Controller as BaseController;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
-class AuthController extends Controller
+class AuthController extends BaseController
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api', ['except' => ['store']]);
+    }
+
     public function store(LoginRequest $request)
     {
         $data = $request->validated();
 
         try {
-            if (!Auth::attempt($data)) {
-                return response()->json([
-                    'errors' => ['Credenciales Incorrectas']
-                ], 422);
+
+            if (!$token = JWTAuth::attempt($data)) {
+                return response()->json(['error' => 'Credenciales Incorrectas'], 401);
             }
 
-            $user = Auth::user();
             return response()->json([
-                'token' => $user->createToken('token')->plainTextToken,
-                'user' => [
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'username' => $user->username,
-                ]
-            ], 200);
+                'token' => $token,
+                'user' => JWTAuth::user()
+            ]);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
@@ -36,11 +35,10 @@ class AuthController extends Controller
     }
 
 
-    public function logout(Request $request)
+    public function logout()
     {
         try {
-            $user = $request->user();
-            $user->currentAccessToken()->delete();
+            JWTAuth::invalidate(JWTAuth::getToken());
             return response()->json('Sesión Cerrada Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([

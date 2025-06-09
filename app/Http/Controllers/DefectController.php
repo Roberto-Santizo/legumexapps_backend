@@ -13,7 +13,6 @@ class DefectController extends Controller
      */
     public function index(Request $request)
     {
-
         if($request->query('paginated')){
             $defects = Defect::paginate(10);
         }else{

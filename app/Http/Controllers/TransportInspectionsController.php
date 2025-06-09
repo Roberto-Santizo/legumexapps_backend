@@ -11,6 +11,7 @@ use App\Models\TransportInspectionRmReception;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class TransportInspectionsController extends Controller
 {
@@ -29,7 +30,9 @@ class TransportInspectionsController extends Controller
     {
         $data = $request->validated();
         $signature2 = $data['verify_by_signature'];
-        $user = $request->user();
+        $payload = JWTAuth::getPayload();
+        $user_id = $payload->get('id');
+
 
         try {
             list(, $signature2) = explode(',', $signature2);
@@ -46,7 +49,7 @@ class TransportInspectionsController extends Controller
                 'observations' => $data['observations'] ?? '',
                 'quality_manager_signature' => '',
                 'verify_by_signature' => $filename2,
-                'user_id' => $user->id,
+                'user_id' => $user_id,
                 'date' => Carbon::now()
             ]);
 
@@ -54,10 +57,10 @@ class TransportInspectionsController extends Controller
             foreach ($data['conditions'] as $condition) {
                 $conditionModel = TransportCondition::find($condition['id']);
 
-                if(!$conditionModel){
+                if (!$conditionModel) {
                     return response()->json([
                         'msg' => 'Condition Not Found'
-                    ],404);
+                    ], 404);
                 }
 
                 TransportInspectionCondition::create([

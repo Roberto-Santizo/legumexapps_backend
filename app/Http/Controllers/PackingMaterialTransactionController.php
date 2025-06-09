@@ -11,6 +11,7 @@ use App\Models\PackingMaterialWastage;
 use App\Models\TaskProductionPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class PackingMaterialTransactionController extends Controller
 {
@@ -38,6 +39,10 @@ class PackingMaterialTransactionController extends Controller
         try {
             $task = TaskProductionPlan::find($data['task_production_plan_id'] ?? null);
 
+            $payload = JWTAuth::getPayload();
+            $user_id = $payload->get('id');
+
+
             $signature1 = $data['responsable_signature'];
             $signature2 = $data['user_signature'];
 
@@ -54,7 +59,7 @@ class PackingMaterialTransactionController extends Controller
 
             $dispatch = PackingMaterialTransaction::create([
                 'task_production_plan_id' => $data['task_production_plan_id'] ?? null,
-                'user_id' => $request->user()->id,
+                'user_id' => $user_id,
                 'reference' => $data['reference'],
                 'responsable' => $data['responsable'],
                 'responsable_signature' => $filename1,

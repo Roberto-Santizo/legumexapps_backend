@@ -17,6 +17,7 @@ use App\Models\TaskWeeklyPlan;
 use App\Models\WeeklyPlan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class DashboardAgricolaController extends Controller
 {
@@ -24,16 +25,18 @@ class DashboardAgricolaController extends Controller
     {
         $week = $request->input('week') ?? Carbon::now()->weekOfYear;
         $year = $request->input('year') ?? Carbon::now()->year;
-        $role = $request->user()->getRoleNames();
+        $payload = JWTAuth::getPayload();
+        $role = $payload->get('role');
 
-        if($role[0] != 'admin' && $role[0] != 'adminagricola'){
+
+        if ($role != 'admin' && $role != 'adminagricola') {
             $permission = $request->user()->permissions()->first();
             $tasks_dron = TaskWeeklyPlan::where('use_dron', 1)->whereHas('plan.finca', function ($query) use ($permission) {
                 $query->where('name', 'LIKE', '%' . $permission->name . '%');
             })->whereHas('plan', function ($query) use ($week, $year) {
                 $query->where('week', $week)->where('year', $year);
             })->get();
-        }else{
+        } else {
             $tasks_dron = TaskWeeklyPlan::where('use_dron', 1)->whereHas('plan', function ($query) use ($week, $year) {
                 $query->where('week', $week)->where('year', $year);
             })->get();
@@ -94,8 +97,11 @@ class DashboardAgricolaController extends Controller
     {
         $week = $request->input('week') ?? Carbon::now()->weekOfYear;
         $year = $request->input('year') ?? Carbon::now()->year;
-        $role = $request->user()->getRoleNames();
-        if ($role[0] != 'admin' && $role[0] != 'adminagricola') {
+        $payload = JWTAuth::getPayload();
+        $role = $payload->get('role');
+
+
+        if ($role != 'admin' && $role != 'adminagricola') {
             $permission = $request->user()->permissions()->first();
             $tasks = TaskWeeklyPlan::whereHas('plan.finca', function ($query) use ($permission) {
                 $query->where('name', 'LIKE', '%' . $permission->name . '%');
@@ -116,16 +122,18 @@ class DashboardAgricolaController extends Controller
         $week = $request->input('week') ?? Carbon::now()->weekOfYear;
         $year = $request->input('year') ?? Carbon::now()->year;
 
-        $role = $request->user()->getRoleNames();
+        $payload = JWTAuth::getPayload();
+        $role = $payload->get('role');
 
-        if ($role[0] != 'admin' && $role[0] != 'adminagricola') {
+
+        if ($role != 'admin' && $role != 'adminagricola') {
             $permission = $request->user()->permissions()->first();
             $tasks = TaskWeeklyPlan::whereHas('plan.finca', function ($query) use ($permission) {
                 $query->where('name', 'LIKE', '%' . $permission->name . '%');
             })->whereHas('plan', function ($query) use ($week, $year) {
                 $query->where('week', $week)->where('year', $year);
             })->whereNot('end_date', null)->get();
-        }else{
+        } else {
             $tasks = TaskWeeklyPlan::whereHas('plan', function ($query) use ($week, $year) {
                 $query->where('week', $week)->where('year', $year);
             })->whereNot('end_date', null)->get();
@@ -139,16 +147,17 @@ class DashboardAgricolaController extends Controller
         $week = $request->input('week') ?? Carbon::now()->weekOfYear;
         $year = $request->input('year') ?? Carbon::now()->year;
 
-        $role = $request->user()->getRoleNames();
+        $payload = JWTAuth::getPayload();
+        $role = $payload->get('role');
 
-        if ($role[0] != 'admin' && $role[0] != 'adminagricola') {
+        if ($role != 'admin' && $role != 'adminagricola') {
             $permission = $request->user()->permissions()->first();
             $tasks = DailyAssignments::where('end_date', null)->whereDate('start_date', Carbon::today())->whereHas('TaskCropWeeklyPlan.plan.finca', function ($query) use ($permission) {
                 $query->where('name', 'LIKE', '%' . $permission->name . '%');
             })->whereHas('TaskCropWeeklyPlan.plan', function ($query) use ($week, $year) {
                 $query->where('week', $week)->where('year', $year);
             })->get();
-        }else{
+        } else {
             $tasks = DailyAssignments::where('end_date', null)->whereDate('start_date', Carbon::today())->whereHas('TaskCropWeeklyPlan.plan', function ($query) use ($week, $year) {
                 $query->where('week', $week)->where('year', $year);
             })->get();
@@ -162,16 +171,17 @@ class DashboardAgricolaController extends Controller
         $week = $request->input('week') ?? Carbon::now()->weekOfYear;
         $year = $request->input('year') ?? Carbon::now()->year;
 
-        $role = $request->user()->getRoleNames();
+        $payload = JWTAuth::getPayload();
+        $role = $payload->get('role');
 
-        if ($role[0] != 'admin' && $role[0] != 'adminagricola') {
+        if ($role != 'admin' && $role != 'adminagricola') {
             $permission = $request->user()->permissions()->first();
             $tasks = DailyAssignments::whereNot('end_date', null)->whereHas('TaskCropWeeklyPlan.plan.finca', function ($query) use ($permission) {
                 $query->where('name', 'LIKE', '%' . $permission->name . '%');
             })->whereHas('TaskCropWeeklyPlan.plan', function ($query) use ($week, $year) {
                 $query->where('week', $week)->where('year', $year);
             })->get();
-        }else{
+        } else {
             $tasks = DailyAssignments::whereNot('end_date', null)->whereHas('TaskCropWeeklyPlan.plan', function ($query) use ($week, $year) {
                 $query->where('week', $week)->where('year', $year);
             })->get();

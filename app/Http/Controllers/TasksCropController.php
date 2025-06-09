@@ -92,7 +92,7 @@ class TasksCropController extends Controller
         ]);
     }
     
-    public function update(Request $request, string $id)
+    public function update(string $id)
     {
         $task = TaskCropWeeklyPlan::find($id);
         $task->status = 0;

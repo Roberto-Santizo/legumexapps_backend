@@ -17,7 +17,7 @@ use App\Http\Controllers\TransportInspectionsController;
 use App\Http\Controllers\VarietyProductsController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('jwt.auth')->group(function () {
     Route::get('/baskets', [BasketController::class, 'index']);
     Route::get('/defects', [DefectController::class, 'index']);
 
