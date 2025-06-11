@@ -3,10 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateRoleRequest as RequestsCreateRoleRequest;
-use App\Http\Resources\CreateRoleRequest;
 use App\Http\Resources\RoleCollection;
 use Illuminate\Http\Request;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx\Rels;
 use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
@@ -14,9 +12,13 @@ class RoleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return new RoleCollection(Role::all());
+        if ($request->query('paginated')) {
+            return new RoleCollection(Role::paginate(10));
+        } else {
+            return new RoleCollection(Role::all());
+        }
     }
 
     /**

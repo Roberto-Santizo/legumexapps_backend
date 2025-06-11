@@ -23,10 +23,7 @@ class AuthController extends BaseController
                 return response()->json(['error' => 'Credenciales Incorrectas'], 401);
             }
 
-            return response()->json([
-                'token' => $token,
-                'user' => JWTAuth::user()
-            ]);
+            return response()->json($token);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
