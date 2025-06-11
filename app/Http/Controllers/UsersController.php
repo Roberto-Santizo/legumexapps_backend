@@ -6,16 +6,19 @@ use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use App\Http\Resources\UserCollection;
-use App\Http\Resources\UserInfoResource;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 
 class UsersController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return new UserCollection(User::with('roles')->with('permissions')->get());
+        if ($request->query('paginated')) {
+            return new UserCollection(User::with('roles')->with('permissions')->paginate(10));
+        } else {
+            return new UserCollection(User::with('roles')->with('permissions')->get());
+        }
     }
 
     public function store(CreateUserRequest $request)
@@ -80,8 +83,5 @@ class UsersController extends Controller
         }
     }
 
-    public function UsersInfo(string $id)
-    {
-       
-    }
+    public function UsersInfo(string $id) {}
 }

@@ -126,7 +126,18 @@ class RmReceptionsController extends Controller
                 'ref_doc' => $data['ref_doc']
             ]);
 
-            return response()->json('Boleta Creada Correctamente', 200);
+            $field_data = new RmReceptionDetailResource($rm_reception->load('field_data'));
+
+            return response()->json([
+                'status' => $rm_reception->quality_status_id,
+                'finca' => $rm_reception->finca->name,
+                'consignacion' => $rm_reception->consignacion ? true : false,
+                'grn' => $rm_reception->grn,
+                'field_data' => $field_data,
+                'prod_data' => null,
+                'quality_doc_data' => null,
+                'transport_data' => null
+            ]);
         } catch (\Throwable $th) {
             return response()->json([
                 'errors' => 'Hubo un error al crear la boleta'

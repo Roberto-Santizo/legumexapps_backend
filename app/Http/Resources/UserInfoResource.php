@@ -20,7 +20,7 @@ class UserInfoResource extends JsonResource
             'email' => $this->email,
             'username' => $this->username,
             'status' =>  $this->status ? true : false,
-            'roles' => $this->getRoleNames()->first(),
+            'role' => $this->getRoleNames()->first(),
             'permissions' => $this->getAllPermissions()->map(function($permission){
                 return [
                     'id' => $permission->id,

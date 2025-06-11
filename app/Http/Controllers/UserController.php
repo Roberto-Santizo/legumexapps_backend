@@ -14,9 +14,15 @@ class UserController extends Controller
     public function index()
     {
         $payload = JWTAuth::getPayload();
-        $role = $payload->get('role');
 
-        return response()->json($role);
+        $user = [
+            'id' => strval($payload->get('id')),
+            'name' => $payload->get('name'),
+            'email' => $payload->get('email'),
+            'role' => $payload->get('role'),
+        ];
+
+        return response()->json($user);
     }
 
     public function show(string $id)
