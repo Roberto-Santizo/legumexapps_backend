@@ -35,7 +35,7 @@ class CreateUserRequest extends FormRequest
                     ->symbols()
             ],
             "permissions" => ['required'],
-            "roles" => ['required']
+            "role" => ['required']
         ];
     }
 

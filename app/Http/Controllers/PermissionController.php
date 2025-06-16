@@ -12,9 +12,13 @@ class PermissionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return new PermissionCollection(Permission::all());
+        if($request->query('paginated')){
+            return new PermissionCollection(Permission::paginate(10));
+        }else{
+            return new PermissionCollection(Permission::all());
+        }
     }
 
     /**

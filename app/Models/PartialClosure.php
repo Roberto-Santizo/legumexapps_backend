@@ -16,4 +16,8 @@ class PartialClosure extends Model
         'start_date',
         'end_date'
     ];
+
+    public function taskWeeklyPlan(){
+        return $this->belongsTo(TaskWeeklyPlan::class);
+    }
 }

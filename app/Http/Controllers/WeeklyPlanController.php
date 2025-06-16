@@ -104,7 +104,9 @@ class WeeklyPlanController extends Controller
                 ->where(function ($query) use ($today) {
                     $query->whereDate('operation_date', $today)
                         ->orWhereHas('closures', function ($q) {
-                            $q->where('end_date', null);
+                            $q->where('end_date', null)->orWhereHas('taskWeeklyPlan', function ($q2) {
+                                $q2->whereNull('end_date');
+                            });
                         });
                 })
                 ->orderBy('lote_plantation_control_id', 'ASC')

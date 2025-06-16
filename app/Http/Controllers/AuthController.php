@@ -20,7 +20,7 @@ class AuthController extends BaseController
         try {
 
             if (!$token = JWTAuth::attempt($data)) {
-                return response()->json(['error' => 'Credenciales Incorrectas'], 401);
+                return response()->json(['msg' => 'Credenciales Incorrectas'], 401);
             }
 
             return response()->json($token);

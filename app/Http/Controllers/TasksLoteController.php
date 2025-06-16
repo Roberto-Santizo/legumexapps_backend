@@ -65,16 +65,20 @@ class TasksLoteController extends Controller
 
         $tasks = $query->get();
 
-        $tasks_filterd = $tasks->filter(function ($task) {
-            if ($task->insumos->count() === 0) {
-                return $task;
-            } else {
-                $flag = $task->prepared_insumos ? true : false;
-                if ($flag) {
+        if ($role !== 'admin' && $role !== 'adminagricola') {
+            $tasks_filterd = $tasks->filter(function ($task) {
+                if ($task->insumos->count() === 0) {
                     return $task;
+                } else {
+                    $flag = $task->prepared_insumos ? true : false;
+                    if ($flag) {
+                        return $task;
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            $tasks_filterd = $tasks;
+        }
 
         return [
             'week' => $task_without_filter->plan->week,
@@ -394,9 +398,7 @@ class TasksLoteController extends Controller
             }
         }
 
-        return response()->json([
-            'message' => 'Insumos Registrados Correctamente'
-        ]);
+        return response()->json('Insumos Registrados Correctamente');
     }
 
     public function GetTaskForEdit(string $id)

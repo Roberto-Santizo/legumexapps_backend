@@ -32,7 +32,7 @@ class UsersController extends Controller
                 'username' => $data['username'],
                 'password' => bcrypt($data['password']),
                 'status' => 1
-            ])->assignRole($data['roles']);
+            ])->assignRole($data['role']);
 
             foreach ($data['permissions'] as $permission_id) {
                 $permission = Permission::find($permission_id);
@@ -41,7 +41,7 @@ class UsersController extends Controller
             return  response()->json('Usuario Creado Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'errors' => 'Existe un error al crear el usuario'
+                'errors' => $th->getMessage()
             ], 500);
         }
     }
@@ -68,7 +68,7 @@ class UsersController extends Controller
             $user->revokePermissionTo($user->permissions);
 
             $user->update($datos);
-            $user->assignRole($datos['roles']);
+            $user->assignRole($datos['role']);
 
             foreach ($datos['permissions'] as $permission_id) {
                 $permission = Permission::find($permission_id);

@@ -36,7 +36,7 @@ class UpdateUserRequest extends FormRequest
                     ->symbols()
             ],
             "permissions" => ['required'],
-            "roles" => ['required']
+            "role" => ['required']
         ];
     }
 
