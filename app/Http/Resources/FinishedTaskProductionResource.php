@@ -16,9 +16,12 @@ class FinishedTaskProductionResource extends JsonResource
     {
         $line_hours = round($this->start_date->diffInHours($this->end_date), 2);
         $hours_timeout = 0;
-        $total_boxes = $this->line_sku->sku->boxes_pallet ? ($this->finished_tarimas * $this->line_sku->sku->boxes_pallet) : 0;
-        $lbs_teoricas = $this->line_sku->sku->presentation ? ($total_boxes * $this->line_sku->sku->presentation) : 0;
-        $performance_hours = $this->line_sku->lbs_performance ? ($lbs_teoricas / $this->line_sku->lbs_performance) : $line_hours;
+
+        if (!$this->line_sku->payment_method) {
+            $performance_hours = $this->total_lbs_produced / $this->line_sku->lbs_performance;
+        } else {
+            $performance_hours = $line_hours;
+        }
 
         foreach ($this->timeouts as $timeout) {
             $hours = 0;
@@ -62,7 +65,7 @@ class FinishedTaskProductionResource extends JsonResource
             'employees' => EmployeeTaskProductionDetailResource::collection($this->employees),
             'history_operation_date' => TaskOperationDateBitacoraResource::collection($this->operationDateChanges),
             'transactions' => PackingMaterialTransactionDetailsResource::collection($this->transactions),
-            'wastages' => PackingMaterialWastageResource::collection($this->wastages) 
+            'wastages' => PackingMaterialWastageResource::collection($this->wastages)
         ];
     }
 }

@@ -71,8 +71,9 @@ class EmployeeController extends Controller
                 ->first();
 
             $assigned = TaskProductionEmployee::where('position', $comodin->last_name)
-                ->whereDate('created_at', $today)
-                ->first();
+                ->whereHas('TaskProduction', function($query){
+                    $query->whereDate('operation_date',Carbon::now());
+                })->first();
 
             return $entrance && !$assigned;
         });

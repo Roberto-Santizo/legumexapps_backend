@@ -9,12 +9,12 @@ use Microsoft\Graph\Graph;
 
 class ChangeEmployeeNotificationService
 {
-    public function sendNotification($assignment, $change, $transfer)
+    public function sendNotification($changes)
     {
-        $this->sendEmailNotification($assignment, $change, $transfer);
+        $this->sendEmailNotification($changes);
     }
 
-    private function sendEmailNotification($assignment, $change, $transfer)
+    private function sendEmailNotification($changes)
     {
         $accessToken = $this->getAccessToken();
 
@@ -27,9 +27,9 @@ class ChangeEmployeeNotificationService
         $recipient1->setEmailAddress(new EmailAddress(['address' => 'soportetecnico.tejar@legumex.net']));
 
         $message = new Message();
-        $message->setSubject('Cambio de empleado en linea ' . $assignment->TaskProduction->line->code . ' ' . $assignment->TaskProduction->line_sku->sku->name);
+        $message->setSubject('Cambio de empleado en linea');
         $message->setBody([
-            'content' => $this->buildMessageBody($assignment, $change, $transfer),
+            'content' => $this->buildMessageBody($changes),
             'contentType' => 'HTML'
         ]);
         $message->setToRecipients([$recipient1]);
@@ -61,59 +61,85 @@ class ChangeEmployeeNotificationService
     }
 
 
-    private function buildMessageBody($assignment, $change, $transfer)
+    private function buildMessageBody($changes)
     {
-        $line = $assignment->TaskProduction->line_sku->line->code;
-        $link = 'http://localhost:5173/permisos-empleados/' . $transfer->id;
+        $rows = '';
+        foreach ($changes as $change) {
+            $old = $change['old_employee'];
+            $new = $change['new_employee'];
+
+            $rows .= <<<HTML
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ccc;">{$old['name']}</td>
+                <td style="padding: 10px; border: 1px solid #ccc;">{$old['code']}</td>
+                <td style="padding: 10px; border: 1px solid #ccc;">{$old['position']}</td>
+                <td style="padding: 10px; border: 1px solid #ccc;">{$new['name']}</td>
+                <td style="padding: 10px; border: 1px solid #ccc;">{$new['code']}</td>
+                <td style="padding: 10px; border: 1px solid #ccc;">{$new['position']}</td>
+            </tr>
+        HTML;
+        }
+
         $message = <<<HTML
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Legumex</title>
-                </head>
-                <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #333333; background-color: #f4f4f4;">
-                <table role="presentation" style="width: 100%; border-collapse: collapse;">
-                        <tr>
-                            <td align="center" style="padding: 20px 0;">
-                                <table role="presentation" style="width: 600px; max-width: 100%; border-collapse: collapse; background-color: #ffffff; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-                                    <tr>
-                                        <td style="background-color: #4a90e2; padding: 20px; text-align: center;">
-                                            <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Se ha realizado un cambio en linea $line</h1>
-                                        </td>
-                                    </tr>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Legumex</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #333333; background-color: #f4f4f4;">
+            <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td align="center" style="padding: 20px 0;">
+                        <table role="presentation" style="width: 600px; max-width: 100%; border-collapse: collapse; background-color: #ffffff; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                            <tr>
+                                <td style="background-color: #4a90e2; padding: 20px; text-align: center;">
+                                    <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Cambios Realizados en Linea</h1>
+                                </td>
+                            </tr>
 
-                                    <tr>
-                                        <td style="padding: 20px;">
-                                            <h2 style="color: #333333; font-size: 20px;">La persona orginalmente asignada $change->original_name con la posición $change->original_position fue reemplazada.</h2>
-                                            <p style="margin-bottom: 20px;">La persona que lo sustituye es $change->new_name con la posicion $change->new_position.</p>
+                            <tr>
+                                <td style="padding: 20px;">
+                                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                                        <thead>
+                                            <tr style="background-color: #f0f0f0;">
+                                                <th style="padding: 10px; border: 1px solid #ccc;">Empleado Anterior</th>
+                                                <th style="padding: 10px; border: 1px solid #ccc;">Código</th>
+                                                <th style="padding: 10px; border: 1px solid #ccc;">Posición</th>
+                                                <th style="padding: 10px; border: 1px solid #ccc;">Empleado Nuevo</th>
+                                                <th style="padding: 10px; border: 1px solid #ccc;">Código</th>
+                                                <th style="padding: 10px; border: 1px solid #ccc;">Posición</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            $rows
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
 
-                                            <table role="presentation" style="width: 100%; border-collapse: collapse; margin-bottom: 20px; text-align: center;">
-                                                <tr>
-                                                    <td>
-                                                        <a href="$link" style="background-color: #4a90e2; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Click aquí para validar el cambio</a>
-                                                    </td>
-                                                </tr>
-                                            </table>
+                            <tr>
+                                <td style="padding: 20px; text-align: center;">
+                                    <h1 style="margin: 0; font-size: 14px;">Validar los cambios en el apartado de permisos</h1>
+                                </td>
+                            </tr>
 
-                                        </td>
-                                    </tr>
+                            <tr>
+                                <td style="background-color: #f0f0f0; padding: 20px; text-align: center; font-size: 14px; color: #666666;">
+                                    <p style="margin: 0;">
+                                        Este correo ha sido enviado automáticamente y tiene como propósito notificarle.
+                                    </p>
+                                </td>
+                            </tr>
 
-                                    <tr>
-                                        <td style="background-color: #f0f0f0; padding: 20px; text-align: center; font-size: 14px; color: #666666;">
-                                            <p style="margin: 0;">
-                                                Este correo ha sido enviado automáticamente y tiene como propósito notificarle.
-                                            </p>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
-                    </table>
-                </body>
-                </html>
-                HTML;
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+    HTML;
 
         return $message;
     }

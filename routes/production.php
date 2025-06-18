@@ -35,15 +35,16 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/tasks-production/finished/details/{id}', [TaskProductionController::class, 'FinishedTaskDetails']);
     Route::get('/tasks-production/details/{id}', [TaskProductionController::class, 'TaskDetails']);
     Route::get('/tasks-production/devolution-details/{id}', [TaskProductionController::class, 'TaskDevolutionDetails']);
+    Route::get('/tasks-production/active-employees/{id}', [TaskProductionController::class, 'TaskActiveEmployees']);
     Route::post('/tasks-production/new-task', [TaskProductionController::class, 'CreateNewTaskProduction']);
-    Route::post('/tasks-production/create-assignee/{id}', [TaskProductionController::class, 'CreateAssignee']);
+    Route::post('/tasks-production/create-assignees/{id}', [TaskProductionController::class, 'CreateAssignee']);
     Route::post('/tasks-production/{id}/add-timeout/open', [TaskProductionController::class, 'AddTimeOutOpen']);
     Route::post('/tasks-production/{id}/add-timeout/close', [TaskProductionController::class, 'AddTimeOutClose']);
     Route::post('/tasks-production/{id}/assign', [TaskProductionController::class, 'Assign']);
-    Route::post('/tasks-production/change-assignment', [TaskProductionController::class, 'ChangeAssignment']);
     Route::post('/tasks-production/{id}/performance', [TaskProductionController::class, 'TakePerformance']);
     Route::post('/tasks-production/{id}/unassign', [TaskProductionController::class, 'Unassign']);
     Route::put('/tasks-production/change-priority', [TaskProductionController::class, 'ChangePriority']);
+    Route::patch('/tasks-production/{id}/confirm-assignments', [TaskProductionController::class, 'ConfirmAssignments']);
     Route::patch('/tasks-production/{id}/start', [TaskProductionController::class, 'StartTaskProduction']);
     Route::patch('/tasks-production/change-operation-date/{id}', [TaskProductionController::class, 'ChangeOperationDate']);
     Route::patch('/tasks-production/assign-operation-date/{id}', [TaskProductionController::class, 'AssignOperationDate']);

@@ -30,7 +30,7 @@ class TaskProductionRecipeResource extends JsonResource
             "code" => $this->item->code,
             "quantity" => $quantity,
             "lote" => "",
-            "destination" => null
+            "destination" => ""
         ];
     }
 }

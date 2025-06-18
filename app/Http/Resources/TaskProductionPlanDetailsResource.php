@@ -16,10 +16,10 @@ class TaskProductionPlanDetailsResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        
-        $positions = $this->line_sku->line->positions->filter(function($position){
-            $assignee = $this->employees()->where('position',$position->name)->first();
-            if(!$assignee){
+
+        $positions = $this->line_sku->line->positions->filter(function ($position) {
+            $assignee = $this->employees()->where('position', $position->name)->first();
+            if (!$assignee) {
                 return $position;
             }
         });
@@ -38,8 +38,7 @@ class TaskProductionPlanDetailsResource extends JsonResource
             'flag' => $this->employees->count() < $this->line_sku->line->positions->count(),
             'total_lbs' => $this->total_lbs,
             'sku' => new SKUResource($this->line_sku->sku),
-            'in_employees' => TaskProductionEmployeeResource::collection($employees),
-            'all_employees' => TaskProductionEmployeeResource::collection($this->employees),
+            'filtered_employees' => TaskProductionEmployeeResource::collection($employees),
             'positions' => PositionResource::collection($positions)
         ];
     }
