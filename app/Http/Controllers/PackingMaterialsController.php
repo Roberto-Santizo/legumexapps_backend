@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreatePackingMaterialRequest;
 use App\Http\Resources\PackingMaterialResource;
+use App\Imports\PackingMaterialImport;
 use App\Models\PackingMaterial;
+use Exception;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PackingMaterialsController extends Controller
 {
@@ -20,13 +23,6 @@ class PackingMaterialsController extends Controller
             $query->where('name', 'like', '%' . $request->query('name') . '%');
         }
 
-        if ($request->query('supplier')) {
-            $query->whereHas('supplier', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->query('supplier') . '%');
-            });
-        }
-
-
         if ($request->query('code')) {
             $query->where('code', $request->query('code'));
         }
@@ -36,9 +32,9 @@ class PackingMaterialsController extends Controller
             $query->where('blocked', $status);
         }
 
-        if($request->query('paginated')){
+        if ($request->query('paginated')) {
             return PackingMaterialResource::collection($query->paginate(10));
-        }else{
+        } else {
             return PackingMaterialResource::collection($query->get());
         }
     }
@@ -64,7 +60,7 @@ class PackingMaterialsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(string $id)
     {
         $item = PackingMaterial::find($id);
 
@@ -80,6 +76,23 @@ class PackingMaterialsController extends Controller
 
             return response()->json('Item actualizado correctamente', 200);
         } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function UploadPackingMaterials(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xls,xlsx'
+        ]);
+
+        try {
+            Excel::import(new PackingMaterialImport, $request->file('file'));
+
+            return response()->json("Items de Material de Empaque creados correctamente", 200);
+        } catch (Exception $th) {
             return response()->json([
                 'msg' => $th->getMessage()
             ], 500);

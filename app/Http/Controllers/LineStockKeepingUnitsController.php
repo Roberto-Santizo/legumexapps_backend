@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateLineStockKeepingUnitRequest;
 use App\Http\Resources\LineStockKeepingUnitsResource;
+use App\Imports\LineStockKeepingUnitsImport;
 use App\Models\LineStockKeepingUnits;
+use Exception;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LineStockKeepingUnitsController extends Controller
 {
@@ -63,6 +66,24 @@ class LineStockKeepingUnitsController extends Controller
         } catch (\Throwable $th) {
             return response()->json([
                 'errors' => 'Hubo un error al actualizar el SKU'
+            ], 500);
+        }
+    }
+
+    public function UploadLinesSkus(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xls,xlsx'
+        ]);
+
+
+        try {
+            Excel::import(new LineStockKeepingUnitsImport, $request->file('file'));
+
+            return response()->json("Lineas creados correctamente", 200);
+        } catch (Exception $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
             ], 500);
         }
     }

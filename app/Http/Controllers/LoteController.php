@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateLoteRequest;
-use App\Http\Resources\FincaLotesResource;
 use App\Http\Resources\LoteCollection;
 use App\Http\Resources\LotePlantationControlResource;
 use App\Imports\UpdateLotesImport;

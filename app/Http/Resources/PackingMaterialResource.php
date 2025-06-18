@@ -20,7 +20,6 @@ class PackingMaterialResource extends JsonResource
             'description' => $this->description,
             'code' => $this->code,
             'blocked' => $this->blocked ? true : false,
-            'supplier' => $this->supplier->name
         ];
     }
 }

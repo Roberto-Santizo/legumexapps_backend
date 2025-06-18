@@ -10,6 +10,7 @@ use App\Models\BiometricTransaction;
 use App\Models\BitacoraLines;
 use App\Models\Line;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 

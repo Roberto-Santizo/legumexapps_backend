@@ -16,9 +16,14 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/employees-comodines', [EmployeeController::class, 'getComodines']);
 
     Route::apiResource('/lines-skus', LineStockKeepingUnitsController::class);
+    Route::post('/lines-skus/upload', [LineStockKeepingUnitsController::class,'UploadLinesSkus']);
+
     Route::apiResource('/timeouts', TimeOutController::class);
     Route::apiResource('/notes', TaskProductionPlanNotesController::class);
+    
     Route::apiResource('/skus', SKUController::class);
+    Route::post('/skus/upload', [SKUController::class,'UploadStockKeepingUnits']);
+    Route::post('/skus/upload/recipe', [SKUController::class,'UploadSkuRecipe']);
 
     Route::apiResource('/lines', LinesController::class);
     Route::get('/lines/performances-per-day/{id}', [LinesController::class, 'GetPerformanceByLine']);

@@ -42,5 +42,3 @@ class CDPSImport implements ToCollection, WithHeadingRow
     }
 }
 
-// CDP	CULTIVO	RECETA	DENSIDAD	TAMAÑO	FECHA DE INICIO
-
