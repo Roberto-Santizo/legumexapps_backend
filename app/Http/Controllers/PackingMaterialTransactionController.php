@@ -87,8 +87,8 @@ class PackingMaterialTransactionController extends Controller
                 ]);
             }
 
-            if ($task && !($task->status > 1)) {
-                $task->status = 1;
+            if ($task && !($task->status > 2)) {
+                $task->status = 2;
                 $task->save();
             }
 

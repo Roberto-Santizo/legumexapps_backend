@@ -16,10 +16,11 @@ class TaskProductionOperationDateResource extends JsonResource
     public function toArray(Request $request): array
     {
         $status = [
-            0 => ['Pendiente entrega de material de empaque', 'bg-orange-500'],
-            1 => ['Lista para ejecución', 'bg-blue-500'],
-            2 => ['En progreso', 'bg-yellow-500'],
-            3 => ['Finalizada', 'bg-green-500']
+            1 => ['Pendiente entrega de material de empaque', 'bg-orange-500'],
+            2 => ['Lista para confirmación de asignaciones', 'bg-blue-500'],
+            3 => ['Lista para ejecución', 'bg-blue-500'],
+            4 => ['En progreso', 'bg-yellow-500'],
+            5 => ['Finalizada', 'bg-green-500']
         ];
 
         $working = ($this->start_date && !$this->end_date) ? true : false;

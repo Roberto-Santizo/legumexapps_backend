@@ -14,31 +14,27 @@ class TaskPackingMaterialReturnDetailsResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $lbs = $this->total_lbs - $this->total_lbs_bascula;
-        $boxes = round($lbs / $this->line_sku->sku->presentation, 2);
-        $bags = $boxes * $this->line_sku->sku->config_bag;
-        $inner_bags = $bags * $this->line_sku->sku->config_inner_bag;
         $first_transaction = $this->transactions->first();
+        $rows = [];
 
-
-        $new_quantity = [
-            $this->line_sku->sku->box_id => $boxes,
-            $this->line_sku->sku->bag_id => $bags,
-            $this->line_sku->sku->bag_inner_id => $inner_bags,
-        ];
-
+        foreach ($first_transaction->items as $item) {
+            $difference = $this->total_lbs - $this->total_lbs_bascula;
+            $item_recipe = $this->line_sku->sku->items()->where('item_id',$item->packing_material_id)->first();
+            $quantity = $difference/$item_recipe->lbs_per_item;
+            
+            $rows[] = [
+                'name' => $item->item->name,
+                'packing_material_id' => strval($item->item->id),
+                'quantity' => $quantity,
+                'lote' => $item->lote,
+                'destination' => $item->destination ?? $this->line_sku->line->name,
+            ];
+        }
+        
         $flag = $this->transactions()->where('type', 2)->exists() ? true : false;
         return [
             'available' => !$flag,
-            'items' => $first_transaction->items->map(function ($item) use ($new_quantity) {
-                return [
-                    "name" => $item->item->name,
-                    'packing_material_id' => strval($item->packing_material_id),
-                    'quantity' => $new_quantity[$item->packing_material_id],
-                    'lote' => $item->lote,
-                    'destination' => 'BODEGA'
-                ];
-            })
+            'items' => $rows
         ];
     }
 }

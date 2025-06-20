@@ -22,12 +22,12 @@ class CreateAssigmentsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'data' => 'required',
-            'data.*.name' => 'required',
-            'data.*.code' => 'required',
-            'data.*.old_position' => 'required',
-            'data.*.new_position' => 'required',
-            'data.*.position_id' => 'required|exists:line_positions,id'
+            'data' => 'nullable|array',
+            'data.*.name' => 'required_with:data.*.code,data.*.old_position,data.*.new_position,data.*.position_id',
+            'data.*.code' => 'required_with:data.*.name',
+            'data.*.old_position' => 'required_with:data.*.name',
+            'data.*.new_position' => 'required_with:data.*.name',
+            'data.*.position_id' => 'required_with:data.*.name|exists:line_positions,id',
         ];
     }
 }

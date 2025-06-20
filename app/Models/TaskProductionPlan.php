@@ -34,17 +34,17 @@ class TaskProductionPlan extends Model
 
     public function weeklyPlan()
     {
-        return $this->belongsTo(WeeklyProductionPlan::class,'weekly_production_plan_id','id');
+        return $this->belongsTo(WeeklyProductionPlan::class, 'weekly_production_plan_id', 'id');
     }
 
     public function employees()
     {
-        return $this->hasMany(TaskProductionEmployee::class,'task_p_id','id');
+        return $this->hasMany(TaskProductionEmployee::class, 'task_p_id', 'id');
     }
 
     public function line_sku()
     {
-        return $this->belongsTo(LineStockKeepingUnits::class,'line_sku_id','id');
+        return $this->belongsTo(LineStockKeepingUnits::class, 'line_sku_id', 'id');
     }
 
     public function performances()
@@ -54,12 +54,12 @@ class TaskProductionPlan extends Model
 
     public function timeouts()
     {
-        return $this->hasMany(TaskProductionTimeout::class,'task_p_id','id');
+        return $this->hasMany(TaskProductionTimeout::class, 'task_p_id', 'id');
     }
 
     public function note()
     {
-        return $this->hasOne(TaskProductionPlanNote::class,'task_p_id','id');
+        return $this->hasOne(TaskProductionPlanNote::class, 'task_p_id', 'id');
     }
 
     public function operationDateChanges()
@@ -74,7 +74,6 @@ class TaskProductionPlan extends Model
 
     public function wastages()
     {
-        return $this->hasMany(PackingMaterialWastage::class,'task_p_id','id');
+        return $this->hasMany(PackingMaterialWastage::class, 'task_p_id', 'id');
     }
-
 }

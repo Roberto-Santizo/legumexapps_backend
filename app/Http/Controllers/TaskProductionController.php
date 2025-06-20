@@ -264,7 +264,7 @@ class TaskProductionController extends Controller
 
         try {
             $task_production->start_date = Carbon::now();
-            $task_production->status = 3;
+            $task_production->status = 4;
             $task_production->save();
 
             return response()->json('Tarea Iniciada', 200);
@@ -291,20 +291,9 @@ class TaskProductionController extends Controller
         }
 
         try {
-            $total_boxes = 0;
-            $lbs_teoricas = 0;
-            $performance_hours = 0;
-            $percentage = 0;
+            $percentage = $data['total_lbs_bascula'] / $task_production->total_lbs;
 
-            if ($task_production->line_sku->lbs_performance) {
-                $total_boxes = $data['total_tarimas'] * $task_production->line_sku->sku->boxes_pallet;
-                $lbs_teoricas = $total_boxes * $task_production->line_sku->sku->presentation;
-                $performance_hours = $lbs_teoricas / $task_production->line_sku->lbs_performance;
-                $percentage = $performance_hours / $task_production->total_hours;
-            }
-
-
-            if ($task_production->line_sku->lbs_performance && $percentage < ($task_production->line_sku->accepted_percentage / 100)) {
+            if ($percentage < ($task_production->line_sku->accepted_percentage / 100)) {
                 $task_production->is_minimum_require = false;
                 $task_production->is_justified = false;
             } else {
@@ -318,7 +307,7 @@ class TaskProductionController extends Controller
             $task_production->total_lbs_bascula = $data['total_lbs_bascula'];
             $task_production->total_lbs_produced = $lbs_produced;
             $task_production->end_date = Carbon::now();
-            $task_production->status = 4;
+            $task_production->status = 5;
             $task_production->save();
 
             if ($task_production->total_lbs_bascula < $task_production->total_lbs) {
@@ -339,7 +328,7 @@ class TaskProductionController extends Controller
         $task_production = TaskProductionPlan::find($id);
 
         $data = new TaskProductionPlanDetailResource($task_production);
-        return response()->json($data, 200); 
+        return response()->json($data, 200);
     }
 
     public function TakePerformance(Request $request, string $id)
@@ -592,21 +581,31 @@ class TaskProductionController extends Controller
         }
 
         try {
-            $tasks = TaskProductionPlan::where('line_id', $task_production->line_id)->whereDate('operation_date', $task_production->operation_date)->where('start_date', null)->where('end_date', null)->get();
-            foreach ($data['data'] as $newEmployee) {
-                $position = LinePosition::find($newEmployee['position_id']);
-                foreach ($tasks as $task) {
-                    $newAssignee = TaskProductionEmployee::create([
-                        'task_p_id' => $task->id,
-                        'name' => $newEmployee['name'],
-                        'code' => $newEmployee['code'],
-                        'position' => $position->name
-                    ]);
+            $tasks = TaskProductionPlan::where('line_id', $task_production->line_id)
+                ->whereDate('operation_date', $task_production->operation_date)
+                ->whereNull('start_date')
+                ->whereNull('end_date')
+                ->get();
+
+            if (!empty($data['data'])) {
+                foreach ($data['data'] as $newEmployee) {
+                    $position = LinePosition::find($newEmployee['position_id']);
+
+                    foreach ($tasks as $task) {
+                        $newAssignee = TaskProductionEmployee::create([
+                            'task_p_id' => $task->id,
+                            'name' => $newEmployee['name'],
+                            'code' => $newEmployee['code'],
+                            'position' => $position->name
+                        ]);
+
+                        $newAssignee->old_position = $newEmployee['old_position'];
+                        $newAssignee->save();
+                    }
                 }
-                $newAssignee->old_position = $newEmployee['old_position'];
+                $this->emailCreateAssigneeService->sendNotification($data['data']);
             }
 
-            $this->emailCreateAssigneeService->sendNotification($data['data']);
             return response()->json('Asignaciónes creadas correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
@@ -614,6 +613,7 @@ class TaskProductionController extends Controller
             ], 500);
         }
     }
+
 
     public function FinishedTaskDetails(string $id)
     {
@@ -750,60 +750,63 @@ class TaskProductionController extends Controller
         }
 
         try {
-            foreach ($data['data'] as $change) {
-                $assignment = TaskProductionEmployee::find($change['old_employee']['id']);
-                $NewChange = TaskProductionEmployeesBitacora::create([
-                    "assignment_id" => $assignment->id,
-                    "original_name" => $assignment->name,
-                    "original_code" => $assignment->code,
-                    "original_position" => $assignment->position,
-                    "new_name" => $change['new_employee']['name'],
-                    "new_code" => $change['new_employee']['code'],
-                    "new_position" => $change['new_employee']['position']
-                ]);
-
-                EmployeeTransfer::create([
-                    'change_employee_id' => $NewChange->id,
-                    'confirmed' => false
-                ]);
-
-                $assignment->name = $NewChange->new_name;
-                $assignment->code = $NewChange->new_code;
-                $assignment->position = $NewChange->new_position;
-                $assignment->save();
-
-                $line = $task->line_sku->line->code;
-
-                $employees = TaskProductionEmployee::whereHas('TaskProduction', function ($query) use ($line) {
-                    $query->where('start_date', null)->where('end_date', null);
-                    $query->whereHas('line', function ($query) use ($line) {
-                        $query->where('code', $line);
-                        $query->whereDate('operation_date', Carbon::now());
-                    });
-                })->where('position', $NewChange->original_position)->get();
-
-                foreach ($employees as $employee) {
-                    TaskProductionEmployeesBitacora::create([
-                        "assignment_id" => $employee->id,
+            if (!empty($data['data'])) {
+                foreach ($data['data'] as $change) {
+                    $assignment = TaskProductionEmployee::find($change['old_employee']['id']);
+                    $NewChange = TaskProductionEmployeesBitacora::create([
+                        "assignment_id" => $assignment->id,
                         "original_name" => $assignment->name,
                         "original_code" => $assignment->code,
                         "original_position" => $assignment->position,
-                        "new_name" => $NewChange->new_name,
-                        "new_code" => $NewChange->new_code,
-                        "new_position" => $NewChange->new_position
+                        "new_name" => $change['new_employee']['name'],
+                        "new_code" => $change['new_employee']['code'],
+                        "new_position" => $change['new_employee']['position']
                     ]);
 
-                    $employee->name = $NewChange->new_name;
-                    $employee->code = $NewChange->new_code;
-                    $employee->position = $NewChange->new_position;
-                    $employee->save();
-                }
+                    EmployeeTransfer::create([
+                        'change_employee_id' => $NewChange->id,
+                        'confirmed' => false
+                    ]);
 
-                $task->status = 2;
-                $task->save();
+                    $assignment->name = $NewChange->new_name;
+                    $assignment->code = $NewChange->new_code;
+                    $assignment->position = $NewChange->new_position;
+                    $assignment->save();
+
+                    $line = $task->line_sku->line->code;
+
+                    $employees = TaskProductionEmployee::whereHas('TaskProduction', function ($query) use ($line) {
+                        $query->where('start_date', null)->where('end_date', null);
+                        $query->whereHas('line', function ($query) use ($line) {
+                            $query->where('code', $line);
+                            $query->whereDate('operation_date', Carbon::now());
+                        });
+                    })->where('position', $NewChange->original_position)->get();
+
+                    foreach ($employees as $employee) {
+                        TaskProductionEmployeesBitacora::create([
+                            "assignment_id" => $employee->id,
+                            "original_name" => $assignment->name,
+                            "original_code" => $assignment->code,
+                            "original_position" => $assignment->position,
+                            "new_name" => $NewChange->new_name,
+                            "new_code" => $NewChange->new_code,
+                            "new_position" => $NewChange->new_position
+                        ]);
+
+                        $employee->name = $NewChange->new_name;
+                        $employee->code = $NewChange->new_code;
+                        $employee->position = $NewChange->new_position;
+                        $employee->save();
+                    }
+                }
                 $this->emailService->sendNotification($data['data']);
-                return response()->json('Asignación Confirmada Correctamente', 200);
             }
+
+
+            $task->status = 3;
+            $task->save();
+            return response()->json('Asignación Confirmada Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()

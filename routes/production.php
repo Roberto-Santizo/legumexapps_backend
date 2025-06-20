@@ -16,14 +16,14 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/employees-comodines', [EmployeeController::class, 'getComodines']);
 
     Route::apiResource('/lines-skus', LineStockKeepingUnitsController::class);
-    Route::post('/lines-skus/upload', [LineStockKeepingUnitsController::class,'UploadLinesSkus']);
+    Route::post('/lines-skus/upload', [LineStockKeepingUnitsController::class, 'UploadLinesSkus']);
 
     Route::apiResource('/timeouts', TimeOutController::class);
     Route::apiResource('/notes', TaskProductionPlanNotesController::class);
-    
+
     Route::apiResource('/skus', SKUController::class);
-    Route::post('/skus/upload', [SKUController::class,'UploadStockKeepingUnits']);
-    Route::post('/skus/upload/recipe', [SKUController::class,'UploadSkuRecipe']);
+    Route::post('/skus/upload', [SKUController::class, 'UploadStockKeepingUnits']);
+    Route::post('/skus/upload/recipe', [SKUController::class, 'UploadSkuRecipe']);
 
     Route::apiResource('/lines', LinesController::class);
     Route::get('/lines/performances-per-day/{id}', [LinesController::class, 'GetPerformanceByLine']);
@@ -32,8 +32,9 @@ Route::middleware('jwt.auth')->group(function () {
 
     Route::apiResource('/weekly-production-plans', WeeklyProductionPlanController::class);
     Route::get('/weekly-production-plans/details/{weekly_plan_id}/{line_id}', [WeeklyProductionPlanController::class, 'GetTasksByLineId']);
-    Route::get('/weekly-production-plans/all-tasks/{weekly_plan_id}', [WeeklyProductionPlanController::class, 'GetAllTasksWeeklyPlan']);
-    Route::get('/weekly-production-plans/tasks/programed', [WeeklyProductionPlanController::class, 'GetTasksOperationDate']);
+    Route::get('/weekly-production-plans/tasks-no-operation-date/{weekly_plan_id}', [WeeklyProductionPlanController::class, 'GetTasksNoOperationDate']);
+    Route::get('/weekly-production-plans/events-for-calendar/{weekly_plan_id}', [WeeklyProductionPlanController::class, 'GetTasksForCalendar']);
+    Route::get('/weekly-production-plans/tasks/programed/{weekly_plan_id}', [WeeklyProductionPlanController::class, 'GetTasksOperationDate']);
     Route::post('/weekly-production-plans/assign/{id}', [WeeklyProductionPlanController::class, 'createAssigments']);
 
     Route::apiResource('/tasks-production', TaskProductionController::class);

@@ -65,28 +65,26 @@ class ReturnPackingMaterialNotificationService
     {
         $url = 'http://localhost:5173/planes-produccion/' . $task_production->weeklyPlan->id . '/' . $task_production->line->id . '?devolutionTaskId=' . $task_production->id;
 
+        $rows = '';
         $line = $task_production->line_sku->line->name;
         $sku = $task_production->line_sku->sku->code;
         $product_name = $task_production->line_sku->sku->product_name;
         $operation_date = $task_production->operation_date->format('d-m-Y');
-        $lbs = $task_production->total_lbs - $task_production->total_lbs_bascula;
+        $difference = $task_production->total_lbs - $task_production->total_lbs_bascula;
+        $recipe = $task_production->line_sku->sku->items;
 
-        $boxes_val = round($lbs / $task_production->line_sku->sku->presentation, 2);
-        $bags_val = $boxes_val * $task_production->line_sku->sku->config_bag;
-        $inner_bags_val = $bags_val * $task_production->line_sku->sku->config_inner_bag;
-
-        $boxes = number_format($boxes_val, 2);
-        $bags = number_format($bags_val, 2);
-        $inner_bags = number_format($inner_bags_val, 2);
-
-        $boxes_type = $task_production->line_sku->sku->box->name;
-        $boxes_type_code = $task_production->line_sku->sku->box->code;
-
-        $bags_type = $task_production->line_sku->sku->bag->name;
-        $bags_type_code = $task_production->line_sku->sku->bag->code;
-
-        $bags_inner_type = $task_production->line_sku->sku->bag_inner->name;
-        $bags_inner_type_code = $task_production->line_sku->sku->bag_inner->code;
+        foreach ($recipe as $item) {
+            $name = $item->item->name;
+            $code = $item->item->code;
+            $quantity = $difference / $item->lbs_per_item;
+            $rows .= <<<HTML
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ccc;">{$code}</td>
+                    <td style="padding: 10px; border: 1px solid #ccc;">{$name}</td>
+                    <td style="padding: 10px; border: 1px solid #ccc;">{$quantity}</td>
+                </tr>
+            HTML;
+        }
 
         $message = <<<HTML
                 <!DOCTYPE html>
@@ -126,29 +124,11 @@ class ReturnPackingMaterialNotificationService
                                                     <tr>
                                                         <th style="border: 1px solid #d1d5db; padding: 10px; text-transform: uppercase; font-weight: 600; font-size: 14px; color: #374151;">Código</th>
                                                         <th style="border: 1px solid #d1d5db; padding: 10px; text-transform: uppercase; font-weight: 600; font-size: 14px; color: #374151;">Descripción del producto</th>
-                                                        <th style="border: 1px solid #d1d5db; padding: 10px; text-transform: uppercase; font-weight: 600; font-size: 14px; color: #374151;">Destino</th>
                                                         <th style="border: 1px solid #d1d5db; padding: 10px; text-transform: uppercase; font-weight: 600; font-size: 14px; color: #374151;">Cantidad</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <tr>
-                                                        <td style="border: 1px solid #e5e7eb; padding: 10px;">{$boxes_type_code}</td>
-                                                        <td style="border: 1px solid #e5e7eb; padding: 10px;">{$boxes_type}</td>
-                                                        <td style="border: 1px solid #e5e7eb; padding: 10px;">{$line}</td>
-                                                        <td style="border: 1px solid #e5e7eb; padding: 10px;">{$boxes}</td>
-                                                    </tr>
-                                                     <tr>
-                                                        <td style="border: 1px solid #e5e7eb; padding: 10px;">{$bags_type_code}</td>
-                                                        <td style="border: 1px solid #e5e7eb; padding: 10px;">{$bags_type}</td>
-                                                        <td style="border: 1px solid #e5e7eb; padding: 10px;">{$line}</td>
-                                                        <td style="border: 1px solid #e5e7eb; padding: 10px;">{$bags}</td>
-                                                    </tr>
-                                                     <tr>
-                                                        <td style="border: 1px solid #e5e7eb; padding: 10px;">{$bags_inner_type_code}</td>
-                                                        <td style="border: 1px solid #e5e7eb; padding: 10px;">{$bags_inner_type}</td>
-                                                        <td style="border: 1px solid #e5e7eb; padding: 10px;">{$line}</td>
-                                                        <td style="border: 1px solid #e5e7eb; padding: 10px;">{$inner_bags}</td>
-                                                    </tr>
+                                                    {$rows}
                                                 </tbody>
                                             </table>
                                         </td>

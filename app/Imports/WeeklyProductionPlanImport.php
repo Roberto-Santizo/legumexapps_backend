@@ -64,7 +64,7 @@ class WeeklyProductionPlanImport implements ToCollection, WithHeadingRow
                     'line_sku_id' => $sku_line->id,
                     'destination' => $row['destino'],
                     'total_lbs' => $row['libras'],
-                    'status' => 0
+                    'status' => 1
                 ]);
             } catch (\Throwable $th) {
                 throw $th;

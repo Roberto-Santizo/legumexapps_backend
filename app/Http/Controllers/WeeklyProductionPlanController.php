@@ -14,6 +14,7 @@ use App\Models\Line;
 use App\Models\TaskProductionPlan;
 use App\Models\WeeklyProductionPlan;
 use Carbon\Carbon;
+use Illuminate\Console\View\Components\Task;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -57,7 +58,7 @@ class WeeklyProductionPlanController extends Controller
 
             return [
                 'id' => strval($line->id),
-                'line' => $linea,
+                'line' => $line->name,
                 'status' => $allCompleted ? true : false,
                 'total_employees' => $line->positions->count(),
                 'assigned_employees' => $tasks->first()->employees->count(),
@@ -120,24 +121,6 @@ class WeeklyProductionPlanController extends Controller
         return TaskProductionPlanByLineResource::collection($tasks->sortBy('operation_date'));
     }
 
-    public function GetTasksForCalendar(string $weekly_plan_id)
-    {
-        $weekly_plan = WeeklyProductionPlan::find($weekly_plan_id);
-
-        if (!$weekly_plan) {
-            return response()->json([
-                'msg' => 'Plan Semanal Not Found'
-            ], 404);
-        }
-
-        $tasks = $weekly_plan->tasks()
-            ->orderBy('priority', 'ASC')
-            ->orderBy('line_id', 'ASC')
-            ->get();
-
-
-        return TaskProductionForCalendarResource::collection($tasks);
-    }
 
     public function GetTasksByDate(Request $request, string $weekly_plan_id)
     {
@@ -205,7 +188,7 @@ class WeeklyProductionPlanController extends Controller
         ], 200);
     }
 
-    public function GetAllTasksWeeklyPlan(string $id)
+    public function GetTasksNoOperationDate(Request $request, string $id)
     {
         $weekly_plan = WeeklyProductionPlan::find($id);
 
@@ -216,8 +199,77 @@ class WeeklyProductionPlanController extends Controller
         }
 
         try {
-            $tasks_no_operation_date = $weekly_plan->tasks()->where('operation_date', null)->get();
-            $tasks = $weekly_plan->tasks()->whereNot('operation_date', null)->get();
+            $query = TaskProductionPlan::query();
+            $query->where('weekly_production_plan_id', $id);
+            $query->whereNull('operation_date');
+
+            if ($request->query('line')) {
+                $query->where('line_id', $request->query('line'));
+            }
+
+            if ($request->query('sku')) {
+                $query->whereHas('line_sku', function ($q) use ($request) {
+                    $q->whereHas('sku', function ($q2) use ($request) {
+                        $q2->where('code', 'LIKE', '%' . $request->query('sku') . '%');
+                    });
+                });
+            }
+
+
+            return response()->json(TaskProductionPlanNoOperationDateResource::collection($query->get()));
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function GetTasksOperationDate(Request $request, string $weekly_plan_id)
+    {
+        $date = Carbon::parse($request->query('date'));
+
+        try {
+            $query = TaskProductionPlan::query();
+            $query->where('weekly_production_plan_id', $weekly_plan_id);
+            $query->whereDate('operation_date', $date);
+
+            if ($request->query('line')) {
+                $query->where('line_id', $request->query('line'));
+            }
+
+            if ($request->query('sku')) {
+                $query->whereHas('line_sku', function ($q) use ($request) {
+                    $q->whereHas('sku', function ($q2) use ($request) {
+                        $q2->where('code', 'LIKE', '%' . $request->query('sku') . '%');
+                    });
+                });
+            }
+
+            if ($request->query('status')) {
+                $query->where('status', $request->query('status'));
+            }
+
+            return TaskProductionOperationDateResource::collection($query->get());
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function GetTasksForCalendar(Request $request, string $id)
+    {
+
+        $weekly_plan = WeeklyProductionPlan::find($id);
+
+        if (!$weekly_plan) {
+            return response()->json([
+                'msg' => 'Plan Semanal No Encontrado'
+            ], 404);
+        }
+
+        try {
+            $tasks = TaskProductionPlan::where('weekly_production_plan_id', $id)->whereNotNull('operation_date')->get();
 
             $events = $tasks->groupBy(function ($item) {
                 return $item->operation_date->format('Y-m-d') . '_' . $item->line_id;
@@ -226,31 +278,13 @@ class WeeklyProductionPlanController extends Controller
                 $lbs = $items->sum('total_lbs');
                 return [
                     'id' => strval($first->line_id),
-                    'title' => $first->line->name . ' | ' . $lbs . ' LBS',
+                    'title' => $first->line->code . ' | ' . $lbs . ' LBS',
                     'start' => $first->operation_date->format('Y-m-d'),
                 ];
             })->values();
 
 
-            return response()->json([
-                'tasks' => TaskProductionPlanNoOperationDateResource::collection($tasks_no_operation_date),
-                'events' => $events
-            ]);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'msg' => $th->getMessage()
-            ], 500);
-        }
-    }
-
-    public function GetTasksOperationDate(Request $request)
-    {
-        $date = Carbon::parse($request->query('date'));
-
-        try {
-            $tasks = TaskProductionPlan::whereDate('operation_date', $date)->get();
-
-            return TaskProductionOperationDateResource::collection($tasks);
+            return response()->json($events);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
