@@ -543,7 +543,7 @@ class TaskProductionController extends Controller
                 'operation_date' => $data['operation_date'],
                 'total_hours' => round($total_hours, 2),
                 'line_sku_id' => $line_sku->id,
-                'status' =>  0,
+                'status' =>  1,
                 'destination' => $data['destination'],
                 'total_lbs' => $data['total_lbs']
             ]);

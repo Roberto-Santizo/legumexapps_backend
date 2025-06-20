@@ -278,7 +278,7 @@ class WeeklyProductionPlanController extends Controller
                 $lbs = $items->sum('total_lbs');
                 return [
                     'id' => strval($first->line_id),
-                    'title' => $first->line->code . ' | ' . $lbs . ' LBS',
+                    'title' => $first->line->code . ' | ' . number_format($lbs) . ' LBS',
                     'start' => $first->operation_date->format('Y-m-d'),
                 ];
             })->values();
