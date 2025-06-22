@@ -27,7 +27,9 @@ class WeeklyPlanController extends Controller
         $week = Carbon::now()->weekOfYear;
         $year = Carbon::now()->year;
 
-        $role = $request->user()->getRoleNames();
+        $payload = JWTAuth::getPayload();
+        $role = $payload->get('role');
+
         $adminroles = ['admin', 'adminagricola', 'auxrrhh'];
 
         $query = WeeklyPlan::query();
@@ -44,7 +46,7 @@ class WeeklyPlanController extends Controller
             $query->where('finca_id', $request->query('finca_id'));
         }
 
-        if (!in_array($role[0], $adminroles)) {
+        if (!in_array($role, $adminroles)) {
             $permission = $request->user()->getRoleNames()->first();
             $query->whereHas('finca', function ($query) use ($permission) {
                 $query->where('name', 'LIKE', '%' . $permission . '%');
@@ -115,6 +117,7 @@ class WeeklyPlanController extends Controller
         } else {
             $tasks_by_lote = $plan->tasks->groupBy('lote_plantation_control_id');
         }
+
 
         $tasks_crop_by_lote = $plan->tasks_crops->groupBy('lote_plantation_control_id');
 
@@ -200,9 +203,9 @@ class WeeklyPlanController extends Controller
         $payload = JWTAuth::getPayload();
         $role = $payload->get('role');
 
-        if (!in_array($role[0], $adminroles)) {
+        if (!in_array($role, $adminroles)) {
             $query->whereHas('finca', function ($q) use ($role) {
-                $q->where('name', 'like', '%' . $role[0] . '%');
+                $q->where('name', 'like', '%' . $role . '%');
             });
         }
 

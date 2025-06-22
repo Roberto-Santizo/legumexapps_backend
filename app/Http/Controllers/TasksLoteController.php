@@ -80,6 +80,7 @@ class TasksLoteController extends Controller
             $tasks_filterd = $tasks;
         }
 
+
         return [
             'week' => $task_without_filter->plan->week,
             'finca' => $task_without_filter->plan->finca->name,
