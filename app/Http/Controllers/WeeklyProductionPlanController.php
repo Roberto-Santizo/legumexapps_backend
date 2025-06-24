@@ -78,15 +78,25 @@ class WeeklyProductionPlanController extends Controller
         ]);
 
         try {
-            Excel::import(new WeeklyProductionPlanImport, $request->file('file'));
+            $import = new WeeklyProductionPlanImport();
 
-            return response()->json('Plan Semanal Creado Correctamente', 200);
+            Excel::import($import, $request->file('file'));
+
+            if (!empty($import->errors)) {
+                return response()->json([
+                    'msg' => 'Plan creado con advertencias',
+                    'plan_errors' => $import->errors
+                ], 400);
+            }
+
+            return response()->json('Plan Creado Correctamente', 200);
         } catch (\Throwable  $th) {
             return response()->json([
                 'msg' => $th->getMessage()
             ], 500);
         }
     }
+
 
     public function createAssigments(Request $request, string $id)
     {
