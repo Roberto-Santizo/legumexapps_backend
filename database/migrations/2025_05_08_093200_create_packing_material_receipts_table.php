@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('user_signature');
             $table->string('supervisor_signature');
             $table->string('observations')->nullable();
+            $table->foreignId('supplier_id')->constrained()->on('supplier_packing_materials');
             $table->timestamps();
         });
     }
