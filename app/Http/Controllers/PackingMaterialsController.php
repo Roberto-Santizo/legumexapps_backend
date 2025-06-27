@@ -24,7 +24,7 @@ class PackingMaterialsController extends Controller
         }
 
         if ($request->query('code')) {
-            $query->where('code', $request->query('code'));
+            $query->where('code', 'LIKE', '%' . $request->query('code') . '%');
         }
 
         if ($request->query('status')) {

@@ -394,8 +394,6 @@ class TaskProductionController extends Controller
         $role = $payload->get('role');
         $user_id = $payload->get('id');
 
-
-
         $task_production = TaskProductionPlan::find($id);
 
         if (!$task_production) {
@@ -405,8 +403,8 @@ class TaskProductionController extends Controller
         }
 
         $new_date = Carbon::parse($data['date']);
-        $old_date = $task_production->operation_date;
         $today = Carbon::today();
+        $old_date = $task_production->operation_date;
 
         $limit_hour = Carbon::createFromTime(15, 0, 0);
         $hour = Carbon::now();
@@ -423,7 +421,14 @@ class TaskProductionController extends Controller
                     'msg' => 'No puede mover tareas fuera de la semana actual'
                 ], 500);
             }
+
+            if ($new_date == $today) {
+                return response()->json([
+                    'msg' => 'No puede mover tareas al día en curso'
+                ], 500);
+            }
         }
+
 
         try {
             $last_task = TaskProductionPlan::whereDate('operation_date', $data['date'])->where('line_id', $task_production->line_id)->get()->first();
@@ -482,6 +487,15 @@ class TaskProductionController extends Controller
         }
 
         try {
+            $today = Carbon::now();
+            $new_date = Carbon::parse($data['date']);
+
+            if ($today === $new_date) {
+                return response()->json([
+                    'msg' => 'No puede asignar tareas a el día en curso'
+                ], 500);
+            }
+
             $task->operation_date = $data['date'];
             $task->save();
 

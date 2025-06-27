@@ -35,7 +35,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/weekly-production-plans/tasks-no-operation-date/{weekly_plan_id}', [WeeklyProductionPlanController::class, 'GetTasksNoOperationDate']);
     Route::get('/weekly-production-plans/events-for-calendar/{weekly_plan_id}', [WeeklyProductionPlanController::class, 'GetTasksForCalendar']);
     Route::get('/weekly-production-plans/tasks/programed/{weekly_plan_id}', [WeeklyProductionPlanController::class, 'GetTasksOperationDate']);
-    Route::post('/weekly-production-plans/assign/{id}', [WeeklyProductionPlanController::class, 'createAssigments']);
+    Route::post('/weekly-production-plans/assign', [WeeklyProductionPlanController::class, 'createAssigments']);
 
     Route::apiResource('/tasks-production', TaskProductionController::class);
     Route::get('/tasks-production/finished/details/{id}', [TaskProductionController::class, 'FinishedTaskDetails']);
