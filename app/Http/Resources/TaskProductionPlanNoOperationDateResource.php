@@ -19,6 +19,7 @@ class TaskProductionPlanNoOperationDateResource extends JsonResource
             'sku' => $this->line_sku->sku->code,  
             'line' => $this->line->name,
             'total_lbs' => $this->total_lbs,
+            'product_name'=> $this->line_sku->sku->product_name,
             'destination' => $this->destination
         ];
     }

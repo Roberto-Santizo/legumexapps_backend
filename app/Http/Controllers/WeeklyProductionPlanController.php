@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\TaskProductionForCalendarResource;
 use App\Http\Resources\TaskProductionOperationDateResource;
 use App\Http\Resources\TaskProductionPlanNoOperationDateResource;
 use App\Http\Resources\TaskProductionPlanByLineResource;
@@ -14,7 +13,6 @@ use App\Models\Line;
 use App\Models\TaskProductionPlan;
 use App\Models\WeeklyProductionPlan;
 use Carbon\Carbon;
-use Illuminate\Console\View\Components\Task;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -217,6 +215,14 @@ class WeeklyProductionPlanController extends Controller
                 $query->where('line_id', $request->query('line'));
             }
 
+            if ($request->query('product')) {
+                $query->whereHas('line_sku', function ($q) use ($request) {
+                    $q->whereHas('sku', function ($q2) use ($request) {
+                        $q2->where('product_name', 'LIKE', '%' . $request->query('product') . '%');
+                    });
+                });
+            }
+
             if ($request->query('sku')) {
                 $query->whereHas('line_sku', function ($q) use ($request) {
                     $q->whereHas('sku', function ($q2) use ($request) {
@@ -285,10 +291,11 @@ class WeeklyProductionPlanController extends Controller
                 return $item->operation_date->format('Y-m-d') . '_' . $item->line_id;
             })->map(function ($items, $key) {
                 $first = $items->first();
-                $lbs = $items->sum('total_lbs');
+                $hours = $items->first()->line_sku->lbs_performance ? ($items->sum('total_lbs') / $items->first()->line_sku->lbs_performance) : 0;
+
                 return [
                     'id' => strval($first->line_id),
-                    'title' => $first->line->code . ' | ' . number_format($lbs) . ' LBS',
+                    'title' => $first->line->code . ' | ' . round($hours, 2) . ' h',
                     'start' => $first->operation_date->format('Y-m-d'),
                 ];
             })->values();

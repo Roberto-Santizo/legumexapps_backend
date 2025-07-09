@@ -22,6 +22,28 @@ class PackingMaterialTransactionController extends Controller
     {
         $query = PackingMaterialTransaction::query();
 
+        if ($request->query('transaction')) {
+            $query->where('reference', $request->query('transaction'));
+        }
+
+        if ($request->query('responsable')) {
+            $query->where('responsable', 'LIKE', '%' . $request->query('responsable') . '%');
+        }
+
+        if ($request->query('delivered_by')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('name', 'LIKE', '%' . $request->query('delivered_by') . '%');
+            });
+        }
+
+        if ($request->query('delivered_date')) {
+            $query->whereDate('created_at', $request->query('delivered_date'));
+        }
+
+        if ($request->query('type')) {
+            $query->where('type', $request->query('type'));
+        }
+
         if ($request->query('paginated')) {
             return PackingMaterialTransactionResource::collection($query->paginate(10));
         }
@@ -113,6 +135,7 @@ class PackingMaterialTransactionController extends Controller
             ], 404);
         }
 
-        return new PackingMaterialTransactionDetailsResource($dispatch);
+        $data = new PackingMaterialTransactionDetailsResource($dispatch);
+        return response()->json($data);
     }
 }
