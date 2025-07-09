@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ChangeAssigmentsRequest;
 use App\Http\Requests\CreateAssigmentsRequest;
+use App\Http\Requests\CreateTaskProductionRequest;
 use App\Http\Resources\FinishedTaskProductionResource;
 use App\Http\Resources\TaskPackingMaterialReturnDetailsResource;
 use App\Http\Resources\TaskProductionEmployeeResource;
@@ -29,6 +30,7 @@ use App\Services\AssignEmployeeNotificationService;
 use App\Services\ChangeEmployeeNotificationService;
 use App\Services\ReturnPackingMaterialNotificationService;
 use Carbon\Carbon;
+use Illuminate\Console\View\Components\Task;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -507,75 +509,72 @@ class TaskProductionController extends Controller
         }
     }
 
-    public function CreateNewTaskProduction(Request $request)
+    public function CreateNewTaskProduction(CreateTaskProductionRequest $request)
     {
-        $data = $request->validate([
-            'line_id' => 'required|exists:lines,id',
-            'operation_date' => 'required',
-            'sku_id' => 'required|exists:stock_keeping_units,id',
-            'total_lbs' => 'required',
-            'destination' => 'required'
-        ]);
+        $data = $request->validated();
 
         $payload = JWTAuth::getPayload();
         $role = $payload->get('role');
 
-
-        $line = Line::find($data['line_id']);
-        $sku = StockKeepingUnit::find($data['sku_id']);
-        $line_sku = LineStockKeepingUnits::where('line_id', $line->id)->where('sku_id', $sku->id)->get()->first();
-
-        $operation_date = Carbon::parse($data['operation_date']);
-        $today = Carbon::today();
-        $limit_hour = Carbon::createFromTime(15, 0, 0);
-        $hour = Carbon::now();
-
-        if ($role != 'admin') {
-            if (!$hour->lessThan($limit_hour)) {
-                return response()->json([
-                    'msg' => 'No se puede programar la tarea, la hora limite para poder programar son las 3:00 PM'
-                ], 500);
-            }
-
-            if ($operation_date->lessThan($today)) {
-                return response()->json([
-                    'msg' => 'No puede programar tareas a fechas pasadas'
-                ], 500);
-            }
-        }
-
         try {
-            $task_line = TaskProductionPlan::where('line_id', $line->id)->get()->last();
-            $weekly_production_plan = WeeklyProductionPlan::all()->last();
 
-            $task_week = TaskProductionPlan::where('line_id', $line->id)->whereDate('operation_date', $data['operation_date'])->get()->last();
-            $total_hours =  $line_sku->lbs_performance ? ($data['total_lbs'] / $line_sku->lbs_performance) : null;
+            $today = Carbon::today();
+            $limit_hour = Carbon::createFromTime(15, 0, 0);
+            $hour = Carbon::now();
 
-            $new_task = TaskProductionPlan::create([
-                'line_id' => $line->id,
-                'weekly_production_plan_id' => $weekly_production_plan->id,
-                'operation_date' => $data['operation_date'],
-                'total_hours' => round($total_hours, 2),
-                'line_sku_id' => $line_sku->id,
-                'status' =>  1,
-                'destination' => $data['destination'],
-                'total_lbs' => $data['total_lbs']
-            ]);
+            if ($role != 'admin') {
+                if (!$hour->lessThan($limit_hour)) {
+                    return response()->json([
+                        'msg' => 'No se puede programar la tarea, la hora limite para poder programar son las 3:00 PM'
+                    ], 500);
+                }
+            }
 
-            if ($task_line) {
-                foreach ($task_line->employees as $employee) {
-                    TaskProductionEmployee::create([
-                        'task_p_id' => $new_task->id,
-                        'name' => $employee->name,
-                        'code' => $employee->code,
-                        'position' => $employee->position
-                    ]);
+            foreach ($data['data'] as $task) {
+                $operation_date = Carbon::parse($task['operation_date']);
+
+
+                if ($operation_date->lessThan($today)) {
+                    return response()->json([
+                        'msg' => 'No puede programar tareas a fechas pasadas'
+                    ], 500);
                 }
 
-                return response()->json('Tarea Creada Correctamente', 200);
-            } else {
-                return response()->json('Tarea Creada Correctamente, Pendiente de Asignación de Personal', 200);
+                $line = Line::find($task['line_id']);
+                $sku = StockKeepingUnit::find($task['sku_id']);
+                $line_sku = LineStockKeepingUnits::where('line_id', $line->id)->where('sku_id', $sku->id)->get()->first();
+
+
+                $task_line = TaskProductionPlan::where('line_id', $line->id)->get()->last();
+                $weekly_production_plan = WeeklyProductionPlan::all()->last();
+
+                // $task_week = TaskProductionPlan::where('line_id', $line->id)->whereDate('operation_date', $task['operation_date'])->get()->last();
+                $total_hours =  $line_sku->lbs_performance ? ($task['total_lbs'] / $line_sku->lbs_performance) : null;
+
+                $new_task = TaskProductionPlan::create([
+                    'line_id' => $line->id,
+                    'weekly_production_plan_id' => $weekly_production_plan->id,
+                    'operation_date' => $task['operation_date'],
+                    'total_hours' => round($total_hours, 2),
+                    'line_sku_id' => $line_sku->id,
+                    'status' =>  1,
+                    'destination' => $task['destination'],
+                    'total_lbs' => $task['total_lbs']
+                ]);
+
+                if ($task_line) {
+                    foreach ($task_line->employees as $employee) {
+                        TaskProductionEmployee::create([
+                            'task_p_id' => $new_task->id,
+                            'name' => $employee->name,
+                            'code' => $employee->code,
+                            'position' => $employee->position
+                        ]);
+                    }
+                }
             }
+
+            return response()->json('Información actualizada correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
@@ -835,7 +834,7 @@ class TaskProductionController extends Controller
         if (!$task) {
             return response()->json([
                 'msg' => 'Tarea no Encontrada'
-            ], 200);
+            ], 404);
         }
 
         try {
@@ -850,7 +849,50 @@ class TaskProductionController extends Controller
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
-            ], 200);
+            ], 500);
+        }
+    }
+    public function TaskReprogramDetails(string $id)
+    {
+        $task = TaskProductionPlan::find($id);
+
+        if (!$task) {
+            return response()->json([
+                'msg' => 'Tarea no Encontrada'
+            ], 404);
+        }
+
+        try {
+            $data = [
+                'id' => strval($task->id),
+                'line' => $task->line->name,
+                'sku' => $task->line_sku->sku->product_name,
+                'line_id' => strval($task->line_id),
+                'sku_id' => strval($task->line_sku->sku->id),
+                'total_lbs' => $task->total_lbs,
+                'destination' => $task->destination
+            ];
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+
+        return response()->json($data);
+    }
+
+    public function destroy(string $id)
+    {
+        $task = TaskProductionPlan::find($id);
+
+        try {
+            $task->delete();
+
+            return response()->json('Tarea eliminada', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
         }
     }
 }

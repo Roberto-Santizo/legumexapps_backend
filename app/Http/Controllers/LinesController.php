@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\LineDetailsByDayResource;
+use App\Http\Resources\LineHoursPerWeekResource;
 use App\Http\Resources\LinesResource;
 use App\Http\Resources\LinesSelectResource;
 use App\Imports\UpdatePositionsImport;
 use App\Models\BiometricTransaction;
 use App\Models\BitacoraLines;
 use App\Models\Line;
+use App\Models\WeeklyPlan;
+use App\Models\WeeklyProductionPlan;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -209,6 +212,47 @@ class LinesController extends Controller
                 'summary' => $summary,
                 'details' => LineDetailsByDayResource::collection($tasks)
             ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function GetHoursPerWeek(string $weekly_plan_id)
+    {
+        $weeklyplan = WeeklyProductionPlan::find($weekly_plan_id);
+
+        if (!$weeklyplan) {
+            return response()->json('Plan no encontrado', 404);
+        }
+
+        try {
+            $tasks = $weeklyplan->tasks()->whereNotNull('operation_date')->get();
+
+            $data = [];
+
+            $data = $tasks->map(function ($task) {
+                $performance = $task->line_sku->lbs_performance;
+                $hours = $performance ? $task->total_lbs / $performance : 0;
+
+                return [
+                    'line_id' => strval($task->line_id),
+                    'line' => $task->line->name,
+                    'hours' => $hours
+                ];
+            });
+
+            $grouped = $data->groupBy('line_id')->map(function ($items) {
+                return [
+                    'line_id' => $items->first()['line_id'],
+                    'line' => $items->first()['line'],
+                    'total_hours' => $items->sum('hours'),
+                ];
+            })->values();
+
+
+            return response()->json($grouped);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage(),

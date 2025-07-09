@@ -27,6 +27,7 @@ Route::middleware('jwt.auth')->group(function () {
 
     Route::apiResource('/lines', LinesController::class);
     Route::get('/lines/performances-per-day/{id}', [LinesController::class, 'GetPerformanceByLine']);
+    Route::get('/lines/hours-per-week/{weekly_plan_id}', [LinesController::class, 'GetHoursPerWeek']);
     Route::get('/lines-by-sku/{id}', [LinesController::class, 'GetAllLinesBySku']);
     Route::post('/lines/update-positions/{id}', [LinesController::class, 'UpdatePositions']);
 
@@ -38,6 +39,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::post('/weekly-production-plans/assign', [WeeklyProductionPlanController::class, 'createAssigments']);
 
     Route::apiResource('/tasks-production', TaskProductionController::class);
+    Route::get('/tasks-production/reprogram-details/{id}', [TaskProductionController::class, 'TaskReprogramDetails']);
     Route::get('/tasks-production/finished/details/{id}', [TaskProductionController::class, 'FinishedTaskDetails']);
     Route::get('/tasks-production/details/{id}', [TaskProductionController::class, 'TaskDetails']);
     Route::get('/tasks-production/devolution-details/{id}', [TaskProductionController::class, 'TaskDevolutionDetails']);
