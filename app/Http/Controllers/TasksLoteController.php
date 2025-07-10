@@ -283,6 +283,7 @@ class TasksLoteController extends Controller
 
         try {
             $task->insumos()->delete();
+            $task->weeklyPlanChanges()->delete();
             $task->delete();
 
             return response()->json('Tarea Eliminada Correctamente', 200);
@@ -423,14 +424,14 @@ class TasksLoteController extends Controller
         ]);
 
         try {
-            $week = Carbon::parse($data['date'])->weekOfYear;
-            $now_week = Carbon::now()->weekOfYear;
+            // $week = Carbon::parse($data['date'])->weekOfYear;
+            // $now_week = Carbon::now()->weekOfYear;
 
-            if ($week < $now_week || $week > $now_week) {
-                return response()->json([
-                    'msg' => 'La fecha no se encuentra dentro de la semana de la tarea'
-                ], 500);
-            }
+            // if ($week < $now_week || $week > $now_week) {
+            //     return response()->json([
+            //         'msg' => 'La fecha no se encuentra dentro de la semana de la tarea'
+            //     ], 500);
+            // }
 
             foreach ($data['tasks'] as $id) {
                 $task_weekly_plan = TaskWeeklyPlan::find($id);

@@ -55,7 +55,7 @@ class WeeklyProductionPlanImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            $total_hours = $sku_line->lbs_performance ? $row['libras'] / $sku_line->lbs_performance : null;
+            $total_hours = $sku_line->lbs_performance ? $row['libras'] / $sku_line->lbs_performance : 0;
 
             TaskProductionPlan::create([
                 'line_id' => $line->id,
