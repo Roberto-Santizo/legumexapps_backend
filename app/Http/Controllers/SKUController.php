@@ -6,12 +6,13 @@ use App\Http\Requests\CreateStockKeepingUnitRequest;
 use App\Http\Resources\SKUResource;
 use App\Imports\RecipeStockKeepingUnitsImport;
 use App\Imports\StockKeepingUnitsImport;
-use App\Models\PackingMaterial;
 use App\Models\StockKeepingUnit;
 use App\Models\StockKeepingUnitRecipe;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class SKUController extends Controller
 {
@@ -20,12 +21,29 @@ class SKUController extends Controller
      */
     public function index(Request $request)
     {
-        if ($request->query('paginated')) {
-            $skus = StockKeepingUnit::paginate(10);
-        } else {
-            $skus = StockKeepingUnit::get();
+        $query = StockKeepingUnit::query();
+
+        $payload = JWTAuth::getPayload();
+        $user = User::find($payload->get('id'));
+        $role = User::find($payload->get('role'));
+
+        $permissions = $user->getPermissionNames()->toArray();
+
+        if ($role != 'admin') {
+            if (in_array('create pcs tasks', $permissions)) {
+                $query->where('code', 'LIKE', '%' . 'PCS' . '%');
+            }
+
+            if (in_array('create pab tasks', $permissions)) {
+                $query->where('code', 'LIKE', '%' . 'PAB' . '%');
+            }
         }
-        return SKUResource::collection($skus);
+
+        if ($request->query('paginated')) {
+            return SKUResource::collection($query->paginate(10));
+        } else {
+            return SKUResource::collection($query->get());
+        }
     }
 
     /**
