@@ -3,21 +3,26 @@
 namespace App\Imports;
 
 use App\Models\Line;
-use App\Models\LinePosition;
 use App\Models\TaskProductionEmployee;
 use App\Models\TaskProductionPlan;
+use App\Models\WeeklyProductionPlan;
 use Exception;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-use function PHPUnit\Framework\isEmpty;
 
 class CreateAssignmentsProductionImport implements ToCollection, WithHeadingRow
 {
     /**
      * @param Collection $collection
      */
+    public $weekly_plan;
+
+    public function __construct($id)
+    {
+        $this->weekly_plan = WeeklyProductionPlan::find($id);
+    }
 
 
     public function collection(Collection $rows)
@@ -31,7 +36,7 @@ class CreateAssignmentsProductionImport implements ToCollection, WithHeadingRow
                     throw new Exception("Linea" . $line);
                 }
 
-                $tasks = TaskProductionPlan::where('line_id', $line->id)->whereNull('start_date')->get();
+                $tasks = TaskProductionPlan::where('line_id', $line->id)->where('weekly_production_plan_id', $this->weekly_plan->id)->whereNull('start_date')->get();
 
                 foreach ($assigments as $employee) {
                     foreach ($tasks as $task) {

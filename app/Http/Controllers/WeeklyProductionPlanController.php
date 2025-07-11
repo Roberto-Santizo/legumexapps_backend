@@ -95,15 +95,15 @@ class WeeklyProductionPlanController extends Controller
         }
     }
 
-
-    public function createAssigments(Request $request)
+    
+    public function createAssigments(Request $request, string $id)
     {
         $request->validate([
             'file' => 'required|mimes:xlsx,csv'
         ]);
 
         try {
-            Excel::import(new CreateAssignmentsProductionImport(), $request->file('file'));
+            Excel::import(new CreateAssignmentsProductionImport($id), $request->file('file'));
 
             return response()->json('Asignaciones Cargadas Correctamente', 200);
         } catch (\Throwable $th) {
