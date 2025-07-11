@@ -12,6 +12,8 @@ use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
+use function PHPUnit\Framework\isEmpty;
+
 class WeeklyProductionPlanImport implements ToCollection, WithHeadingRow
 {
     public array $errors = [];
@@ -23,6 +25,10 @@ class WeeklyProductionPlanImport implements ToCollection, WithHeadingRow
         foreach ($rows as $row) {
             $year = $row['year'];
             $week = $row['semana'];
+
+            if (empty($row['year'])) {
+                return null;
+            }
 
             $weekly_production_plan = WeeklyProductionPlan::firstOrCreate([
                 'week' => $week,

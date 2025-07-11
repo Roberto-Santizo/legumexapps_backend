@@ -605,15 +605,12 @@ class TaskProductionController extends Controller
                     $position = LinePosition::find($newEmployee['position_id']);
 
                     foreach ($tasks as $task) {
-                        $newAssignee = TaskProductionEmployee::create([
+                        TaskProductionEmployee::create([
                             'task_p_id' => $task->id,
                             'name' => $newEmployee['name'],
                             'code' => $newEmployee['code'],
                             'position' => $position->name
                         ]);
-
-                        $newAssignee->old_position = $newEmployee['old_position'];
-                        $newAssignee->save();
                     }
                 }
                 $this->emailCreateAssigneeService->sendNotification($data['data']);
@@ -761,6 +758,7 @@ class TaskProductionController extends Controller
                 'msg' => 'Tarea no Encontrada'
             ], 404);
         }
+
 
         try {
             if (!empty($data['data'])) {
