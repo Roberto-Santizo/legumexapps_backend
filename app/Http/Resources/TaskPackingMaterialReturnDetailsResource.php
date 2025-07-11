@@ -28,6 +28,7 @@ class TaskPackingMaterialReturnDetailsResource extends JsonResource
                 'quantity' => $quantity,
                 'lote' => $item->lote,
                 'destination' => $item->destination ?? $this->line_sku->line->name,
+                'code' => $item->item->code
             ];
         }
         

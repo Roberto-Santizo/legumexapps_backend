@@ -23,7 +23,7 @@ class CreatePackingMaterialDispatchResource extends FormRequest
     {
         return [
             'task_production_plan_id' => ['sometimes', 'exists:task_production_plans,id'],
-            'reference' => ['required', 'unique:packing_material_transactions,reference'],
+            'reference' => ['required'],
             'responsable' => ['required', 'string'],
             'responsable_signature' => ['required'],
             'user_signature' => ['required'],
