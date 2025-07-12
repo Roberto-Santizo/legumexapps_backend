@@ -95,7 +95,7 @@ class WeeklyProductionPlanController extends Controller
         }
     }
 
-    
+
     public function createAssigments(Request $request, string $id)
     {
         $request->validate([

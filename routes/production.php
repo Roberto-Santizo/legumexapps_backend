@@ -4,6 +4,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeePermissionsController;
 use App\Http\Controllers\LinesController;
 use App\Http\Controllers\LineStockKeepingUnitsController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SKUController;
 use App\Http\Controllers\TaskProductionController;
 use App\Http\Controllers\TaskProductionPlanNotesController;
@@ -37,6 +38,8 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/weekly-production-plans/events-for-calendar/{weekly_plan_id}', [WeeklyProductionPlanController::class, 'GetTasksForCalendar']);
     Route::get('/weekly-production-plans/tasks/programed/{weekly_plan_id}', [WeeklyProductionPlanController::class, 'GetTasksOperationDate']);
     Route::post('/weekly-production-plans/assign/{weekly_plan_id}', [WeeklyProductionPlanController::class, 'createAssigments']);
+    Route::post('/weekly-production-plans/packing-material-necessity/{weekly_plan_id}', [ReportController::class, 'downloadPackingMaterialNecessity']);
+    Route::post('/weekly-production-plans/report-weekly-production/{weekly_plan_id}', [ReportController::class, 'downloadWeeklyProduction']);
 
     Route::apiResource('/tasks-production', TaskProductionController::class);
     Route::get('/tasks-production/reprogram-details/{id}', [TaskProductionController::class, 'TaskReprogramDetails']);
