@@ -38,9 +38,7 @@ class ReturnPackingMaterialNotificationService
             'content' => $this->buildMessageBody($task_production),
             'contentType' => 'HTML'
         ]);
-        $message->setToRecipients([$recipient1]);
-        $message->setToRecipients([$recipient2]);
-        $message->setToRecipients([$recipient3]);
+        $message->setToRecipients([$recipient1, $recipient2, $recipient3]);
 
         $graph->createRequest("POST", "/users/$userId/sendMail")
             ->attachBody([
