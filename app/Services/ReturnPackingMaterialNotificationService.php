@@ -26,6 +26,12 @@ class ReturnPackingMaterialNotificationService
         $recipient1 = new Recipient();
         $recipient1->setEmailAddress(new EmailAddress(['address' => 'soportetecnico.tejar@legumex.net']));
 
+        $recipient2 = new Recipient();
+        $recipient2->setEmailAddress(new EmailAddress(['address' => 'sara.xoyon@legumex.net']));
+
+        $recipient3 = new Recipient();
+        $recipient3->setEmailAddress(new EmailAddress(['address' => 'bodega.empaque@legumex.net']));
+
         $message = new Message();
         $message->setSubject('Devolución de material de empaque en línea ' . $task_production->line_sku->line->name . ' - ' . $task_production->line_sku->sku->code);
         $message->setBody([
@@ -33,6 +39,8 @@ class ReturnPackingMaterialNotificationService
             'contentType' => 'HTML'
         ]);
         $message->setToRecipients([$recipient1]);
+        $message->setToRecipients([$recipient2]);
+        $message->setToRecipients([$recipient3]);
 
         $graph->createRequest("POST", "/users/$userId/sendMail")
             ->attachBody([
@@ -63,7 +71,7 @@ class ReturnPackingMaterialNotificationService
 
     private function buildMessageBody($task_production)
     {
-        $url = 'http://localhost:5173/planes-produccion/' . $task_production->weeklyPlan->id . '/' . $task_production->line->id . '?devolutionTaskId=' . $task_production->id;
+        $url = 'https://legumexapps.com/planes-produccion/' . $task_production->weeklyPlan->id . '/' . $task_production->line->id . '?devolutionTaskId=' . $task_production->id;
 
         $rows = '';
         $line = $task_production->line_sku->line->name;

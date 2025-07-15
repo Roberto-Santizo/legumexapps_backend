@@ -29,21 +29,21 @@ class SKUController extends Controller
 
         $permissions = $user->getPermissionNames()->toArray();
 
-        if ($role != 'admin') {
-            $query->where(function ($q) use ($permissions) {
-                if (in_array('create pcs tasks', $permissions)) {
-                    $q->orWhere('code', 'LIKE', '%PCS%');
-                }
+        // if ($role != 'admin') {
+        //     $query->where(function ($q) use ($permissions) {
+        //         if (in_array('create pcs tasks', $permissions)) {
+        //             $q->orWhere('code', 'LIKE', '%PCS%');
+        //         }
 
-                if (in_array('create pab tasks', $permissions)) {
-                    $q->orWhere('code', 'LIKE', '%PAB%');
-                }
+        //         if (in_array('create pab tasks', $permissions)) {
+        //             $q->orWhere('code', 'LIKE', '%PAB%');
+        //         }
 
-                if (in_array('create ptf tasks', $permissions)) {
-                    $q->orWhere('code', 'LIKE', '%PTF%');
-                }
-            });
-        }
+        //         if (in_array('create ptf tasks', $permissions)) {
+        //             $q->orWhere('code', 'LIKE', '%PTF%');
+        //         }
+        //     });
+        // }
 
         if ($request->query('paginated')) {
             return SKUResource::collection($query->paginate(10));

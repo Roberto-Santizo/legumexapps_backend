@@ -36,6 +36,8 @@ class WeeklyProductionExport implements FromCollection, WithHeadings, WithTitle,
                 'TOTAL LIBRAS' => $task->total_lbs,
                 'TOTAL CAJAS' => $boxes,
                 'TOTAL TARIMAS' => $pallets,
+                'DESTINO' => $task->destination,
+                'CLIENTE' => $task->line_sku->sku->client_name,
                 'FECHA OPERACIÓN' => $task->operation_date ? $task->operation_date->format('d-m-Y') : 'SIN PROGRAMACIÓN',
             ]);
         }
@@ -44,7 +46,7 @@ class WeeklyProductionExport implements FromCollection, WithHeadings, WithTitle,
     }
     public function headings(): array
     {
-        return ['SKU', 'PRODUCTO', 'LINEA', 'TOTAL LIBRAS', 'TOTAL CAJAS', 'TOTAL TARIMAS', 'FECHA OPERACIÓN'];
+        return ['SKU', 'PRODUCTO', 'LINEA', 'TOTAL LIBRAS', 'TOTAL CAJAS', 'TOTAL TARIMAS', 'DESTINO', 'CLIENTE', 'FECHA OPERACIÓN'];
     }
 
 

@@ -55,8 +55,7 @@ class EmployeeController extends Controller
 
     public function getComodines()
     {
-        $comodines = BiometricEmployee::where('auth_dept_id', '3eef8d8594bd4fa80194f5ccac7b1d5c')
-            ->orWhere('auth_dept_id', '3eef8d8594bd4fa80194f5ccac7b1d5b')
+        $comodines = BiometricEmployee::where('last_name','LIKE','%LDC%')
             ->get()
             ->map(function ($item, $index) {
                 $item->temp_id = $index + 10;

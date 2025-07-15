@@ -411,25 +411,7 @@ class TaskProductionController extends Controller
         $limit_hour = Carbon::createFromTime(15, 0, 0);
         $hour = Carbon::now();
 
-        if ($role !== 'admin') {
-            if (!$hour->lessThan($limit_hour)) {
-                return response()->json([
-                    'msg' => 'No se puede programar la tarea, la hora limite para poder programar son las 3:00 PM'
-                ], 500);
-            }
-
-            if ($new_date->weekOfYear != $today->weekOfYear) {
-                return response()->json([
-                    'msg' => 'No puede mover tareas fuera de la semana actual'
-                ], 500);
-            }
-
-            if ($new_date == $today) {
-                return response()->json([
-                    'msg' => 'No puede mover tareas al día en curso'
-                ], 500);
-            }
-        }
+       
 
 
         try {
@@ -522,13 +504,7 @@ class TaskProductionController extends Controller
             $limit_hour = Carbon::createFromTime(15, 0, 0);
             $hour = Carbon::now();
 
-            if ($role != 'admin') {
-                if (!$hour->lessThan($limit_hour)) {
-                    return response()->json([
-                        'msg' => 'No se puede programar la tarea, la hora limite para poder programar son las 3:00 PM'
-                    ], 500);
-                }
-            }
+          
 
             foreach ($data['data'] as $task) {
                 $operation_date = Carbon::parse($task['operation_date']);

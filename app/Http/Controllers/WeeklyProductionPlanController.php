@@ -57,7 +57,7 @@ class WeeklyProductionPlanController extends Controller
             return [
                 'id' => strval($line->id),
                 'line' => $line->name,
-                'status' => $allCompleted ? true : false,
+                'status' => true,
                 'total_employees' => $line->positions->count(),
                 'assigned_employees' => $tasks->first()->employees->count(),
             ];
