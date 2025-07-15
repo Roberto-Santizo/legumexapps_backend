@@ -41,6 +41,7 @@ class PackingMaterialNecessityExport implements FromCollection, WithHeadings, Wi
                         'PRODUCTO' => $task->line_sku->sku->product_name,
                         'LINEA' => $task->line_sku->line->name,
                         'CANTIDAD' => $quantity,
+                        'CLIENTE' => $task->line_sku->sku->client_name,
                         'FECHA OPERACIÓN' => $task->operation_date ? $task->operation_date->format('d-m-Y') : 'SIN FECHA DE PROGRAMACIÓN',
                     ]);
                 }
@@ -52,13 +53,13 @@ class PackingMaterialNecessityExport implements FromCollection, WithHeadings, Wi
 
     public function headings(): array
     {
-        return ['CODIGO ITEM', 'ITEM', 'SKU', 'PRODUCTO', 'LINEA', 'CANTIDAD', 'FECHA OPERACIÓN'];
+        return ['CODIGO ITEM', 'ITEM', 'SKU', 'PRODUCTO', 'LINEA', 'CANTIDAD', 'CLIENTE', 'FECHA OPERACIÓN'];
     }
 
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('A1:G1')->applyFromArray([
+        $sheet->getStyle('A1:H1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['argb' => 'FFFFFF'],
