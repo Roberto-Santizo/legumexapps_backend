@@ -117,15 +117,27 @@ class WeeklyProductionPlanController extends Controller
     {
         $weekly_plan = WeeklyProductionPlan::find($weekly_plan_id);
         $today = Carbon::today();
-
+        $yesterday = Carbon::yesterday();
+        
         if (!$weekly_plan) {
             return response()->json([
                 'msg' => 'Plan Semanal Not Found'
             ], 404);
         }
 
-        $tasks = $weekly_plan->tasks()->where('line_id', $line_id)->whereDate('operation_date', $today)->whereNot('status', 0)->get();
 
+        $tasks = $weekly_plan->tasks()
+            ->where('line_id', $line_id)
+            ->whereNot('status', 0)
+            ->where(function ($query) use ($today, $yesterday) {
+                $query->whereDate('operation_date', $today)
+                    ->orWhere(function ($q) use ($yesterday) {
+                        $q->whereDate('operation_date', $yesterday)
+                            ->whereHas('line', function ($q2) {
+                                $q2->where('shift', 0);
+                            });
+                    });
+            })->orderBy('operation_date', 'DESC')->get();
         return TaskProductionPlanByLineResource::collection($tasks->sortBy('operation_date'));
     }
 

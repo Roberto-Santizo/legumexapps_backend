@@ -15,6 +15,7 @@ use App\Models\EmployeeTransfer;
 use App\Models\Line;
 use App\Models\LinePosition;
 use App\Models\LineStockKeepingUnits;
+use App\Models\ProductionOperationChange;
 use App\Models\StockKeepingUnit;
 use App\Models\TaskOperationDateBitacora;
 use App\Models\TaskProductionEmployee;
@@ -393,8 +394,8 @@ class TaskProductionController extends Controller
 
 
         $payload = JWTAuth::getPayload();
-        $role = $payload->get('role');
         $user_id = $payload->get('id');
+        $role = $payload->get('role');
 
         $task_production = TaskProductionPlan::find($id);
 
@@ -404,15 +405,45 @@ class TaskProductionController extends Controller
             ], 404);
         }
 
-        $new_date = Carbon::parse($data['date']);
-        $today = Carbon::today();
+
         $old_date = $task_production->operation_date;
+        $today = Carbon::today();
+        $new_date = Carbon::parse($data['date']);
+        $diff = $today->diffInDays($new_date);
+        $week = Carbon::parse($data['date'])->weekOfYear;
+        $now_week = Carbon::now()->weekOfYear;
 
-        $limit_hour = Carbon::createFromTime(15, 0, 0);
-        $hour = Carbon::now();
 
-       
+        if ($role != 'admin') {
+            if ($today === $new_date) {
+                return response()->json([
+                    'msg' => 'No puede asignar tareas a el día en curso'
+                ], 500);
+            }
 
+            if ($diff < 0) {
+                return response()->json([
+                    'msg' => 'No puede asignar tareas a días anteriores'
+                ], 500);
+            }
+
+            if ($diff == 1) {
+                $limit_hour = Carbon::createFromTime(15, 0, 0);
+                $hour = Carbon::now();
+
+                if ($hour > $limit_hour) {
+                    return response()->json([
+                        'msg' => 'El limite para realizar cambios es a las 3PM'
+                    ], 500);
+                }
+            }
+
+            if ($week < $now_week || $week > $now_week) {
+                return response()->json([
+                    'msg' => 'La fecha no se encuentra dentro de la semana de la tarea'
+                ], 500);
+            }
+        }
 
         try {
             $last_task = TaskProductionPlan::whereDate('operation_date', $data['date'])->where('line_id', $task_production->line_id)->get()->first();
@@ -449,6 +480,11 @@ class TaskProductionController extends Controller
                 }
             }
 
+            ProductionOperationChange::create([
+                'user_id' => $user_id,
+                'task_production_plan_id' => $task_production->id,
+            ]);
+
             return response()->json('Fecha de Operación Actualizada Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
@@ -471,17 +507,56 @@ class TaskProductionController extends Controller
         }
 
         try {
-            $today = Carbon::now();
-            $new_date = Carbon::parse($data['date']);
 
-            if ($today === $new_date) {
-                return response()->json([
-                    'msg' => 'No puede asignar tareas a el día en curso'
-                ], 500);
+            $payload = JWTAuth::getPayload();
+            $id = $payload->get('id');
+            $role = $payload->get('role');
+
+            $today = Carbon::today();
+            $new_date = Carbon::parse($data['date']);
+            $diff = $today->diffInDays($new_date);
+            $week = Carbon::parse($data['date'])->weekOfYear;
+            $now_week = Carbon::now()->weekOfYear;
+
+
+            if ($role != 'admin') {
+                if ($today === $new_date) {
+                    return response()->json([
+                        'msg' => 'No puede asignar tareas a el día en curso'
+                    ], 500);
+                }
+
+                if ($diff < 0) {
+                    return response()->json([
+                        'msg' => 'No puede asignar tareas a días anteriores'
+                    ], 500);
+                }
+
+                if ($diff == 1) {
+                    $limit_hour = Carbon::createFromTime(15, 0, 0);
+                    $hour = Carbon::now();
+
+                    if ($hour > $limit_hour) {
+                        return response()->json([
+                            'msg' => 'El limite para realizar cambios es a las 3PM'
+                        ], 500);
+                    }
+                }
+
+                if ($week < $now_week || $week > $now_week) {
+                    return response()->json([
+                        'msg' => 'La fecha no se encuentra dentro de la semana de la tarea'
+                    ], 500);
+                }
             }
 
             $task->operation_date = $data['date'];
             $task->save();
+
+            ProductionOperationChange::create([
+                'user_id' => $id,
+                'task_production_plan_id' => $task->id,
+            ]);
 
             return response()->json('Tarea Actualizada Correctamente', 200);
         } catch (\Throwable $th) {
@@ -496,15 +571,50 @@ class TaskProductionController extends Controller
         $data = $request->validated();
 
         $payload = JWTAuth::getPayload();
+        $user_id = $payload->get('id');
         $role = $payload->get('role');
 
         try {
 
             $today = Carbon::today();
+            $new_date = Carbon::parse($data['operation_date']);
             $limit_hour = Carbon::createFromTime(15, 0, 0);
             $hour = Carbon::now();
+            $diff = $today->diffInDays($new_date);
+            $week = Carbon::parse($data['operation_date'])->weekOfYear;
+            $now_week = Carbon::now()->weekOfYear;
 
-          
+            if ($role != 'admin') {
+                if ($today === $new_date) {
+                    return response()->json([
+                        'msg' => 'No puede asignar tareas a el día en curso'
+                    ], 500);
+                }
+
+                if ($diff < 0) {
+                    return response()->json([
+                        'msg' => 'No puede asignar tareas a días anteriores'
+                    ], 500);
+                }
+
+                if ($diff == 1) {
+                    $limit_hour = Carbon::createFromTime(15, 0, 0);
+                    $hour = Carbon::now();
+
+                    if ($hour > $limit_hour) {
+                        return response()->json([
+                            'msg' => 'El limite para realizar cambios es a las 3PM'
+                        ], 500);
+                    }
+                }
+
+                if ($week < $now_week || $week > $now_week) {
+                    return response()->json([
+                        'msg' => 'La fecha no se encuentra dentro de la semana de la tarea'
+                    ], 500);
+                }
+            }
+
 
             foreach ($data['data'] as $task) {
                 $operation_date = Carbon::parse($task['operation_date']);
@@ -523,8 +633,6 @@ class TaskProductionController extends Controller
 
                 $task_line = TaskProductionPlan::where('line_id', $line->id)->get()->last();
                 $weekly_production_plan = WeeklyProductionPlan::all()->last();
-
-                // $task_week = TaskProductionPlan::where('line_id', $line->id)->whereDate('operation_date', $task['operation_date'])->get()->last();
                 $total_hours =  $line_sku->lbs_performance ? ($task['total_lbs'] / $line_sku->lbs_performance) : null;
 
                 $new_task = TaskProductionPlan::create([
@@ -550,6 +658,10 @@ class TaskProductionController extends Controller
                 }
             }
 
+            ProductionOperationChange::create([
+                'user_id' => $user_id,
+                'task_production_plan_id' => $new_task->id,
+            ]);
             return response()->json('Información actualizada correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
