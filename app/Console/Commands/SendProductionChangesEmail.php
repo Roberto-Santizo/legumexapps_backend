@@ -51,5 +51,6 @@ class SendProductionChangesEmail extends Command
                 return;
             }
         }
+         $this->info('Correo Enviado');
     }
 }
