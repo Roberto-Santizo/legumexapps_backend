@@ -47,7 +47,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/tasks-production/details/{id}', [TaskProductionController::class, 'TaskDetails']);
     Route::get('/tasks-production/devolution-details/{id}', [TaskProductionController::class, 'TaskDevolutionDetails']);
     Route::get('/tasks-production/active-employees/{id}', [TaskProductionController::class, 'TaskActiveEmployees']);
-    Route::post('/tasks-production/new-task', [TaskProductionController::class, 'CreateNewTaskProduction']);
+    Route::post('/tasks-production/new-task/{weekly_plan_id}', [TaskProductionController::class, 'CreateNewTaskProduction']);
     Route::post('/tasks-production/create-assignees/{id}', [TaskProductionController::class, 'CreateAssignee']);
     Route::post('/tasks-production/{id}/add-timeout/open', [TaskProductionController::class, 'AddTimeOutOpen']);
     Route::post('/tasks-production/{id}/add-timeout/close', [TaskProductionController::class, 'AddTimeOutClose']);

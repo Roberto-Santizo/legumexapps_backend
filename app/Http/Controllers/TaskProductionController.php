@@ -413,7 +413,6 @@ class TaskProductionController extends Controller
         $week = Carbon::parse($data['date'])->weekOfYear;
         $now_week = Carbon::now()->weekOfYear;
 
-
         if ($role != 'admin') {
             if ($today === $new_date) {
                 return response()->json([
@@ -438,11 +437,11 @@ class TaskProductionController extends Controller
                 }
             }
 
-            if ($week < $now_week || $week > $now_week) {
-                return response()->json([
-                    'msg' => 'La fecha no se encuentra dentro de la semana de la tarea'
-                ], 500);
-            }
+            // if ($week < $now_week || $week > $now_week) {
+            //     return response()->json([
+            //         'msg' => 'La fecha no se encuentra dentro de la semana de la tarea'
+            //     ], 500);
+            // }
         }
 
         try {
@@ -543,11 +542,11 @@ class TaskProductionController extends Controller
                     }
                 }
 
-                if ($week < $now_week || $week > $now_week) {
-                    return response()->json([
-                        'msg' => 'La fecha no se encuentra dentro de la semana de la tarea'
-                    ], 500);
-                }
+                // if ($week < $now_week || $week > $now_week) {
+                //     return response()->json([
+                //         'msg' => 'La fecha no se encuentra dentro de la semana de la tarea'
+                //     ], 500);
+                // }
             }
 
             $task->operation_date = $data['date'];
@@ -577,11 +576,11 @@ class TaskProductionController extends Controller
         try {
 
             $today = Carbon::today();
-            $new_date = Carbon::parse($data['operation_date']);
+            $new_date = Carbon::parse($data['data'][0]['operation_date']);
             $limit_hour = Carbon::createFromTime(15, 0, 0);
             $hour = Carbon::now();
             $diff = $today->diffInDays($new_date);
-            $week = Carbon::parse($data['operation_date'])->weekOfYear;
+            $week = Carbon::parse($data['data'][0]['operation_date'])->weekOfYear;
             $now_week = Carbon::now()->weekOfYear;
 
             if ($role != 'admin') {
@@ -608,11 +607,11 @@ class TaskProductionController extends Controller
                     }
                 }
 
-                if ($week < $now_week || $week > $now_week) {
-                    return response()->json([
-                        'msg' => 'La fecha no se encuentra dentro de la semana de la tarea'
-                    ], 500);
-                }
+                // if ($week < $now_week || $week > $now_week) {
+                //     return response()->json([
+                //         'msg' => 'La fecha no se encuentra dentro de la semana de la tarea'
+                //     ], 500);
+                // }
             }
 
 
@@ -656,12 +655,13 @@ class TaskProductionController extends Controller
                         ]);
                     }
                 }
+
+                ProductionOperationChange::create([
+                    'user_id' => $user_id,
+                    'task_production_plan_id' => $new_task->id,
+                ]);
             }
 
-            ProductionOperationChange::create([
-                'user_id' => $user_id,
-                'task_production_plan_id' => $new_task->id,
-            ]);
             return response()->json('Información actualizada correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
@@ -972,6 +972,7 @@ class TaskProductionController extends Controller
         $task = TaskProductionPlan::find($id);
 
         try {
+            $task->employees()->delete();
             $task->delete();
 
             return response()->json('Tarea eliminada', 200);

@@ -33,7 +33,7 @@ class TaskProductionOperationDateResource extends JsonResource
             'total_lbs' => $this->total_lbs,
             'finished' => $this->end_date ? true : false,
             'working' => $working,
-            'destination' => $this->destination,
+            'destination' => $this->destination ?? 'SIN DESTINO ASOCIADO',
             'status' => $status[$this->status][0],
             'status_id' => strval($this->status),
             'color' => $status[$this->status][1],

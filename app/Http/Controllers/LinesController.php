@@ -175,9 +175,9 @@ class LinesController extends Controller
                 if ($task->line_sku->lbs_performance && $task->finished_tarimas) {
                     // $total_boxes = $task->line_sku->sku->boxes_pallet * $task->finished_tarimas;
                     // $lbs_teoricas = $task->line_sku->sku->presentation * $total_boxes;
-                    $performance_hours = $task->total_lbs_bascula / $task->line_sku->lbs_performance;
+                    $performance_hours += $task->total_lbs_bascula / $task->line_sku->lbs_performance;
                 } else {
-                    $performance_hours = $task->start_date->diffInHours($task->end_date);
+                    $performance_hours += $task->start_date->diffInHours($task->end_date);
                 }
             });
 
