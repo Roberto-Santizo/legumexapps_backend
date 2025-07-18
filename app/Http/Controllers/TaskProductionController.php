@@ -565,9 +565,17 @@ class TaskProductionController extends Controller
         }
     }
 
-    public function CreateNewTaskProduction(CreateTaskProductionRequest $request)
+    public function CreateNewTaskProduction(CreateTaskProductionRequest $request, String $id)
     {
         $data = $request->validated();
+
+        $weekly_plan = WeeklyProductionPlan::find($id);
+
+        if (!$weekly_plan) {
+            return response()->json([
+                'msg' => 'Plan Semanal No Encontrado'
+            ], 404);
+        }
 
         $payload = JWTAuth::getPayload();
         $user_id = $payload->get('id');
@@ -631,12 +639,11 @@ class TaskProductionController extends Controller
 
 
                 $task_line = TaskProductionPlan::where('line_id', $line->id)->get()->last();
-                $weekly_production_plan = WeeklyProductionPlan::all()->last();
                 $total_hours =  $line_sku->lbs_performance ? ($task['total_lbs'] / $line_sku->lbs_performance) : null;
 
                 $new_task = TaskProductionPlan::create([
                     'line_id' => $line->id,
-                    'weekly_production_plan_id' => $weekly_production_plan->id,
+                    'weekly_production_plan_id' => $weekly_plan->id,
                     'operation_date' => $task['operation_date'],
                     'total_hours' => round($total_hours, 2),
                     'line_sku_id' => $line_sku->id,
