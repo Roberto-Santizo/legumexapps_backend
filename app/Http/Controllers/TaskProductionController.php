@@ -854,9 +854,8 @@ class TaskProductionController extends Controller
             ], 404);
         }
 
-
         try {
-            if (!empty($data['data'])) {
+            if (!empty($data['data']) && !$data['previous_config']) {
                 foreach ($data['data'] as $change) {
                     $assignment = TaskProductionEmployee::find($change['old_employee']['id']);
                     $NewChange = TaskProductionEmployeesBitacora::create([
@@ -878,35 +877,24 @@ class TaskProductionController extends Controller
                     $assignment->code = $NewChange->new_code;
                     $assignment->position = $NewChange->new_position;
                     $assignment->save();
-
-                    $line = $task->line_sku->line->code;
-
-                    $employees = TaskProductionEmployee::whereHas('TaskProduction', function ($query) use ($line) {
-                        $query->where('start_date', null)->where('end_date', null);
-                        $query->whereHas('line', function ($query) use ($line) {
-                            $query->where('code', $line);
-                            $query->whereDate('operation_date', Carbon::now());
-                        });
-                    })->where('position', $NewChange->original_position)->get();
-
-                    foreach ($employees as $employee) {
-                        TaskProductionEmployeesBitacora::create([
-                            "assignment_id" => $employee->id,
-                            "original_name" => $assignment->name,
-                            "original_code" => $assignment->code,
-                            "original_position" => $assignment->position,
-                            "new_name" => $NewChange->new_name,
-                            "new_code" => $NewChange->new_code,
-                            "new_position" => $NewChange->new_position
-                        ]);
-
-                        $employee->name = $NewChange->new_name;
-                        $employee->code = $NewChange->new_code;
-                        $employee->position = $NewChange->new_position;
-                        $employee->save();
-                    }
                 }
                 $this->emailService->sendNotification($data['data']);
+            } else if ($data['previous_config']) {
+                $task->employees()->delete();
+                $last_task = TaskProductionPlan::where('line_id', $task->line_id)
+                    ->whereDate('operation_date', $task->operation_date)
+                    ->whereNotNull('start_date')
+                    ->whereNotNull('end_date')
+                    ->get()->last();
+
+                foreach ($last_task->employees as $employee) {
+                    TaskProductionEmployee::create([
+                        'task_p_id' => $task->id,
+                        'name' => $employee->name,
+                        'code' => $employee->code,
+                        'position' => $employee->position
+                    ]);
+                }
             }
 
 
@@ -963,7 +951,7 @@ class TaskProductionController extends Controller
                 'line_id' => strval($task->line_id),
                 'sku_id' => strval($task->line_sku->sku->id),
                 'total_lbs' => $task->total_lbs,
-                'destination' => $task->destination
+                'destination' => $task->destination ?? 'SIN DESTINO ASOCIADO'
             ];
         } catch (\Throwable $th) {
             return response()->json([

@@ -18,18 +18,18 @@ class TaskProductionPlanByLineResource extends JsonResource
     {
         $total_hours = 0;
         $paused = false;
-        if($this->timeouts->count() > 0){
-            $paused =( $this->timeouts->last()->end_date === null) ? true : false;
+        if ($this->timeouts->count() > 0) {
+            $paused = ($this->timeouts->last()->end_date === null) ? true : false;
         }
 
         if ($this->start_date && $this->end_date) {
             $total_hours = $this->start_date->diffInHours($this->end_date);
         }
 
-        // $total_in_employees = $this->employees->filter(function ($employee) {
-        //     $today = Carbon::today();
-        //     return !(BiometricTransaction::where('last_name', $employee->position)->whereDate('event_time', $today)->exists());
-        // });
+        $total_in_employees = $this->employees->filter(function ($employee) {
+            $today = Carbon::today();
+            return !(BiometricTransaction::where('last_name', $employee->position)->whereDate('event_time', $today)->exists());
+        });
 
         return [
             'id' => strval($this->id),
@@ -42,8 +42,8 @@ class TaskProductionPlanByLineResource extends JsonResource
             'end_date' => $this->end_date ? $this->end_date->format('d-m-Y h:i:s A') : null,
             'hours' => $this->total_hours,
             'total_hours' => $total_hours,
-            'total_in_employees' => 0,
-            'total_employees' => 0,
+            'total_in_employees' => $total_in_employees->count(),
+            'total_employees' => $this->employees->count(),
             'priority' => $this->priority,
             'paused' => $paused,
             'is_minimum_requrire' => $this->is_minimum_require ? true : false,

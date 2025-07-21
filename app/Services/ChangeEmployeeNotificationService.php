@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use Beta\Microsoft\Graph\Model\EmailAddress;
-use Beta\Microsoft\Graph\Model\Message;
 use Beta\Microsoft\Graph\Model\Recipient;
 use Microsoft\Graph\Graph;
 
@@ -23,22 +22,28 @@ class ChangeEmployeeNotificationService
 
         $userId = 'noreply@legumex.net';
 
-        $recipient1 = new Recipient();
-        $recipient1->setEmailAddress(new EmailAddress(['address' => 'soportetecnico.tejar@legumex.net']));
+        $emails = explode(',', env('NOTIFY_EMAILS_CHANGES_EMPLOYEES'));
 
-        $message = new Message();
-        $message->setSubject('Cambio de empleado en linea');
-        $message->setBody([
-            'content' => $this->buildMessageBody($changes),
-            'contentType' => 'HTML'
-        ]);
-        $message->setToRecipients([$recipient1]);
+        $recipients = array_map(function ($email) {
+            $recipient = new Recipient();
+            $recipient->setEmailAddress(new EmailAddress(['address' => $email]));
+            return $recipient;
+        }, $emails);
+
+        $body = [
+            'message' => [
+                'subject' => 'Cambios de Empleados',
+                'body' => [
+                    'contentType' => 'HTML',
+                    'content' => $this->buildMessageBody($changes),
+                ],
+                'toRecipients' => $recipients,
+            ],
+            'saveToSentItems' => true,
+        ];
 
         $graph->createRequest("POST", "/users/$userId/sendMail")
-            ->attachBody([
-                'message' => $message,
-                'saveToSentItems' => "true"
-            ])
+            ->attachBody($body)
             ->execute();
     }
 

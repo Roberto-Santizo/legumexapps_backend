@@ -55,7 +55,7 @@ class EmployeeController extends Controller
 
     public function getComodines()
     {
-        $comodines = BiometricEmployee::where('last_name','LIKE','%LDC%')
+        $comodines = BiometricEmployee::where('last_name', 'LIKE', '%LDC%')
             ->get()
             ->map(function ($item, $index) {
                 $item->temp_id = $index + 10;
@@ -70,8 +70,8 @@ class EmployeeController extends Controller
                 ->first();
 
             $assigned = TaskProductionEmployee::where('position', $comodin->last_name)
-                ->whereHas('TaskProduction', function($query){
-                    $query->whereDate('operation_date',Carbon::now());
+                ->whereHas('TaskProduction', function ($query) {
+                    $query->whereDate('operation_date', Carbon::now());
                 })->first();
 
             return $entrance && !$assigned;
