@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ChangeItemStatus;
 use App\Http\Requests\CreatePackingMaterialRequest;
 use App\Http\Resources\PackingMaterialResource;
 use App\Imports\PackingMaterialImport;
@@ -9,6 +10,7 @@ use App\Models\PackingMaterial;
 use Exception;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class PackingMaterialsController extends Controller
 {
@@ -24,7 +26,7 @@ class PackingMaterialsController extends Controller
         }
 
         if ($request->query('code')) {
-            $query->where('code', 'LIKE', '%'.$request->query('code').'%');
+            $query->where('code', 'LIKE', '%' . $request->query('code') . '%');
         }
 
         if ($request->query('status')) {
@@ -63,6 +65,9 @@ class PackingMaterialsController extends Controller
     public function update(string $id)
     {
         $item = PackingMaterial::find($id);
+        $payload = JWTAuth::getPayload();
+        $user_id = $payload->get('id');
+
 
         if (!$item) {
             return response()->json([
@@ -74,6 +79,7 @@ class PackingMaterialsController extends Controller
             $item->blocked = !$item->blocked;
             $item->save();
 
+            broadcast(new ChangeItemStatus($user_id));
             return response()->json('Item actualizado correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
