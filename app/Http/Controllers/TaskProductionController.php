@@ -697,14 +697,18 @@ class TaskProductionController extends Controller
 
             if (!empty($data['data'])) {
                 foreach ($data['data'] as $newEmployee) {
-                    $position = LinePosition::find($newEmployee['position_id']);
+                    $position = null;
+
+                    if ($newEmployee['position_id']) {
+                        $position = LinePosition::find($newEmployee['position_id']);
+                    }
 
                     foreach ($tasks as $task) {
                         TaskProductionEmployee::create([
                             'task_p_id' => $task->id,
                             'name' => $newEmployee['name'],
                             'code' => $newEmployee['code'],
-                            'position' => $position->name
+                            'position' => $position ? $position->name : $newEmployee['old_position']
                         ]);
                     }
                 }

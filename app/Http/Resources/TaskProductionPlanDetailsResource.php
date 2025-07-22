@@ -15,43 +15,49 @@ class TaskProductionPlanDetailsResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+     public function toArray(Request $request): array
     {
         $today = Carbon::today();
 
-        $positions = $this->line_sku->line->positions->filter(function ($position) {
-            $assignee = $this->employees()->where('position', $position->name)->first();
-            if (!$assignee) {
-                return $position;
-            }
+        $line = $this->line_sku->line;
+        $positions = $line->positions;
+        $employees = $this->employees;
+
+        static $presentPositions = null;
+        if (is_null($presentPositions)) {
+            $presentPositions = BiometricTransaction::whereDate('event_time', $today)
+                ->pluck('last_name')
+                ->toArray();
+        }
+
+        $filteredEmployees = $employees->filter(function ($employee) use ($presentPositions) {
+            return !in_array($employee->position, $presentPositions);
         });
 
-        $employees = $this->employees->filter(function ($employee) use ($today) {
-            return !(BiometricTransaction::where('last_name', $employee->position)->whereDate('event_time', $today)->exists());
+        $unassignedPositions = $positions->filter(function ($position) use ($employees) {
+            return $employees->contains('position', $position->name);
         });
 
-        $last_task = TaskProductionPlan::where('line_id', $this->line_id)
-            ->where('operation_date', $today)
+        $lastTask = TaskProductionPlan::where('line_id', $this->line_id)
+            ->whereDate('operation_date', $today)
             ->whereNotNull('start_date')
             ->whereNotNull('end_date')
-            ->get()
-            ->last();
-
-        $exists_previuos_config = $last_task ? true : false; 
+            ->latest('end_date')
+            ->first();
 
         return [
             'id' => strval($this->id),
-            'line' => $this->line_sku->line->code,
+            'line' => $line->code,
             'operation_date' => $this->operation_date,
             'start_date' => $this->start_date,
-            'assigned_employees' => $this->employees->count(),
-            'flag' => $this->employees->count() < $this->line_sku->line->positions->count(),
+            'assigned_employees' => $employees->count(),
+            'flag' => $employees->count() < $positions->count(),
             'total_lbs' => $this->total_lbs,
             'sku' => new SKUResource($this->line_sku->sku),
-            'filtered_employees' => TaskProductionEmployeeResource::collection($employees),
-            'all_employees' => TaskProductionEmployeeResource::collection($this->employees),
-            'exists_previuos_config' => $exists_previuos_config,
-            'positions' => PositionResource::collection($positions)
+            'filtered_employees' => TaskProductionEmployeeResource::collection($filteredEmployees),
+            'all_employees' => TaskProductionEmployeeResource::collection($employees),
+            'exists_previuos_config' => $lastTask !== null,
+            'positions' => PositionResource::collection($unassignedPositions)
         ];
     }
 }
