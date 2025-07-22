@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardProductionController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeePermissionsController;
 use App\Http\Controllers\LinesController;
@@ -62,4 +63,10 @@ Route::middleware('jwt.auth')->group(function () {
     Route::patch('/tasks-production/{id}/end', [TaskProductionController::class, 'EndTaskProduction']);
 
     Route::apiResource('/employee-permissions', EmployeePermissionsController::class);
+
+
+    //DASHBOARD
+    Route::get('/dashboard/production/finished-tasks-per-line', [DashboardProductionController::class, 'GetFinishedTasksPerLine']);
+    Route::get('/dashboard/production/in-progress', [DashboardProductionController::class, 'GetInProgressTasks']);
+    // Route::get('/dashboard/production/finished-tasks', [DashboardProductionController::class, 'GetInProgressTasks']);
 });
