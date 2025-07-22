@@ -7,9 +7,11 @@ use App\Http\Controllers\LineStockKeepingUnitsController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SKUController;
 use App\Http\Controllers\TaskProductionController;
+use App\Http\Controllers\TaskProductionDraftController;
 use App\Http\Controllers\TaskProductionPlanNotesController;
 use App\Http\Controllers\TimeOutController;
 use App\Http\Controllers\WeeklyProductionPlanController;
+use App\Http\Controllers\WeeklyProductionPlanDraftController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('jwt.auth')->group(function () {
@@ -60,6 +62,13 @@ Route::middleware('jwt.auth')->group(function () {
     Route::patch('/tasks-production/change-operation-date/{id}', [TaskProductionController::class, 'ChangeOperationDate']);
     Route::patch('/tasks-production/assign-operation-date/{id}', [TaskProductionController::class, 'AssignOperationDate']);
     Route::patch('/tasks-production/{id}/end', [TaskProductionController::class, 'EndTaskProduction']);
+
+    //DRAFT PLANES SEMANALES
+    Route::apiResource('/weekly-production-plans-drafts', WeeklyProductionPlanDraftController::class);
+
+    Route::get('/tasks-production-drafts/{id}', [TaskProductionDraftController::class,'index']);
+    Route::post('/tasks-production-drafts/{id}', [TaskProductionDraftController::class,'store']);
+
 
     Route::apiResource('/employee-permissions', EmployeePermissionsController::class);
 });
