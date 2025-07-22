@@ -41,6 +41,9 @@ class TaskProductionPlanDetailResource extends JsonResource
             return $performance;
         });
 
+        $total_produced = $this->performances->sum('lbs_bascula');
+        $percentage = ($total_produced / $this->total_lbs)*100;
+
         return [
             'line' => $this->line_sku->line->name,
             'sku' => $this->line_sku->sku->code,
@@ -49,6 +52,10 @@ class TaskProductionPlanDetailResource extends JsonResource
             'HRendimiento' => round($performance_hours, 3),
             'HLinea' => round($line_hours, 3),
             'HTiemposMuertos' => round($hours_timeouts, 3),
+            'total_produced' => $total_produced,
+            'total_lbs' => $this->total_lbs,
+            'percentage' => $percentage,
+            'total_tarimas'=> $this->performances->sum('tarimas_produced'),
             'timeouts' => TaskProductionTimeoutResource::collection($this->timeouts),
             'performances' => TaskProductionPerformaceResource::collection($this->performances),
             'employees' => EmployeeTaskProductionDetailResource::collection($this->employees)
