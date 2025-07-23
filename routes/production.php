@@ -61,9 +61,9 @@ Route::middleware('jwt.auth')->group(function () {
     Route::patch('/tasks-production/change-operation-date/{id}', [TaskProductionController::class, 'ChangeOperationDate']);
     Route::patch('/tasks-production/assign-operation-date/{id}', [TaskProductionController::class, 'AssignOperationDate']);
     Route::patch('/tasks-production/{id}/end', [TaskProductionController::class, 'EndTaskProduction']);
+    Route::patch('/tasks-production/{id}/unassign', [TaskProductionController::class, 'UnassignTaskProduction']);
 
     Route::apiResource('/employee-permissions', EmployeePermissionsController::class);
-
 
     //DASHBOARD
     Route::get('/dashboard/production/finished-tasks-per-line', [DashboardProductionController::class, 'GetFinishedTasksPerLine']);

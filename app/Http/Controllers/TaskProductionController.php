@@ -886,7 +886,6 @@ class TaskProductionController extends Controller
             } else if ($data['previous_config']) {
                 $task->employees()->delete();
                 $last_task = TaskProductionPlan::where('line_id', $task->line_id)
-                    ->whereDate('operation_date', $task->operation_date)
                     ->whereNotNull('start_date')
                     ->whereNotNull('end_date')
                     ->get()->last();
@@ -975,6 +974,27 @@ class TaskProductionController extends Controller
             $task->delete();
 
             return response()->json('Tarea eliminada', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function UnassignTaskProduction(string $id)
+    {
+        $task = TaskProductionPlan::find($id);
+
+        try {
+            if (!$task) {
+                return response()->json([
+                    'msg' => 'Tarea No Encontrada'
+                ], 404);
+            }
+            $task->operation_date = null;
+            $task->save();
+
+            return response()->json('Tarea Actualizada', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()

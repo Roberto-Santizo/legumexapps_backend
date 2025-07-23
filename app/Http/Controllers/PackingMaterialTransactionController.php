@@ -37,7 +37,9 @@ class PackingMaterialTransactionController extends Controller
         }
 
         if ($request->query('delivered_date')) {
-            $query->whereDate('created_at', $request->query('delivered_date'));
+            $query->whereHas('task', function ($q) use ($request) {
+                $q->whereDate('operation_date', $request->query('delivered_date'));
+            });
         }
 
         if ($request->query('type')) {

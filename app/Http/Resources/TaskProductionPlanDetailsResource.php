@@ -15,7 +15,7 @@ class TaskProductionPlanDetailsResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-     public function toArray(Request $request): array
+    public function toArray(Request $request): array
     {
         $today = Carbon::today();
 
@@ -39,7 +39,6 @@ class TaskProductionPlanDetailsResource extends JsonResource
         });
 
         $lastTask = TaskProductionPlan::where('line_id', $this->line_id)
-            ->whereDate('operation_date', $today)
             ->whereNotNull('start_date')
             ->whereNotNull('end_date')
             ->latest('end_date')
