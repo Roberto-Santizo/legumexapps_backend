@@ -22,11 +22,11 @@ class WeeklyProductionPlanController extends Controller
     {
 
         if ($request->query('paginated')) {
-            $plans_production = WeeklyProductionPlan::orderBy('week','DESC')->get();
+            $plans_production = WeeklyProductionPlan::orderBy('week', 'DESC')->get();
         } else {
             $plans_production = WeeklyProductionPlan::get();
         }
-        
+
         return WeeklyPlanProductionResource::collection($plans_production);
     }
 
@@ -104,39 +104,39 @@ class WeeklyProductionPlanController extends Controller
     }
 
     public function GetTasksByLineId(string $weekly_plan_id, string $line_id)
-        {
-            $weekly_plan = WeeklyProductionPlan::find($weekly_plan_id);
+    {
+        $weekly_plan = WeeklyProductionPlan::find($weekly_plan_id);
 
-            if (!$weekly_plan) {
-                return response()->json(['msg' => 'Plan Semanal Not Found'], 404);
-            }
-
-            $today = Carbon::today();
-            $yesterday = Carbon::yesterday();
-
-            $tasks = $weekly_plan->tasks()
-                ->with([
-                    'timeouts',
-                    'employees',
-                    'line_sku.line',
-                    'line_sku.sku'
-                ])
-                ->where('line_id', $line_id)
-                ->whereNot('status', 0)
-                ->where(function ($query) use ($today, $yesterday) {
-                    $query->whereDate('operation_date', $today)
-                        ->orWhere(function ($q) use ($yesterday) {
-                            $q->whereDate('operation_date', $yesterday)
-                                ->whereHas('line', function ($q2) {
-                                    $q2->where('shift', 0);
-                                });
-                        });
-                })
-                ->orderBy('operation_date', 'DESC')
-                ->get();
-
-            return TaskProductionPlanByLineResource::collection($tasks);
+        if (!$weekly_plan) {
+            return response()->json(['msg' => 'Plan Semanal Not Found'], 404);
         }
+
+        $today = Carbon::today();
+        $yesterday = Carbon::yesterday();
+
+        $tasks = $weekly_plan->tasks()
+            ->with([
+                'timeouts',
+                'employees',
+                'line_sku.line',
+                'line_sku.sku'
+            ])
+            ->where('line_id', $line_id)
+            ->whereNot('status', 0)
+            ->where(function ($query) use ($today, $yesterday) {
+                $query->whereDate('operation_date', $today)
+                    ->orWhere(function ($q) use ($yesterday) {
+                        $q->whereDate('operation_date', $yesterday)
+                            ->whereHas('line', function ($q2) {
+                                $q2->where('shift', 0);
+                            });
+                    });
+            })
+            ->orderBy('operation_date', 'DESC')
+            ->get();
+
+        return TaskProductionPlanByLineResource::collection($tasks);
+    }
 
 
 
@@ -260,7 +260,9 @@ class WeeklyProductionPlanController extends Controller
             $query->whereDate('operation_date', $date);
 
             if ($request->query('line')) {
-                $query->where('line_id', $request->query('line'));
+                $query->whereHas('line', function ($q) use ($request) {
+                    $q->where('code', $request->query('line'));
+                });
             }
 
             if ($request->query('sku')) {

@@ -20,7 +20,7 @@ class TaskProductionPlanByLineResource extends JsonResource
 
         if (is_null($presentPositions)) {
             $presentPositions = BiometricTransaction::whereDate('event_time', Carbon::today())
-                ->pluck('last_name')
+                ->pluck('pin')
                 ->toArray();
         }
 
