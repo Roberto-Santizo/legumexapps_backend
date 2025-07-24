@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('task_production_plans', function (Blueprint $table) {
-            $table->float('finished_tarimas')->change();
+            $table->float('finished_tarimas')->default(0)->change();
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('task_production_plans', function (Blueprint $table) {
-            $table->integer('finished_tarimas')->change();
+            $table->integer('finished_tarimas')->default(0)->change();
         });
     }
 };
