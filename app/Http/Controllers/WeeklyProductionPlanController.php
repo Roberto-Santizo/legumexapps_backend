@@ -13,6 +13,7 @@ use App\Models\Line;
 use App\Models\TaskProductionPlan;
 use App\Models\WeeklyProductionPlan;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -297,21 +298,29 @@ class WeeklyProductionPlanController extends Controller
         }
 
         try {
-            $tasks = TaskProductionPlan::where('weekly_production_plan_id', $id)->whereNotNull('operation_date')->get();
+            $tasks = TaskProductionPlan::where('weekly_production_plan_id', $id)
+                ->with('line_sku', 'line')
+                ->whereNotNull('operation_date')
+                ->get();
 
-            $events = $tasks->groupBy(function ($item) {
-                return $item->operation_date->format('Y-m-d') . '_' . $item->line_id;
-            })->map(function ($items, $key) {
-                $first = $items->first();
-                $hours = $items->first()->line_sku->lbs_performance ? ($items->sum('total_lbs') / $items->first()->line_sku->lbs_performance) : 0;
+            $events = $tasks
+                ->groupBy('operation_date')
+                ->flatMap(function (Collection $tasksByDate, $dateKey) {
+                    $groupedByLine = $tasksByDate->groupBy(fn($task) => $task->line->name);
+                    $date = Carbon::parse($dateKey);
 
-                return [
-                    'id' => strval($first->line_id),
-                    'title' => $first->line->code . ' | ' . round($hours, 2) . ' h',
-                    'start' => $first->operation_date->format('Y-m-d'),
-                ];
-            })->values();
+                    return $groupedByLine->map(function ($tasks, $lineName) use ($date) {
+                        $hours = $tasks->sum(function ($task) {
+                            return $task->total_lbs / $task->line_sku->lbs_performance;
+                        });
 
+                        return [
+                            'id' => uniqid(),
+                            'title' => "{$lineName} | " . round($hours, 2) . " h",
+                            'start' => $date->format('d-m-Y'),
+                        ];
+                    })->values();
+                })->values()->all();
 
             return response()->json($events);
         } catch (\Throwable $th) {
