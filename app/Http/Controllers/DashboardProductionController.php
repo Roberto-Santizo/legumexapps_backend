@@ -7,6 +7,7 @@ use App\Models\TaskProductionPlan;
 use App\Models\WeeklyProductionPlan;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class DashboardProductionController extends Controller
 {
@@ -44,20 +45,23 @@ class DashboardProductionController extends Controller
         }
     }
 
-    public function GetInProgressTasks()
+    public function GetInProgressTasks(Request $request)
     {
         try {
             $week = Carbon::now()->weekOfYear;
 
-            $plan = WeeklyProductionPlan::where('week', $week)->first();
+            $query = TaskProductionPlan::query();
+            $query->whereHas('weeklyPlan', function ($q) use ($week) {
+                $q->where('week', $week);
+            });
+            $query->whereNotNull('start_date');
+            $query->whereNull('end_date');
 
-            if (!$plan) {
-                return response()->json(['msg' => 'No plan found for this week'], 404);
+            if ($request->query('line')) {
+                $query->orderBy('line_id', $request->query('line'));
             }
 
-            $tasks = $plan->tasks()->select()->whereNotNull('start_date')->whereNull('end_date')->get();
-
-            return TaskProductionDashboardResource::collection($tasks);
+            return TaskProductionDashboardResource::collection($query->get());
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage(),
