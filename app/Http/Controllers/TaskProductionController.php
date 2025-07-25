@@ -638,13 +638,13 @@ class TaskProductionController extends Controller
                 $line_sku = LineStockKeepingUnits::where('line_id', $line->id)->where('sku_id', $sku->id)->get()->first();
 
 
-                $task_line = TaskProductionPlan::where('line_id', $line->id)->get()->last();
+                $task_line = TaskProductionPlan::where('line_id', $line->id)->where('weekly_production_plan_id', $weekly_plan->id)->get()->last();
                 $total_hours =  $line_sku->lbs_performance ? ($task['total_lbs'] / $line_sku->lbs_performance) : null;
 
                 $new_task = TaskProductionPlan::create([
                     'line_id' => $line->id,
                     'weekly_production_plan_id' => $weekly_plan->id,
-                    'operation_date' => $task['operation_date'],
+                    'operation_date' => $task['operation_date'] ?? null,
                     'total_hours' => round($total_hours, 2),
                     'line_sku_id' => $line_sku->id,
                     'status' =>  1,
@@ -971,6 +971,7 @@ class TaskProductionController extends Controller
 
         try {
             $task->employees()->delete();
+            $task->productionChanges()->delete();
             $task->delete();
 
             return response()->json('Tarea eliminada', 200);

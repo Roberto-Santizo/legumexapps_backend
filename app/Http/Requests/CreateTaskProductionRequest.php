@@ -24,7 +24,7 @@ class CreateTaskProductionRequest extends FormRequest
         return [
             'data' => ['array'],
             'data.*.line_id' => ['required'],
-            'data.*.operation_date' => ['required'],
+            'data.*.operation_date' => ['sometimes'],
             'data.*.sku_id' => ['required'],
             'data.*.total_lbs' => ['required'],
             'data.*.destination' => ['required'],

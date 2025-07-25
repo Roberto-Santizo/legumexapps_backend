@@ -76,13 +76,14 @@ class ProductionOperationChangeNotificationService
             if (count($change->task->operationDateChanges) > 0) {
                 $reason = $change->task->operationDateChanges->last()->reason;
             }
+            $operation_date = $change->task->operation_date ? $change->task->operation_date->format('d-m-Y') : 'SIN FECHA ASIGNADA';
 
             $rows .= <<<HTML
             <tr>
                 <td style="padding: 10px; border: 1px solid #ccc;">{$change->task->line_sku->sku->code}</td>
                 <td style="padding: 10px; border: 1px solid #ccc;">{$change->task->line_sku->sku->product_name}</td>
                 <td style="padding: 10px; border: 1px solid #ccc;">{$change->task->line_sku->line->name}</td>
-                <td style="padding: 10px; border: 1px solid #ccc;">{$change->task->operation_date->format('d-m-Y')}</td>
+                <td style="padding: 10px; border: 1px solid #ccc;">{$operation_date}</td>
                 <td style="padding: 10px; border: 1px solid #ccc;">{$change->task->weeklyPlan->week}</td>
                 <td style="padding: 10px; border: 1px solid #ccc;">{$reason}</td>
                 <td style="padding: 10px; border: 1px solid #ccc;">{$change->user->name}</td>

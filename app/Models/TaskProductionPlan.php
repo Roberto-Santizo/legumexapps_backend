@@ -76,4 +76,9 @@ class TaskProductionPlan extends Model
     {
         return $this->hasMany(PackingMaterialWastage::class, 'task_p_id', 'id');
     }
+
+    public function productionChanges()
+    {
+        return $this->hasMany(ProductionOperationChange::class, 'task_production_plan_id', 'id');
+    }
 }
