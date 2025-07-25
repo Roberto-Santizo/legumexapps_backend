@@ -25,6 +25,8 @@ class TaskProductionOperationDateResource extends JsonResource
 
         $working = ($this->start_date && !$this->end_date) ? true : false;
         $total_lbs =  $this->total_lbs;
+        $has_employees = $this->employees->count() > 0 ? true : false;
+
         return [
             'id' => strval($this->id),
             'sku' => $this->line_sku->sku->code,
@@ -34,6 +36,7 @@ class TaskProductionOperationDateResource extends JsonResource
             'finished' => $this->end_date ? true : false,
             'working' => $working,
             'destination' => $this->destination ?? 'SIN DESTINO ASOCIADO',
+            'has_employees' => $has_employees,
             'status' => $status[$this->status][0],
             'status_id' => strval($this->status),
             'color' => $status[$this->status][1],

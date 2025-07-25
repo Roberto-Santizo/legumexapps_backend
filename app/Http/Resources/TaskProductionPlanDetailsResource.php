@@ -25,13 +25,13 @@ class TaskProductionPlanDetailsResource extends JsonResource
 
         static $presentPositions = null;
         if (is_null($presentPositions)) {
-            $presentPositions = BiometricTransaction::whereDate('event_time', $today)
-                ->pluck('last_name')
+            $presentCodes = BiometricTransaction::whereDate('event_time', $today)
+                ->pluck('pin')
                 ->toArray();
         }
 
-        $filteredEmployees = $employees->filter(function ($employee) use ($presentPositions) {
-            return !in_array($employee->position, $presentPositions);
+        $filteredEmployees = $employees->filter(function ($employee) use ($presentCodes) {
+            return !in_array($employee->code, $presentCodes);
         });
 
         $unassignedPositions = $positions->filter(function ($position) use ($employees) {

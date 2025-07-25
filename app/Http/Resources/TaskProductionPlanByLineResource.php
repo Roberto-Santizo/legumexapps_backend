@@ -36,7 +36,7 @@ class TaskProductionPlanByLineResource extends JsonResource
         }
 
         $total_in_employees = $this->employees->filter(function ($employee) use ($presentPositions) {
-            return in_array($employee->position, $presentPositions);
+            return in_array($employee->code, $presentPositions);
         });
 
         return [

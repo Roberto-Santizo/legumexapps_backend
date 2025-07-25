@@ -1001,4 +1001,25 @@ class TaskProductionController extends Controller
             ], 500);
         }
     }
+
+    public function DeleteTaskProductionAssigments(Request $request, string $id)
+    {
+        $task = TaskProductionPlan::find($id);
+
+        if (!$task) {
+            return response()->json([
+                'msg' => 'Tarea no Encontrada'
+            ], 404);
+        }
+
+        try {
+            $task->employees()->delete();
+
+            return response()->json('Asignaciones eliminadas', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
 }

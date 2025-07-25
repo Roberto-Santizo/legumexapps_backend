@@ -306,7 +306,7 @@ class WeeklyProductionPlanController extends Controller
             $events = $tasks
                 ->groupBy('operation_date')
                 ->flatMap(function (Collection $tasksByDate, $dateKey) {
-                    $groupedByLine = $tasksByDate->groupBy(fn($task) => $task->line->name);
+                    $groupedByLine = $tasksByDate->groupBy(fn($task) => $task->line->code);
                     $date = Carbon::parse($dateKey);
 
                     return $groupedByLine->map(function ($tasks, $lineName) use ($date) {
@@ -317,7 +317,7 @@ class WeeklyProductionPlanController extends Controller
                         return [
                             'id' => uniqid(),
                             'title' => "{$lineName} | " . round($hours, 2) . " h",
-                            'start' => $date->format('d-m-Y'),
+                            'start' => $date->format('Y-m-d'),
                         ];
                     })->values();
                 })->values()->all();
