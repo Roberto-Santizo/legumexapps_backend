@@ -7,6 +7,7 @@ use App\Http\Requests\CreateAssigmentsRequest;
 use App\Http\Requests\CreateTaskProductionRequest;
 use App\Http\Resources\FinishedTaskProductionResource;
 use App\Http\Resources\TaskPackingMaterialReturnDetailsResource;
+use App\Http\Resources\TaskProductionEditDetailsResource;
 use App\Http\Resources\TaskProductionEmployeeResource;
 use App\Http\Resources\TaskProductionPlanDetailResource;
 use App\Http\Resources\TaskProductionPlanDetailsResource;
@@ -129,25 +130,34 @@ class TaskProductionController extends Controller
     public function update(Request $request, string $id)
     {
         $data = $request->validate([
+            'sku_id' => 'required',
             'line_id' => 'required',
-            'operation_date' => 'required',
-            'total_hours' => 'required',
+            'total_lbs' => 'required',
+            'destination' => 'required',
+            'operation_date' => 'sometimes'
         ]);
 
         $task_production_plan = TaskProductionPlan::find($id);
 
         if (!$task_production_plan) {
             return response()->json([
-                'msg' => 'Task Production Plan Not Found'
+                'msg' => 'Tarea No Encontrada'
             ], 404);
         }
 
         try {
+            $line_sku = LineStockKeepingUnits::where('line_id', $data['line_id'])->where('sku_id', $data['sku_id'])->first();
+            if (!$line_sku) {
+                return response()->json([
+                    'msg' => 'La linea no cuenta con relación con el sku seleccionado'
+                ], 404);
+            }
+
+            $data['line_sku'] = $line_sku->id;
+
             $task_production_plan->update($data);
 
-            return response()->json([
-                'msg' => 'Task Production Plan Updated Successfully'
-            ], 200);
+            return response()->json('Tarea Actualizada Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
@@ -972,8 +982,8 @@ class TaskProductionController extends Controller
         try {
             $task->employees()->delete();
             $task->productionChanges()->delete();
+            $task->operationDateChanges()->delete();
             $task->delete();
-
             return response()->json('Tarea eliminada', 200);
         } catch (\Throwable $th) {
             return response()->json([
@@ -1017,6 +1027,26 @@ class TaskProductionController extends Controller
             $task->employees()->delete();
 
             return response()->json('Asignaciones eliminadas', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function GetEditDetails(Request $request, string $id)
+    {
+        $task = TaskProductionPlan::find($id);
+
+        if (!$task) {
+            return response()->json([
+                'msg' => 'Tarea no Encontrada'
+            ], 404);
+        }
+
+        try {
+            $task  = new TaskProductionEditDetailsResource($task);
+            return response()->json($task);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
