@@ -44,7 +44,7 @@ Route::middleware('jwt.auth')->group(function () {
 
     Route::apiResource('/tasks-production', TaskProductionController::class);
     Route::get('/tasks-production/edit-details/{id}', [TaskProductionController::class, 'GetEditDetails']);
-    Route::get('/tasks-production/reprogram-details/{id}', [TaskProductionController::class, 'TaskReprograsmDetails']);
+    Route::get('/tasks-production/reprogram-details/{id}', [TaskProductionController::class, 'TaskReprogramDetails']);
     Route::get('/tasks-production/finished/details/{id}', [TaskProductionController::class, 'FinishedTaskDetails']);
     Route::get('/tasks-production/details/{id}', [TaskProductionController::class, 'TaskDetails']);
     Route::get('/tasks-production/devolution-details/{id}', [TaskProductionController::class, 'TaskDevolutionDetails']);

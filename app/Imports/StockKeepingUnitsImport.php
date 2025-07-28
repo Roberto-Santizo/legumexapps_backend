@@ -16,6 +16,10 @@ class StockKeepingUnitsImport implements ToCollection, WithHeadingRow
     {
         foreach ($collection as $row) {
             try {
+                if (empty($row['codigo'])) {
+                    return null;
+                }
+
                 StockKeepingUnit::create([
                     'code' => $row['codigo'],
                     'product_name' => $row['product'],

@@ -27,6 +27,8 @@ class TaskProductionOperationDateResource extends JsonResource
         $total_lbs =  $this->total_lbs;
         $has_employees = $this->employees->count() > 0 ? true : false;
 
+        $devolution_flag = ($this->end_date && !$this->transactions()->where('type', 2)->first() && $this->total_lbs_bascula < $this->total_lbs) ? true : false;
+
         return [
             'id' => strval($this->id),
             'sku' => $this->line_sku->sku->code,
@@ -40,6 +42,7 @@ class TaskProductionOperationDateResource extends JsonResource
             'status' => $status[$this->status][0],
             'status_id' => strval($this->status),
             'color' => $status[$this->status][1],
+            'devolution' => $devolution_flag,
             'recipe' => $this->line_sku->sku->items->map(function ($item) use ($total_lbs) {
                 return new TaskProductionRecipeResource($item, $total_lbs);
             })
