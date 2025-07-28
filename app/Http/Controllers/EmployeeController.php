@@ -53,30 +53,34 @@ class EmployeeController extends Controller
         return new EmployeeCollection($filter_employees);
     }
 
-    public function getComodines()
+   public function getComodines()
     {
-        $comodines = BiometricEmployee::where('last_name','LIKE','%LDC%')
+        $today = Carbon::today();
+
+        $comodines = BiometricEmployee::where('last_name', 'LIKE', '%LDC%')->get();
+
+        $entrances = BiometricTransaction::whereDate('event_time', $today)
+            ->whereIn('pin', $comodines->pluck('pin'))
             ->get()
-            ->map(function ($item, $index) {
-                $item->temp_id = $index + 10;
-                return $item;
-            });
+            ->groupBy('pin');
 
-        $comodinesFiltrados = $comodines->filter(function ($comodin) {
-            $today = Carbon::today();
+        $assigned = TaskProductionEmployee::whereIn('position', $comodines->pluck('last_name'))
+            ->whereHas('TaskProduction', function ($query) use ($today) {
+                $query->whereDate('operation_date', $today);
+            })
+            ->get()
+            ->groupBy('position');
 
-            $entrance = BiometricTransaction::where('last_name', $comodin->last_name)
-                ->whereDate('event_time', $today)
-                ->first();
+        $comodinesFiltrados = $comodines->filter(function ($comodin, $index) use ($entrances, $assigned) {
+            $comodin->temp_id = $index + 10;
 
-            $assigned = TaskProductionEmployee::where('position', $comodin->last_name)
-                ->whereHas('TaskProduction', function($query){
-                    $query->whereDate('operation_date',Carbon::now());
-                })->first();
+            $hasEntrance = $entrances->has($comodin->pin);
+            $isAssigned = $assigned->has($comodin->last_name);
 
-            return $entrance && !$assigned;
+            return $hasEntrance && !$isAssigned;
         });
 
         return BiometricEmployeeResource::collection($comodinesFiltrados);
     }
+
 }

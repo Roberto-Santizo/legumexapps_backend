@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardProductionController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeePermissionsController;
 use App\Http\Controllers\LinesController;
@@ -44,6 +45,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::post('/weekly-production-plans/report-weekly-production/{weekly_plan_id}', [ReportController::class, 'downloadWeeklyProduction']);
 
     Route::apiResource('/tasks-production', TaskProductionController::class);
+    Route::get('/tasks-production/edit-details/{id}', [TaskProductionController::class, 'GetEditDetails']);
     Route::get('/tasks-production/reprogram-details/{id}', [TaskProductionController::class, 'TaskReprogramDetails']);
     Route::get('/tasks-production/finished/details/{id}', [TaskProductionController::class, 'FinishedTaskDetails']);
     Route::get('/tasks-production/details/{id}', [TaskProductionController::class, 'TaskDetails']);
@@ -62,6 +64,8 @@ Route::middleware('jwt.auth')->group(function () {
     Route::patch('/tasks-production/change-operation-date/{id}', [TaskProductionController::class, 'ChangeOperationDate']);
     Route::patch('/tasks-production/assign-operation-date/{id}', [TaskProductionController::class, 'AssignOperationDate']);
     Route::patch('/tasks-production/{id}/end', [TaskProductionController::class, 'EndTaskProduction']);
+    Route::patch('/tasks-production/{id}/unassign', [TaskProductionController::class, 'UnassignTaskProduction']);
+    Route::patch('/tasks-production/{id}/delete-assignments', [TaskProductionController::class, 'DeleteTaskProductionAssigments']);
 
     //DRAFT PLANES SEMANALES
     Route::apiResource('/weekly-production-plans-drafts', WeeklyProductionPlanDraftController::class);
@@ -71,4 +75,9 @@ Route::middleware('jwt.auth')->group(function () {
 
 
     Route::apiResource('/employee-permissions', EmployeePermissionsController::class);
+
+    //DASHBOARD
+    Route::get('/dashboard/production/finished-tasks-per-line', [DashboardProductionController::class, 'GetFinishedTasksPerLine']);
+    Route::get('/dashboard/production/in-progress', [DashboardProductionController::class, 'GetInProgressTasks']);
+    // Route::get('/dashboard/production/finished-tasks', [DashboardProductionController::class, 'GetInProgressTasks']);
 });

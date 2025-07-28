@@ -31,9 +31,12 @@ class CreateAssignmentsProductionImport implements ToCollection, WithHeadingRow
         foreach ($rowsGroupedByDepartment as $line => $assigments) {
             try {
                 $line = Line::where('code', $line)->first();
+                if (empty($line)) {
+                    return null;
+                }
 
                 if (!$line) {
-                    throw new Exception("Linea" . $line);
+                    throw new Exception("No existe linea " . $line);
                 }
 
                 $tasks = TaskProductionPlan::where('line_id', $line->id)->where('weekly_production_plan_id', $this->weekly_plan->id)->whereNull('start_date')->get();

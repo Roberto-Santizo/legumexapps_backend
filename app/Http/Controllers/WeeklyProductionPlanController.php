@@ -13,6 +13,7 @@ use App\Models\Line;
 use App\Models\TaskProductionPlan;
 use App\Models\WeeklyProductionPlan;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -22,11 +23,11 @@ class WeeklyProductionPlanController extends Controller
     {
 
         if ($request->query('paginated')) {
-            $plans_production = WeeklyProductionPlan::orderBy('week','DESC')->get();
+            $plans_production = WeeklyProductionPlan::orderBy('week', 'DESC')->get();
         } else {
             $plans_production = WeeklyProductionPlan::get();
         }
-        
+
         return WeeklyPlanProductionResource::collection($plans_production);
     }
 
@@ -106,17 +107,21 @@ class WeeklyProductionPlanController extends Controller
     public function GetTasksByLineId(string $weekly_plan_id, string $line_id)
     {
         $weekly_plan = WeeklyProductionPlan::find($weekly_plan_id);
-        $today = Carbon::today();
-        $yesterday = Carbon::yesterday();
-        
+
         if (!$weekly_plan) {
-            return response()->json([
-                'msg' => 'Plan Semanal Not Found'
-            ], 404);
+            return response()->json(['msg' => 'Plan Semanal Not Found'], 404);
         }
 
+        $today = Carbon::today();
+        $yesterday = Carbon::yesterday();
 
         $tasks = $weekly_plan->tasks()
+            ->with([
+                'timeouts',
+                'employees',
+                'line_sku.line',
+                'line_sku.sku'
+            ])
             ->where('line_id', $line_id)
             ->whereNot('status', 0)
             ->where(function ($query) use ($today, $yesterday) {
@@ -127,9 +132,13 @@ class WeeklyProductionPlanController extends Controller
                                 $q2->where('shift', 0);
                             });
                     });
-            })->orderBy('operation_date', 'DESC')->get();
-        return TaskProductionPlanByLineResource::collection($tasks->sortBy('operation_date'));
+            })
+            ->orderBy('operation_date', 'DESC')
+            ->get();
+
+        return TaskProductionPlanByLineResource::collection($tasks);
     }
+
 
 
     public function GetTasksByDate(Request $request, string $weekly_plan_id)
@@ -252,7 +261,9 @@ class WeeklyProductionPlanController extends Controller
             $query->whereDate('operation_date', $date);
 
             if ($request->query('line')) {
-                $query->where('line_id', $request->query('line'));
+                $query->whereHas('line', function ($q) use ($request) {
+                    $q->where('code', $request->query('line'));
+                });
             }
 
             if ($request->query('sku')) {
@@ -287,21 +298,29 @@ class WeeklyProductionPlanController extends Controller
         }
 
         try {
-            $tasks = TaskProductionPlan::where('weekly_production_plan_id', $id)->whereNotNull('operation_date')->get();
+            $tasks = TaskProductionPlan::where('weekly_production_plan_id', $id)
+                ->with('line_sku', 'line')
+                ->whereNotNull('operation_date')
+                ->get();
 
-            $events = $tasks->groupBy(function ($item) {
-                return $item->operation_date->format('Y-m-d') . '_' . $item->line_id;
-            })->map(function ($items, $key) {
-                $first = $items->first();
-                $hours = $items->first()->line_sku->lbs_performance ? ($items->sum('total_lbs') / $items->first()->line_sku->lbs_performance) : 0;
+            $events = $tasks
+                ->groupBy('operation_date')
+                ->flatMap(function (Collection $tasksByDate, $dateKey) {
+                    $groupedByLine = $tasksByDate->groupBy(fn($task) => $task->line->code);
+                    $date = Carbon::parse($dateKey);
 
-                return [
-                    'id' => strval($first->line_id),
-                    'title' => $first->line->code . ' | ' . round($hours, 2) . ' h',
-                    'start' => $first->operation_date->format('Y-m-d'),
-                ];
-            })->values();
+                    return $groupedByLine->map(function ($tasks, $lineName) use ($date) {
+                        $hours = $tasks->sum(function ($task) {
+                            return $task->total_lbs / $task->line_sku->lbs_performance;
+                        });
 
+                        return [
+                            'id' => uniqid(),
+                            'title' => "{$lineName} | " . round($hours, 2) . " h",
+                            'start' => $date->format('Y-m-d'),
+                        ];
+                    })->values();
+                })->values()->all();
 
             return response()->json($events);
         } catch (\Throwable $th) {

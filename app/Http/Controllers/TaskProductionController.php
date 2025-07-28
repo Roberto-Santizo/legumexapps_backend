@@ -7,6 +7,7 @@ use App\Http\Requests\CreateAssigmentsRequest;
 use App\Http\Requests\CreateTaskProductionRequest;
 use App\Http\Resources\FinishedTaskProductionResource;
 use App\Http\Resources\TaskPackingMaterialReturnDetailsResource;
+use App\Http\Resources\TaskProductionEditDetailsResource;
 use App\Http\Resources\TaskProductionEmployeeResource;
 use App\Http\Resources\TaskProductionPlanDetailResource;
 use App\Http\Resources\TaskProductionPlanDetailsResource;
@@ -129,25 +130,34 @@ class TaskProductionController extends Controller
     public function update(Request $request, string $id)
     {
         $data = $request->validate([
+            'sku_id' => 'required',
             'line_id' => 'required',
-            'operation_date' => 'required',
-            'total_hours' => 'required',
+            'total_lbs' => 'required',
+            'destination' => 'required',
+            'operation_date' => 'sometimes'
         ]);
 
         $task_production_plan = TaskProductionPlan::find($id);
 
         if (!$task_production_plan) {
             return response()->json([
-                'msg' => 'Task Production Plan Not Found'
+                'msg' => 'Tarea No Encontrada'
             ], 404);
         }
 
         try {
+            $line_sku = LineStockKeepingUnits::where('line_id', $data['line_id'])->where('sku_id', $data['sku_id'])->first();
+            if (!$line_sku) {
+                return response()->json([
+                    'msg' => 'La linea no cuenta con relación con el sku seleccionado'
+                ], 404);
+            }
+
+            $data['line_sku'] = $line_sku->id;
+
             $task_production_plan->update($data);
 
-            return response()->json([
-                'msg' => 'Task Production Plan Updated Successfully'
-            ], 200);
+            return response()->json('Tarea Actualizada Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
@@ -638,13 +648,13 @@ class TaskProductionController extends Controller
                 $line_sku = LineStockKeepingUnits::where('line_id', $line->id)->where('sku_id', $sku->id)->get()->first();
 
 
-                $task_line = TaskProductionPlan::where('line_id', $line->id)->get()->last();
+                $task_line = TaskProductionPlan::where('line_id', $line->id)->where('weekly_production_plan_id', $weekly_plan->id)->get()->last();
                 $total_hours =  $line_sku->lbs_performance ? ($task['total_lbs'] / $line_sku->lbs_performance) : null;
 
                 $new_task = TaskProductionPlan::create([
                     'line_id' => $line->id,
                     'weekly_production_plan_id' => $weekly_plan->id,
-                    'operation_date' => $task['operation_date'],
+                    'operation_date' => $task['operation_date'] ?? null,
                     'total_hours' => round($total_hours, 2),
                     'line_sku_id' => $line_sku->id,
                     'status' =>  1,
@@ -697,14 +707,18 @@ class TaskProductionController extends Controller
 
             if (!empty($data['data'])) {
                 foreach ($data['data'] as $newEmployee) {
-                    $position = LinePosition::find($newEmployee['position_id']);
+                    $position = null;
+
+                    if ($newEmployee['position_id']) {
+                        $position = LinePosition::find($newEmployee['position_id']);
+                    }
 
                     foreach ($tasks as $task) {
                         TaskProductionEmployee::create([
                             'task_p_id' => $task->id,
                             'name' => $newEmployee['name'],
                             'code' => $newEmployee['code'],
-                            'position' => $position->name
+                            'position' => $position ? $position->name : $newEmployee['old_position']
                         ]);
                     }
                 }
@@ -854,9 +868,8 @@ class TaskProductionController extends Controller
             ], 404);
         }
 
-
         try {
-            if (!empty($data['data'])) {
+            if (!empty($data['data']) && !$data['previous_config']) {
                 foreach ($data['data'] as $change) {
                     $assignment = TaskProductionEmployee::find($change['old_employee']['id']);
                     $NewChange = TaskProductionEmployeesBitacora::create([
@@ -878,35 +891,23 @@ class TaskProductionController extends Controller
                     $assignment->code = $NewChange->new_code;
                     $assignment->position = $NewChange->new_position;
                     $assignment->save();
-
-                    $line = $task->line_sku->line->code;
-
-                    $employees = TaskProductionEmployee::whereHas('TaskProduction', function ($query) use ($line) {
-                        $query->where('start_date', null)->where('end_date', null);
-                        $query->whereHas('line', function ($query) use ($line) {
-                            $query->where('code', $line);
-                            $query->whereDate('operation_date', Carbon::now());
-                        });
-                    })->where('position', $NewChange->original_position)->get();
-
-                    foreach ($employees as $employee) {
-                        TaskProductionEmployeesBitacora::create([
-                            "assignment_id" => $employee->id,
-                            "original_name" => $assignment->name,
-                            "original_code" => $assignment->code,
-                            "original_position" => $assignment->position,
-                            "new_name" => $NewChange->new_name,
-                            "new_code" => $NewChange->new_code,
-                            "new_position" => $NewChange->new_position
-                        ]);
-
-                        $employee->name = $NewChange->new_name;
-                        $employee->code = $NewChange->new_code;
-                        $employee->position = $NewChange->new_position;
-                        $employee->save();
-                    }
                 }
                 $this->emailService->sendNotification($data['data']);
+            } else if ($data['previous_config']) {
+                $task->employees()->delete();
+                $last_task = TaskProductionPlan::where('line_id', $task->line_id)
+                    ->whereNotNull('start_date')
+                    ->whereNotNull('end_date')
+                    ->get()->last();
+
+                foreach ($last_task->employees as $employee) {
+                    TaskProductionEmployee::create([
+                        'task_p_id' => $task->id,
+                        'name' => $employee->name,
+                        'code' => $employee->code,
+                        'position' => $employee->position
+                    ]);
+                }
             }
 
 
@@ -963,7 +964,7 @@ class TaskProductionController extends Controller
                 'line_id' => strval($task->line_id),
                 'sku_id' => strval($task->line_sku->sku->id),
                 'total_lbs' => $task->total_lbs,
-                'destination' => $task->destination
+                'destination' => $task->destination ?? 'SIN DESTINO ASOCIADO'
             ];
         } catch (\Throwable $th) {
             return response()->json([
@@ -980,9 +981,72 @@ class TaskProductionController extends Controller
 
         try {
             $task->employees()->delete();
+            $task->productionChanges()->delete();
+            $task->operationDateChanges()->delete();
             $task->delete();
-
             return response()->json('Tarea eliminada', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function UnassignTaskProduction(string $id)
+    {
+        $task = TaskProductionPlan::find($id);
+
+        try {
+            if (!$task) {
+                return response()->json([
+                    'msg' => 'Tarea No Encontrada'
+                ], 404);
+            }
+            $task->operation_date = null;
+            $task->save();
+
+            return response()->json('Tarea Actualizada', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function DeleteTaskProductionAssigments(Request $request, string $id)
+    {
+        $task = TaskProductionPlan::find($id);
+
+        if (!$task) {
+            return response()->json([
+                'msg' => 'Tarea no Encontrada'
+            ], 404);
+        }
+
+        try {
+            $task->employees()->delete();
+
+            return response()->json('Asignaciones eliminadas', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function GetEditDetails(Request $request, string $id)
+    {
+        $task = TaskProductionPlan::find($id);
+
+        if (!$task) {
+            return response()->json([
+                'msg' => 'Tarea no Encontrada'
+            ], 404);
+        }
+
+        try {
+            $task  = new TaskProductionEditDetailsResource($task);
+            return response()->json($task);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()

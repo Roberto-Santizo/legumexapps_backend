@@ -26,8 +26,8 @@ class CreateAssigmentsRequest extends FormRequest
             'data.*.name' => 'required_with:data.*.code,data.*.old_position,data.*.new_position,data.*.position_id',
             'data.*.code' => 'required_with:data.*.name',
             'data.*.old_position' => 'required_with:data.*.name',
-            'data.*.new_position' => 'required_with:data.*.name',
-            'data.*.position_id' => 'required_with:data.*.name|exists:line_positions,id',
+            'data.*.new_position' => 'sometimes',
+            'data.*.position_id' => 'sometimes',
         ];
     }
 }

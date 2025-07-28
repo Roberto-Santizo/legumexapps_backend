@@ -22,6 +22,7 @@ class ChangeAssigmentsRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'previous_config' => 'required|boolean',
             'data' => 'sometimes|array',
             'data.*.old_employee' => 'required',
             'data.*.old_employee.id' => 'required|exists:task_production_employees,id',

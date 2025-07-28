@@ -54,7 +54,7 @@ class FinishedTaskProductionResource extends JsonResource
             'total_lbs' => $this->total_lbs,
             'total_lbs_produced' => $this->total_lbs_produced,
             'total_lbs_bascula' => $this->total_lbs_bascula,
-            'destination' => $this->destination,
+            'destination' => $this->destination ?? 'SIN DESTINO ASOCIADO',
             'start_date' => $this->start_date->format('d-m-Y h:i:s A'),
             'end_date' => $this->end_date->format('d-m-Y h:i:s A'),
             'max_value' => max($summary),
