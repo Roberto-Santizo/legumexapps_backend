@@ -69,9 +69,14 @@ Route::middleware('jwt.auth')->group(function () {
 
     //DRAFT PLANES SEMANALES
     Route::apiResource('/weekly-production-plans-drafts', WeeklyProductionPlanDraftController::class);
+    Route::get('/weekly-production-plans-drafts/{id}/tasks', [WeeklyProductionPlanDraftController::class, 'GetTasks']);
+    Route::get('/weekly-production-plans-drafts/{id}/packing-material-necessity', [WeeklyProductionPlanDraftController::class, 'GetPackingMaterialNecessity']);
+    Route::post('/weekly-production-plans-drafts/{id}/upload-tasks', [WeeklyProductionPlanDraftController::class, 'UploadTasks']);
 
-    Route::get('/tasks-production-drafts/{id}', [TaskProductionDraftController::class,'index']);
-    Route::post('/tasks-production-drafts/{id}', [TaskProductionDraftController::class,'store']);
+    Route::get('/tasks-production-drafts/{id}/edit-details', [TaskProductionDraftController::class, 'show']);
+    Route::post('/tasks-production-drafts/{id}', [TaskProductionDraftController::class, 'store']);
+    Route::delete('/tasks-production-drafts/{id}', [TaskProductionDraftController::class, 'destroy']);
+    Route::put('/tasks-production-drafts/{id}', [TaskProductionDraftController::class, 'update']);
 
 
     Route::apiResource('/employee-permissions', EmployeePermissionsController::class);

@@ -26,6 +26,11 @@ class TaskProductionDraft extends Model
 
     public function sku()
     {
-        return $this->belongsTo(StockKeepingUnit::class,'stock_keeping_unit_id','id');
+        return $this->belongsTo(StockKeepingUnit::class, 'stock_keeping_unit_id', 'id');
+    }
+
+    public function line_performance()
+    {
+        return $this->hasOne(LineStockKeepingUnits::class, 'sku_id', 'stock_keeping_unit_id')->whereColumn('line_id', 'line_id');
     }
 }

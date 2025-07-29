@@ -228,7 +228,6 @@ class LinesController extends Controller
         }
 
         try {
-            // $tasks = $weeklyplan->tasks()->whereNotNull('operation_date')->get();
             $tasks = $weeklyplan->tasks()->get();
 
             $data = [];

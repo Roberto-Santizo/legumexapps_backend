@@ -1,8 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Broadcast;
-use Illuminate\Support\Facades\Log;
 
-Broadcast::channel('item.status', function () {
+// Broadcast::channel('item.status', function () {
+//     return true;
+// });
+
+
+Broadcast::channel('planification.change', function () {
     return true;
 });

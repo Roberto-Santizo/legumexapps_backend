@@ -22,7 +22,6 @@ class CreateDraftTaskPlan extends FormRequest
     public function rules(): array
     {
         return [
-            'draft_weekly_production_plan_id' => ['required','exists:draft_weekly_production_plans,id'],
             'line_id' => ['required','exists:lines,id'],
             'stock_keeping_unit_id' => ['required', 'exists:stock_keeping_units,id'],
             'total_boxes' => ['required'],
