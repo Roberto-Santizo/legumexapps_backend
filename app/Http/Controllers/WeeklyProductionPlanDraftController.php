@@ -172,7 +172,7 @@ class WeeklyProductionPlanDraftController extends Controller
                     'code' => $key,
                     'name' => $item['name'],
                     'quantity' => $item['quantity'],
-                    'inventory' => random_int(1,100000)
+                    'inventory' => random_int(1, 100000)
                 ];
             }
             return response()->json($resultado);
@@ -206,6 +206,58 @@ class WeeklyProductionPlanDraftController extends Controller
             return response()->json([
                 'msg' => $th->getMessage()
             ], 500);
+        }
+    }
+
+    public function GetRawMaterialNecessity(string $id)
+    {
+        $draft = DraftWeeklyProductionPlan::find($id);
+
+        if (!$draft) {
+            return response()->json([
+                'msg' => 'Draft No Encontrado'
+            ], 404);
+        }
+
+        try {
+            $tasks = TaskProductionDraft::with('sku.items.item')->get();
+
+            $resumen = [];
+
+            foreach ($tasks as $task) {
+                $totalLbs = $task->total_boxes * $task->sku->presentation;
+
+                foreach ($task->sku->products as $recipeItem) {
+                    $itemName = $recipeItem->item->product_name;
+                    $itemCode = $recipeItem->item->code;
+
+                    $requiredQty = $totalLbs * $recipeItem->percentage;
+
+                    if (!isset($resumen[$itemCode])) {
+                        $resumen[$itemCode] = 0;
+                    }
+
+                    $resumen[$itemCode] = [
+                        'name' => $itemName,
+                        'code' => $itemCode,
+                        'quantity' => $requiredQty,
+                    ];
+                }
+            }
+
+            $resultado = [];
+
+            foreach ($resumen as $key => $item) {
+                $resultado[] = [
+                    'code' => $key,
+                    'name' => $item['name'],
+                    'quantity' => $item['quantity'],
+                    'inventory' => random_int(1, 100000)
+                ];
+            }
+            return response()->json($resultado);
+        } catch (\Throwable $th) {
+            //throw $th;
         }
     }
 }

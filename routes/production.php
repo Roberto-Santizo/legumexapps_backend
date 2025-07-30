@@ -5,6 +5,8 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeePermissionsController;
 use App\Http\Controllers\LinesController;
 use App\Http\Controllers\LineStockKeepingUnitsController;
+use App\Http\Controllers\RawMaterialItemController;
+use App\Http\Controllers\RawMaterialItemRecipeController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SKUController;
 use App\Http\Controllers\TaskProductionController;
@@ -67,10 +69,19 @@ Route::middleware('jwt.auth')->group(function () {
     Route::patch('/tasks-production/{id}/unassign', [TaskProductionController::class, 'UnassignTaskProduction']);
     Route::patch('/tasks-production/{id}/delete-assignments', [TaskProductionController::class, 'DeleteTaskProductionAssigments']);
 
+    //MATERIA PRIMA
+    Route::apiResource('/raw-material-items', RawMaterialItemController::class);
+
+    Route::post('/raw-material-items-recipes/upload', [RawMaterialItemRecipeController::class, 'upload']);
+    Route::get('/raw-material-items-recipes/{stock_keeping_unit_id}', [RawMaterialItemRecipeController::class, 'index']);
+    Route::post('/raw-material-items-recipes/{stock_keeping_unit_id}', [RawMaterialItemRecipeController::class, 'store']);
+    Route::put('/raw-material-items-recipes/{id}', [RawMaterialItemRecipeController::class, 'update']);
+
     //DRAFT PLANES SEMANALES
     Route::apiResource('/weekly-production-plans-drafts', WeeklyProductionPlanDraftController::class);
     Route::get('/weekly-production-plans-drafts/{id}/tasks', [WeeklyProductionPlanDraftController::class, 'GetTasks']);
     Route::get('/weekly-production-plans-drafts/{id}/packing-material-necessity', [WeeklyProductionPlanDraftController::class, 'GetPackingMaterialNecessity']);
+    Route::get('/weekly-production-plans-drafts/{id}/raw-material-necessity', [WeeklyProductionPlanDraftController::class, 'GetRawMaterialNecessity']);
     Route::post('/weekly-production-plans-drafts/{id}/upload-tasks', [WeeklyProductionPlanDraftController::class, 'UploadTasks']);
 
     Route::get('/tasks-production-drafts/{id}/edit-details', [TaskProductionDraftController::class, 'show']);

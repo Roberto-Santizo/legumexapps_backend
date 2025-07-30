@@ -25,4 +25,9 @@ class StockKeepingUnit extends Model
     {
         return $this->hasMany(StockKeepingUnitRecipe::class,'sku_id','id');
     }
+
+     public function products()
+    {
+        return $this->hasMany(RawMaterialSkuRecipe::class,'stock_keeping_unit_id','id');
+    }
 }
