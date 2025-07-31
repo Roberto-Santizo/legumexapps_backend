@@ -16,7 +16,7 @@ class LotePlantationControlResource extends JsonResource
     {
         return [
             'id' => strval($this->id),
-            'cdp' => $this->cdp->name
+            'name' => $this->cdp->name
         ];
     }
 }

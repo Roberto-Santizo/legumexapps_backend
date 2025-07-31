@@ -23,7 +23,7 @@ class WeeklyProductionPlanController extends Controller
     {
 
         if ($request->query('paginated')) {
-            $plans_production = WeeklyProductionPlan::orderBy('week', 'DESC')->get();
+            $plans_production = WeeklyProductionPlan::orderBy('created_at', 'DESC')->paginate(10);
         } else {
             $plans_production = WeeklyProductionPlan::get();
         }
