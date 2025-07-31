@@ -15,6 +15,10 @@ class DraftWeeklyProductionPlan extends Model
         'confirmation_date'
     ];
 
+    protected $casts = [
+        'confirmation_date' => 'datetime'
+    ];
+
     public function tasks()
     {
         return $this->hasMany(TaskProductionDraft::class, 'draft_weekly_production_plan_id');

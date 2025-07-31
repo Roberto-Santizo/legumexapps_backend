@@ -39,6 +39,23 @@ class RawMaterialItemRecipeController extends Controller
         }
     }
 
+    public function show(string $id)
+    {
+        $recipe = RawMaterialSkuRecipe::find($id);
+
+        if (!$recipe) {
+            return response()->json([
+                'msg' => 'Item no encontrado'
+            ], 404);
+        }
+
+        try {
+            return response()->json($recipe);
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+    }
+
     /**
      * Store a newly created resource in storage.
      */

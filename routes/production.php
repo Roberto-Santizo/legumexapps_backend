@@ -74,6 +74,7 @@ Route::middleware('jwt.auth')->group(function () {
 
     Route::post('/raw-material-items-recipes/upload', [RawMaterialItemRecipeController::class, 'upload']);
     Route::get('/raw-material-items-recipes/{stock_keeping_unit_id}', [RawMaterialItemRecipeController::class, 'index']);
+    Route::get('/raw-material-items-recipes/item/{id}', [RawMaterialItemRecipeController::class, 'show']);
     Route::post('/raw-material-items-recipes/{stock_keeping_unit_id}', [RawMaterialItemRecipeController::class, 'store']);
     Route::put('/raw-material-items-recipes/{id}', [RawMaterialItemRecipeController::class, 'update']);
 
@@ -83,12 +84,13 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/weekly-production-plans-drafts/{id}/packing-material-necessity', [WeeklyProductionPlanDraftController::class, 'GetPackingMaterialNecessity']);
     Route::get('/weekly-production-plans-drafts/{id}/raw-material-necessity', [WeeklyProductionPlanDraftController::class, 'GetRawMaterialNecessity']);
     Route::post('/weekly-production-plans-drafts/{id}/upload-tasks', [WeeklyProductionPlanDraftController::class, 'UploadTasks']);
+    Route::post('/weekly-production-plans-drafts/{id}/create-plan', [WeeklyProductionPlanDraftController::class, 'CreateWeeklyProductionPlan']);
+    Route::patch('/weekly-production-plans-drafts/{id}/confirm', [WeeklyProductionPlanDraftController::class, 'ConfirmPlan']);
 
     Route::get('/tasks-production-drafts/{id}/edit-details', [TaskProductionDraftController::class, 'show']);
     Route::post('/tasks-production-drafts/{id}', [TaskProductionDraftController::class, 'store']);
     Route::delete('/tasks-production-drafts/{id}', [TaskProductionDraftController::class, 'destroy']);
     Route::put('/tasks-production-drafts/{id}', [TaskProductionDraftController::class, 'update']);
-
 
     Route::apiResource('/employee-permissions', EmployeePermissionsController::class);
 

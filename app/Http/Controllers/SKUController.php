@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateStockKeepingUnitRequest;
 use App\Http\Resources\SKUResource;
+use App\Http\Resources\StockKeepingUnitResource;
 use App\Imports\RecipeStockKeepingUnitsImport;
 use App\Imports\StockKeepingUnitsImport;
 use App\Models\StockKeepingUnit;
@@ -29,6 +30,14 @@ class SKUController extends Controller
 
         $permissions = $user->getPermissionNames()->toArray();
 
+        if ($request->query('product_name')) {
+            $query->where('product_name', 'LIKE', '%' . $request->query('product_name') . '%');
+        }
+
+        if ($request->query('code')) {
+            $query->where('code', 'LIKE', '%' . $request->query('code') . '%');
+        }
+        
         // if ($role != 'admin') {
         //     $query->where(function ($q) use ($permissions) {
         //         if (in_array('create pcs tasks', $permissions)) {
@@ -117,6 +126,25 @@ class SKUController extends Controller
             return response()->json([
                 'msg' => $th->getMessage()
             ], 500);
+        }
+    }
+
+    public function show(string $id)
+    {
+        $sku = StockKeepingUnit::where('id', $id)->with('items')->with('products')->first();
+
+        if (!$sku) {
+            return response()->json([
+                'msg' => 'Sku No Encontrado'
+            ], 404);
+        }
+
+        try {
+            $data = new StockKeepingUnitResource($sku);
+
+            return response()->json($data);
+        } catch (\Throwable $th) {
+            //throw $th;
         }
     }
 }
