@@ -147,7 +147,7 @@ class WeeklyProductionPlanDraftController extends Controller
         }
 
         try {
-            $tasks = TaskProductionDraft::with('sku.items.item')->get();
+            $tasks = TaskProductionDraft::with('sku.items.item')->where('draft_weekly_production_plan_id', $draft->id)->get();
 
             $resumen = [];
 
@@ -226,7 +226,7 @@ class WeeklyProductionPlanDraftController extends Controller
         }
 
         try {
-            $tasks = TaskProductionDraft::with('sku.items.item')->get();
+            $tasks = TaskProductionDraft::with('sku.items.item')->where('draft_weekly_production_plan_id', $draft->id)->get();
 
             $resumen = [];
 

@@ -16,6 +16,7 @@ class DraftProductionPlanResourceDetails extends JsonResource
     public function toArray(Request $request): array
     {
         $plan_exists = WeeklyProductionPlan::where('year', $this->year)->where('week', $this->week)->first();
+        $flag_tasks = $this->tasks->count() == 0 ? true : false;
 
         return [
             'id' => strval($this->id),
@@ -26,6 +27,7 @@ class DraftProductionPlanResourceDetails extends JsonResource
             'production_confirmation' => $this->production_confirmation ? true : false,
             'bodega_confirmation' => $this->bodega_confirmation  ? true : false,
             'logistics_confirmation' => $this->logistics_confirmation  ? true : false,
+            'flag_tasks' => !$flag_tasks,
             'tasks' => TaskProductionDraftResource::collection($this->tasks)
         ];
     }
