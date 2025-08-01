@@ -108,8 +108,7 @@ class WeeklyProductionPlanDraftController extends Controller
 
             $data = $tasks->map(function ($task) {
                 $performance = $task->line_performance->lbs_performance;
-                $total_lbs = $task->sku->presentation * $task->total_boxes;
-                $hours = $performance ? $total_lbs / $performance : 0;
+                $hours = $performance ? $task->total_lbs / $performance : 0;
 
                 return [
                     'line_id' => strval($task->line_id),
@@ -152,12 +151,10 @@ class WeeklyProductionPlanDraftController extends Controller
             $resumen = [];
 
             foreach ($tasks as $task) {
-                $totalLbs = $task->total_boxes * $task->sku->presentation;
-
                 foreach ($task->sku->items as $recipeItem) {
                     $itemName = $recipeItem->item->name;
                     $itemCode = $recipeItem->item->code;
-                    $requiredQty = $totalLbs * $recipeItem->lbs_per_item;
+                    $requiredQty = $task->total_lbs * $recipeItem->lbs_per_item;
 
                     if (!isset($resumen[$itemCode])) {
                         $resumen[$itemCode] = 0;
@@ -168,6 +165,7 @@ class WeeklyProductionPlanDraftController extends Controller
                         'code' => $itemCode,
                         'quantity' => $requiredQty,
                     ];
+
                 }
             }
 
@@ -231,13 +229,11 @@ class WeeklyProductionPlanDraftController extends Controller
             $resumen = [];
 
             foreach ($tasks as $task) {
-                $totalLbs = $task->total_boxes * $task->sku->presentation;
-
                 foreach ($task->sku->products as $recipeItem) {
                     $itemName = $recipeItem->item->product_name;
                     $itemCode = $recipeItem->item->code;
 
-                    $requiredQty = $totalLbs * $recipeItem->percentage;
+                    $requiredQty = $task->total_lbs * $recipeItem->percentage;
 
                     if (!isset($resumen[$itemCode])) {
                         $resumen[$itemCode] = 0;
@@ -327,7 +323,6 @@ class WeeklyProductionPlanDraftController extends Controller
 
             $tasks = $draft->tasks;
             $performances = LineStockKeepingUnits::all();
-            $skus = StockKeepingUnit::all();
 
             $weekly_plan = WeeklyProductionPlan::create([
                 'week' => $draft->week,
@@ -336,9 +331,7 @@ class WeeklyProductionPlanDraftController extends Controller
 
             foreach ($tasks as $task) {
                 $performance = $performances->where('line_id', $task->line_id)->where('sku_id', $task->stock_keeping_unit_id)->first();
-                $sku = $skus->where('id', $task->stock_keeping_unit_id)->first();
-                $total_lbs = $task->total_boxes * $sku->presentation;
-                $total_hours = $total_lbs / $performance->lbs_performance;
+                $total_hours = $task->total_lbs / $performance->lbs_performance;
 
                 TaskProductionPlan::create([
                     'line_id' => $task->line_id,
@@ -348,7 +341,7 @@ class WeeklyProductionPlanDraftController extends Controller
                     'line_sku_id' => $performance->id,
                     'status' =>  1,
                     'destination' => $task->destination,
-                    'total_lbs' => $total_lbs
+                    'total_lbs' => $task->total_lbs
                 ]);
             }
 

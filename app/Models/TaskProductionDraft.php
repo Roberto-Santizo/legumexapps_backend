@@ -10,7 +10,7 @@ class TaskProductionDraft extends Model
         'draft_weekly_production_plan_id',
         'line_id',
         'stock_keeping_unit_id',
-        'total_boxes',
+        'total_lbs',
         'destination'
     ];
 

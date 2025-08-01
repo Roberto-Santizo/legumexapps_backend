@@ -56,7 +56,7 @@ class TaskProductionDraftImport implements ToCollection, WithHeadingRow
                 'draft_weekly_production_plan_id' => $this->draft->id,
                 'line_id' => $line->id,
                 'stock_keeping_unit_id' => $sku->id,
-                'total_boxes' => $row['cajas'],
+                'total_lbs' => $row['libras'],
                 'destination' => $row['destino']
             ]);
         }

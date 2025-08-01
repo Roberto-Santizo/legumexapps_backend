@@ -65,6 +65,7 @@ class TaskProductionDraftController extends Controller
     {
         $data = $request->validated();
 
+
         $draft_plan = DraftWeeklyProductionPlan::find($id);
 
         if (!$draft_plan) {
@@ -78,7 +79,7 @@ class TaskProductionDraftController extends Controller
                 'draft_weekly_production_plan_id' => $draft_plan->id,
                 'line_id' => $data['line_id'],
                 'stock_keeping_unit_id' => $data['stock_keeping_unit_id'],
-                'total_boxes' => $data['total_boxes'],
+                'total_lbs' => $data['total_lbs'],
                 'destination' => $data['destination']
             ]);
 
@@ -96,7 +97,7 @@ class TaskProductionDraftController extends Controller
      */
     public function show(string $id)
     {
-        $task = TaskProductionDraft::select('id', 'line_id', 'stock_keeping_unit_id', 'total_boxes', 'destination')->where('id', $id)->first();
+        $task = TaskProductionDraft::select('id', 'line_id', 'stock_keeping_unit_id', 'total_lbs', 'destination')->where('id', $id)->first();
 
         if (!$task) {
             return response()->json([

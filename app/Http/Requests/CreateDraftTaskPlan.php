@@ -24,7 +24,7 @@ class CreateDraftTaskPlan extends FormRequest
         return [
             'line_id' => ['required','exists:lines,id'],
             'stock_keeping_unit_id' => ['required', 'exists:stock_keeping_units,id'],
-            'total_boxes' => ['required'],
+            'total_lbs' => ['required'],
             'destination' => ['required']
         ];
     }
