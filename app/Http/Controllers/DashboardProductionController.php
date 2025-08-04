@@ -61,11 +61,44 @@ class DashboardProductionController extends Controller
                 $query->orderBy('line_id', $request->query('line'));
             }
 
-            return TaskProductionDashboardResource::collection($query->get());
+            $data = TaskProductionDashboardResource::collection($query->get());
+
+            return response()->json($data);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage(),
             ], 500);
         }
     }
+
+    public function GetFinishedTasks(Request $request)
+    {
+        try {
+            $week = Carbon::now()->weekOfYear;
+
+            $query = TaskProductionPlan::query();
+            $query->whereHas('weeklyPlan', function ($q) use ($week) {
+                $q->where('week', $week);
+            });
+            $query->whereNotNull('start_date');
+            $query->whereNotNull('end_date');
+
+            if ($request->query('line')) {
+                $query->orderBy('line_id', $request->query('line'));
+            }
+
+            $data = TaskProductionDashboardResource::collection($query->get());
+
+            return response()->json($data);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    // public function GetSummaryTimeouts()
+    // {
+    //     dd('aca');
+    // }
 }

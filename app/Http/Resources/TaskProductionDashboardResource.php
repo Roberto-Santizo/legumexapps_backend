@@ -19,6 +19,7 @@ class TaskProductionDashboardResource extends JsonResource
             'line' => $this->line->name,
             'sku' => $this->line_sku->sku->code,
             'product' => $this->line_sku->sku->product_name,
+            'operation_date' => $this->operation_date->format('d-m-Y')
         ];
     }
 }

@@ -97,5 +97,6 @@ Route::middleware('jwt.auth')->group(function () {
     //DASHBOARD
     Route::get('/dashboard/production/finished-tasks-per-line', [DashboardProductionController::class, 'GetFinishedTasksPerLine']);
     Route::get('/dashboard/production/in-progress', [DashboardProductionController::class, 'GetInProgressTasks']);
-    // Route::get('/dashboard/production/finished-tasks', [DashboardProductionController::class, 'GetInProgressTasks']);
+    Route::get('/dashboard/production/finished-tasks', [DashboardProductionController::class, 'GetFinishedTasks']);
+    // Route::get('/dashboard/production/timeouts-summary', [DashboardProductionController::class, 'GetSummaryTimeouts']);
 });

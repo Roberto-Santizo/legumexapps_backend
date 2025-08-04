@@ -3,18 +3,17 @@
 namespace App\Services;
 
 use Beta\Microsoft\Graph\Model\EmailAddress;
-use Beta\Microsoft\Graph\Model\Message;
 use Beta\Microsoft\Graph\Model\Recipient;
 use Microsoft\Graph\Graph;
 
 class AssignEmployeeNotificationService
 {
-    public function sendNotification($changes)
+    public function sendNotification($changes, $task)
     {
-        $this->sendEmailNotification($changes);
+        $this->sendEmailNotification($changes, $task);
     }
 
-    private function sendEmailNotification($changes)
+    private function sendEmailNotification($changes, $task)
     {
         $accessToken = $this->getAccessToken();
 
@@ -23,22 +22,28 @@ class AssignEmployeeNotificationService
 
         $userId = 'noreply@legumex.net';
 
-        $recipient1 = new Recipient();
-        $recipient1->setEmailAddress(new EmailAddress(['address' => 'soportetecnico.tejar@legumex.net']));
+        $emails = explode(',', env('NOTIFY_EMAILS_CHANGES_EMPLOYEES'));
 
-        $message = new Message();
-        $message->setSubject('Asignación de empleado nuevo empleados');
-        $message->setBody([
-            'content' => $this->buildMessageBody($changes),
-            'contentType' => 'HTML'
-        ]);
-        $message->setToRecipients([$recipient1]);
+        $recipients = array_map(function ($email) {
+            $recipient = new Recipient();
+            $recipient->setEmailAddress(new EmailAddress(['address' => $email]));
+            return $recipient;
+        }, $emails);
+
+        $body = [
+            'message' => [
+                'subject' => 'Asignación de comodines ' . $task->line->name,
+                'body' => [
+                    'contentType' => 'HTML',
+                    'content' => $this->buildMessageBody($changes, $task),
+                ],
+                'toRecipients' => $recipients,
+            ],
+            'saveToSentItems' => true,
+        ];
 
         $graph->createRequest("POST", "/users/$userId/sendMail")
-            ->attachBody([
-                'message' => $message,
-                'saveToSentItems' => "true"
-            ])
+            ->attachBody($body)
             ->execute();
     }
 
@@ -61,8 +66,10 @@ class AssignEmployeeNotificationService
     }
 
 
-    private function buildMessageBody($changes)
+    private function buildMessageBody($changes, $task)
     {
+        $line = $task->line->name;
+        $date = $task->operation_date->format('d-m-Y');
         $rows = '';
         foreach ($changes as $change) {
             $rows .= <<<HTML
@@ -90,7 +97,7 @@ class AssignEmployeeNotificationService
                                 <table role="presentation" style="width: 600px; max-width: 100%; border-collapse: collapse; background-color: #ffffff; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
                                     <tr>
                                         <td style="background-color: #4a90e2; padding: 20px; text-align: center;">
-                                            <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Asignaciones de personal</h1>
+                                            <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Asignaciones de personal {$line}</h1>
                                         </td>
                                     </tr>
 
@@ -114,7 +121,7 @@ class AssignEmployeeNotificationService
 
                                       <tr>
                                         <td style="padding: 20px; text-align: center;">
-                                            <h1 style="margin: 0; font-size: 14px;">Estos cambios son realizados a nivel semanal</h1>
+                                            <h1 style="margin: 0; font-size: 14px;">Cambios realizados {$date}</h1>
                                         </td>
                                     </tr>
 

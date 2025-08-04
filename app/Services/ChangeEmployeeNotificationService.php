@@ -8,12 +8,12 @@ use Microsoft\Graph\Graph;
 
 class ChangeEmployeeNotificationService
 {
-    public function sendNotification($changes)
+    public function sendNotification($changes, $task)
     {
-        $this->sendEmailNotification($changes);
+        $this->sendEmailNotification($changes, $task);
     }
 
-    private function sendEmailNotification($changes)
+    private function sendEmailNotification($changes, $task)
     {
         $accessToken = $this->getAccessToken();
 
@@ -32,10 +32,10 @@ class ChangeEmployeeNotificationService
 
         $body = [
             'message' => [
-                'subject' => 'Cambios de Empleados',
+                'subject' => 'Cambios de Empleados ' . $task->line->name,
                 'body' => [
                     'contentType' => 'HTML',
-                    'content' => $this->buildMessageBody($changes),
+                    'content' => $this->buildMessageBody($changes, $task),
                 ],
                 'toRecipients' => $recipients,
             ],
@@ -66,9 +66,11 @@ class ChangeEmployeeNotificationService
     }
 
 
-    private function buildMessageBody($changes)
+    private function buildMessageBody($changes, $task)
     {
         $rows = '';
+        $line = $task->line->name;
+        $date = $task->operation_date->format('d-m-Y');
         foreach ($changes as $change) {
             $old = $change['old_employee'];
             $new = $change['new_employee'];
@@ -100,7 +102,7 @@ class ChangeEmployeeNotificationService
                         <table role="presentation" style="width: 600px; max-width: 100%; border-collapse: collapse; background-color: #ffffff; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
                             <tr>
                                 <td style="background-color: #4a90e2; padding: 20px; text-align: center;">
-                                    <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Cambios Realizados en Linea</h1>
+                                    <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Cambios Realizados en Linea {$line}</h1>
                                 </td>
                             </tr>
 
@@ -126,7 +128,7 @@ class ChangeEmployeeNotificationService
 
                             <tr>
                                 <td style="padding: 20px; text-align: center;">
-                                    <h1 style="margin: 0; font-size: 14px;">Validar los cambios en el apartado de permisos</h1>
+                                    <h1 style="margin: 0; font-size: 14px;">Cambios realizados {$date}</h1>
                                 </td>
                             </tr>
 

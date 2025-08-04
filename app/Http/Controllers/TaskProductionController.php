@@ -722,7 +722,7 @@ class TaskProductionController extends Controller
                         ]);
                     }
                 }
-                $this->emailCreateAssigneeService->sendNotification($data['data']);
+                $this->emailCreateAssigneeService->sendNotification($data['data'], $task);
             }
 
             return response()->json('Asignaciónes creadas correctamente', 200);
@@ -892,7 +892,7 @@ class TaskProductionController extends Controller
                     $assignment->position = $NewChange->new_position;
                     $assignment->save();
                 }
-                $this->emailService->sendNotification($data['data']);
+                $this->emailService->sendNotification($data['data'], $task);
             } else if ($data['previous_config']) {
                 $task->employees()->delete();
                 $last_task = TaskProductionPlan::where('line_id', $task->line_id)

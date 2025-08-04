@@ -165,7 +165,6 @@ class WeeklyProductionPlanDraftController extends Controller
                         'code' => $itemCode,
                         'quantity' => $requiredQty,
                     ];
-
                 }
             }
 
@@ -330,14 +329,14 @@ class WeeklyProductionPlanDraftController extends Controller
             ]);
 
             foreach ($tasks as $task) {
-                $performance = $performances->where('line_id', $task->line_id)->where('sku_id', $task->stock_keeping_unit_id)->first();
-                $total_hours = $task->total_lbs / $performance->lbs_performance;
+                $performance = LineStockKeepingUnits::where('sku_id', $task->stock_keeping_unit_id)->where('line_id', $task->line_id)->first();
+                $hours = $performance->lbs_performance ? $task->total_lbs / $performance->lbs_performance : 0;
 
                 TaskProductionPlan::create([
                     'line_id' => $task->line_id,
                     'weekly_production_plan_id' => $weekly_plan->id,
                     'operation_date' => null,
-                    'total_hours' => round($total_hours, 2),
+                    'total_hours' => round($hours, 2),
                     'line_sku_id' => $performance->id,
                     'status' =>  1,
                     'destination' => $task->destination,
