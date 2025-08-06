@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class WeeklyProductionPlanController extends Controller
 {
@@ -42,8 +43,6 @@ class WeeklyProductionPlanController extends Controller
         $lineas = $groupedTasks->keys()->map(function ($linea) {
             $line = Line::where('code', $linea)->first();
             $tasks = TaskProductionPlan::where('line_id', $line->id)->get();
-
-            $allCompleted = $tasks->every(fn($task) => $task->employees->count() > 0);
 
             return [
                 'id' => strval($line->id),
@@ -114,6 +113,9 @@ class WeeklyProductionPlanController extends Controller
 
         $today = Carbon::today();
         $yesterday = Carbon::yesterday();
+        $payload = JWTAuth::getPayload();
+        $role = $payload->get('role');
+
 
         $tasks = $weekly_plan->tasks()
             ->with([
@@ -124,14 +126,15 @@ class WeeklyProductionPlanController extends Controller
             ])
             ->where('line_id', $line_id)
             ->whereNot('status', 0)
-            ->where(function ($query) use ($today, $yesterday) {
-                $query->whereDate('operation_date', $today)
-                    ->orWhere(function ($q) use ($yesterday) {
+            ->where(function ($query) use ($today, $yesterday, $role) {
+                if ($role !== 'admin') {
+                    $query->whereDate('operation_date', $today)->orWhere(function ($q) use ($yesterday) {
                         $q->whereDate('operation_date', $yesterday)
                             ->whereHas('line', function ($q2) {
                                 $q2->where('shift', 0);
                             });
                     });
+                }
             })
             ->orderBy('operation_date', 'DESC')
             ->get();
