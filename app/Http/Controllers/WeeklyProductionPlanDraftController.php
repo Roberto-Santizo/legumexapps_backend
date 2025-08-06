@@ -8,7 +8,7 @@ use App\Http\Resources\DraftWeeklyProductionPlanResource;
 use App\Imports\TaskProductionDraftImport;
 use App\Models\DraftWeeklyProductionPlan;
 use App\Models\LineStockKeepingUnits;
-use App\Models\StockKeepingUnit;
+use App\Models\RawMaterialSkuRecipe;
 use App\Models\TaskProductionDraft;
 use App\Models\TaskProductionPlan;
 use App\Models\WeeklyProductionPlan;
@@ -91,7 +91,7 @@ class WeeklyProductionPlanDraftController extends Controller
         }
     }
 
-    public function GetTasks(string $id)
+    public function GetTasks(Request $request, string $id)
     {
         $draft = DraftWeeklyProductionPlan::find($id);
 
@@ -102,15 +102,23 @@ class WeeklyProductionPlanDraftController extends Controller
         }
 
         try {
-            $tasks = $draft->tasks()->with('line_performance')->with('sku')->get();
+            $query = TaskProductionDraft::query();
+            $query->where('draft_weekly_production_plan_id', $draft->id);
+
+            if ($request->query('line')) {
+                $query->where('line_id', $request->query('line'));
+            }
+
+            $tasks = $query->with('line_performance')->with('sku')->get();
+            $performances = LineStockKeepingUnits::all();
 
             $data = [];
 
-            $data = $tasks->map(function ($task) {
-                $performance = $task->line_performance->lbs_performance;
-                $hours = $performance ? $task->total_lbs / $performance : 0;
+            $data = $tasks->map(function ($task) use ($performances) {
+                $performance = $performances->where('sku_id', $task->stock_keeping_unit_id)->where('line_id', $task->line_id)->first();
+                $hours = $performance->lbs_performance ? $task->total_lbs / $performance->lbs_performance : 0;
 
-                return [
+                return (object)[
                     'line_id' => strval($task->line_id),
                     'line' => $task->line->name,
                     'hours' => $hours
@@ -119,8 +127,8 @@ class WeeklyProductionPlanDraftController extends Controller
 
             $grouped = $data->groupBy('line_id')->map(function ($items) {
                 return [
-                    'line_id' => $items->first()['line_id'],
-                    'line' => $items->first()['line'],
+                    'line_id' => $items->first()->line_id,
+                    'line' => $items->first()->line,
                     'total_hours' => round($items->sum('hours'), 2),
                 ];
             })->values();
@@ -134,7 +142,7 @@ class WeeklyProductionPlanDraftController extends Controller
         }
     }
 
-    public function GetPackingMaterialNecessity(string $id)
+    public function GetPackingMaterialNecessity(Request $request, string $id)
     {
 
         $draft = DraftWeeklyProductionPlan::find($id);
@@ -146,7 +154,14 @@ class WeeklyProductionPlanDraftController extends Controller
         }
 
         try {
-            $tasks = TaskProductionDraft::with('sku.items.item')->where('draft_weekly_production_plan_id', $draft->id)->get();
+            $query = TaskProductionDraft::query();
+            $query->where('draft_weekly_production_plan_id', $draft->id);
+
+            if ($request->query('line')) {
+                $query->where('line_id', $request->query('line'));
+            }
+
+            $tasks = $query->with('sku.items.item')->get();
 
             $resumen = [];
 
@@ -154,7 +169,7 @@ class WeeklyProductionPlanDraftController extends Controller
                 foreach ($task->sku->items as $recipeItem) {
                     $itemName = $recipeItem->item->name;
                     $itemCode = $recipeItem->item->code;
-                    $requiredQty = $task->total_lbs * $recipeItem->lbs_per_item;
+                    $requiredQty = $task->total_lbs / $recipeItem->lbs_per_item;
 
                     if (!isset($resumen[$itemCode])) {
                         $resumen[$itemCode] = 0;
@@ -212,7 +227,7 @@ class WeeklyProductionPlanDraftController extends Controller
         }
     }
 
-    public function GetRawMaterialNecessity(string $id)
+    public function GetRawMaterialNecessity(Request $request, string $id)
     {
         $draft = DraftWeeklyProductionPlan::find($id);
 
@@ -223,7 +238,14 @@ class WeeklyProductionPlanDraftController extends Controller
         }
 
         try {
-            $tasks = TaskProductionDraft::with('sku.items.item')->where('draft_weekly_production_plan_id', $draft->id)->get();
+            $query = TaskProductionDraft::query();
+            $query->where('draft_weekly_production_plan_id', $draft->id);
+
+            if ($request->query('line')) {
+                $query->where('line_id', $request->query('line'));
+            }
+
+            $tasks = $query->with('sku.products.item')->get();
 
             $resumen = [];
 
@@ -231,6 +253,7 @@ class WeeklyProductionPlanDraftController extends Controller
                 foreach ($task->sku->products as $recipeItem) {
                     $itemName = $recipeItem->item->product_name;
                     $itemCode = $recipeItem->item->code;
+
 
                     $requiredQty = $task->total_lbs * $recipeItem->percentage;
 

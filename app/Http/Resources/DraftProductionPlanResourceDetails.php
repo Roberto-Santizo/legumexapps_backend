@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\TaskProductionDraft;
 use App\Models\WeeklyProductionPlan;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -17,6 +18,23 @@ class DraftProductionPlanResourceDetails extends JsonResource
     {
         $plan_exists = WeeklyProductionPlan::where('year', $this->year)->where('week', $this->week)->first();
         $flag_tasks = $this->tasks->count() == 0 ? true : false;
+        $query = TaskProductionDraft::query();
+
+        if ($request->query('sku')) {
+            $query->whereHas('sku', function ($q) use ($request) {
+                $q->where('code', 'LIKE', '%' . $request->query('sku') . '%');
+            });
+        }
+
+        if ($request->query('product_name')) {
+            $query->whereHas('sku', function ($q) use ($request) {
+                $q->where('product_name', 'LIKE', '%' . $request->query('product_name') . '%');
+            });
+        }
+
+        if ($request->query('line')) {
+            $query->where('line_id', $request->query('line'));
+        }
 
         return [
             'id' => strval($this->id),
@@ -28,7 +46,7 @@ class DraftProductionPlanResourceDetails extends JsonResource
             'bodega_confirmation' => $this->bodega_confirmation  ? true : false,
             'logistics_confirmation' => $this->logistics_confirmation  ? true : false,
             'flag_tasks' => !$flag_tasks,
-            'tasks' => TaskProductionDraftResource::collection($this->tasks)
+            'tasks' => TaskProductionDraftResource::collection($query->get())
         ];
     }
 }

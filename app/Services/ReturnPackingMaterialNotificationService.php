@@ -32,13 +32,17 @@ class ReturnPackingMaterialNotificationService
         $recipient3 = new Recipient();
         $recipient3->setEmailAddress(new EmailAddress(['address' => 'bodega.empaque@legumex.net']));
 
+        $recipient4 = new Recipient();
+        $recipient4->setEmailAddress(new EmailAddress(['address' => 'auxiliarbodegap@legumex.net']));
+
+
         $message = new Message();
         $message->setSubject('Devolución de material de empaque en línea ' . $task_production->line_sku->line->name . ' - ' . $task_production->line_sku->sku->code);
         $message->setBody([
             'content' => $this->buildMessageBody($task_production),
             'contentType' => 'HTML'
         ]);
-        $message->setToRecipients([$recipient1, $recipient2, $recipient3]);
+        $message->setToRecipients([$recipient1, $recipient2, $recipient3, $recipient4]);
 
         $graph->createRequest("POST", "/users/$userId/sendMail")
             ->attachBody([

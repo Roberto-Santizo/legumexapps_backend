@@ -19,7 +19,8 @@ class TaskProductionDraftResource extends JsonResource
             'total_lbs' => $this->total_lbs,
             'line' => $this->line->name,
             'sku' => $this->sku->code,
-            'destination' => $this->destination
+            'destination' => $this->destination,
+            'product_name' => $this->sku->product_name
         ];
     }
 }
