@@ -105,13 +105,14 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                         return $carry + array_sum(array_merge(...array_values($task->dates ?? [])));
                     }, 0);
 
-                    $percentage = $hours[0] / $total_hours;
+                    $percentage = array_sum($hours) / $total_hours;
                     $day_carbon = Carbon::parse($day);
                     $registrations = $this->getEmployeeRegistration($employeeAssignment->employee_id, $day_carbon);
                     $entrance = Carbon::parse($registrations['entrance']);
                     $exit = Carbon::parse($registrations['exit']);
-
+                    
                     $hours_teoricas_employee = $task->hours;
+
                     $rows->push([
                         'CODIGO' => $employeeAssignment->code,
                         'EMPLEADO' => $employeeAssignment->name,
@@ -139,7 +140,7 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
             if ($assignment->end_date && $assignment->lbs_planta) {
                 foreach ($assignment->employees as $employeeAssignment) {
                     $day = $assignment->start_date->IsoFormat('dddd');
-                    $percentage = $employeeAssignment->lbs / $assignment->lbs_finca;
+                    $percentage = $employeeAssignment->lbs / $assignment->lbs_planta;
                     $total_hours = $assignment->plants / 150;
                     $hours = $percentage * $total_hours;
                     $budget = $hours * 12.728;

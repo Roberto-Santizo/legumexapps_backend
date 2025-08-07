@@ -18,6 +18,7 @@ class PackingMaterialTransactionDetailsResource extends JsonResource
             'id' => strval($this->id),
             'type' => $this->type,
             'transaction_date' => $this->created_at->format('d-m-Y h:i:s A'),
+            'transaction' => $this->reference,
             'items' => PackingMaterialTransactionItemResource::collection($this->items),
             'observations' => $this->observations ?? '',
             'delivered_by' => $this->user->name,

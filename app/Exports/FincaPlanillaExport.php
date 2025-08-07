@@ -81,18 +81,66 @@ class FincaPlanillaExport implements FromCollection, WithHeadings, WithTitle, Wi
 
     public function calculateTasksWithClosures(&$employee, $task)
     {
-        $groupedByDay = $this->calculateTotalHoursByDay($task);
-        $total_hours = array_sum($groupedByDay);
+        try {
+            $dates = [];
 
-        foreach ($groupedByDay as $day => $hours) {
-            $exists = Employee::whereDate('punch_time', $day)->where('emp_code', $employee->emp_code)->exists();
-            if ($exists) {
-                $percentage = ($hours / $total_hours);
-                $employee['hours'] += ($task->hours * $percentage);
-                $employee['amount'] += ($task->budget * $percentage);
+            foreach ($task->closures as $index => $closure) {
+                $dates[$index][] = $closure->start_date;
+                $dates[$index][] = $closure->end_date;
             }
+
+            $all_dates = array_merge(...$dates);
+            array_unshift($all_dates, $task->start_date);
+            array_push($all_dates, $task->end_date);
+
+            $groupedByDay = array_reduce($all_dates, function ($carry, $datetime) {
+                $date = $datetime->format('Y-m-d');
+                $carry[$date][] = $datetime->toDateTimeString();
+                return $carry;
+            }, []);
+
+            foreach ($groupedByDay as $key => $dayDates) {
+                $first_date = Carbon::parse($dayDates[0]);
+                $second_date = Carbon::parse($dayDates[1]);
+                $groupedByDay[$key] = $first_date->diffInHours($second_date);
+            }
+
+            $task->employees->map(function ($employeeAssignment) use ($groupedByDay) {
+                $employeeAssignment->total_hours = 0;
+                $employeeAssignment->dates = [];
+                $dates = [];
+                foreach ($groupedByDay as $day => $hours) {
+                    $flag = count($this->getEmployeeRegistration($employeeAssignment->employee_id, $day)) > 1;
+                    if ($flag) {
+                        $dates[$day][] = $hours;
+                        $employeeAssignment->dates = $dates;
+                        $employeeAssignment->total_hours += $hours;
+                    }
+                }
+
+                return $employeeAssignment;
+            });
+
+            $total_hours = $task->employees->reduce(function ($carry, $emp) {
+                return $carry + array_sum(array_merge(...array_values($emp->dates ?? [])));
+            }, 0);
+
+            foreach ($task->employees as $employeeAssignment) {
+                if ($employeeAssignment->employee_id !== $employee['id']) {
+                    continue;
+                }
+
+                foreach ($employeeAssignment->dates as $day => $hours) {
+                    $percentage = array_sum($hours) / $total_hours;
+                    $employee['hours'] += ($task->hours * $percentage);
+                    $employee['amount'] += ($task->budget * $percentage);
+                }
+            }
+        } catch (\Throwable $th) {
+            throw $th;
         }
     }
+
 
     public function calculateTasksWithNoClosures(&$employee, $task)
     {
@@ -138,6 +186,21 @@ class FincaPlanillaExport implements FromCollection, WithHeadings, WithTitle, Wi
         }
 
         return $groupedByDay;
+    }
+
+    public function getEmployeeRegistration($emp_id, $date)
+    {
+        $entrance_date = Employee::whereDate('punch_time', $date)->where('emp_id', $emp_id)->orderBy('punch_time', 'ASC')->first();
+        $exit_date = Employee::whereDate('punch_time', $date)->where('emp_id', $emp_id)->orderBy('punch_time', 'DESC')->first();
+
+        if (!$entrance_date && !$exit_date) {
+            return [];
+        }
+
+        return [
+            'entrance' => $entrance_date ? $entrance_date->punch_time->format('d-m-Y h:i:s A') : null,
+            'exit' => $exit_date ? $exit_date->punch_time->format('d-m-Y h:i:s A') : null
+        ];
     }
 
     public function headings(): array
