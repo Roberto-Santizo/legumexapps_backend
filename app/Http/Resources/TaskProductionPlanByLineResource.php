@@ -14,7 +14,7 @@ class TaskProductionPlanByLineResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-     public function toArray(Request $request): array
+    public function toArray(Request $request): array
     {
         static $presentPositions = null;
 
@@ -45,9 +45,9 @@ class TaskProductionPlanByLineResource extends JsonResource
             'sku' => $this->line_sku->sku->code,
             'product' => $this->line_sku->sku->product_name,
             'total_lbs' => $this->total_lbs,
-            'operation_date' => $this->operation_date->format('d-m-Y'),
-            'start_date' => optional($this->start_date)->format('d-m-Y h:i:s A'),
-            'end_date' => optional($this->end_date)->format('d-m-Y h:i:s A'),
+            'operation_date' => $this->operation_date ? $this->operation_date->format('d-m-Y') : 'SIN FECHA DE OPERACIÓN',
+            'start_date' => $this->start_date ? $this->start_date->format('d-m-Y h:i:s A') : '',
+            'end_date' => $this->end_date ? $this->end_date->format('d-m-Y h:i:s A') : '',
             'hours' => $this->total_hours,
             'total_hours' => $total_hours,
             'total_in_employees' => $total_in_employees->count(),

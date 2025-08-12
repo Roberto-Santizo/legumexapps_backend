@@ -19,6 +19,7 @@ class DraftProductionPlanResourceDetails extends JsonResource
         $plan_exists = WeeklyProductionPlan::where('year', $this->year)->where('week', $this->week)->first();
         $flag_tasks = $this->tasks->count() == 0 ? true : false;
         $query = TaskProductionDraft::query();
+        $query->where('draft_weekly_production_plan_id', $this->id);
 
         if ($request->query('sku')) {
             $query->whereHas('sku', function ($q) use ($request) {

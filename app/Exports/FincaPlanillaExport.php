@@ -64,6 +64,7 @@ class FincaPlanillaExport implements FromCollection, WithHeadings, WithTitle, Wi
 
             if ($employee->hours >= 44) {
                 $septimo = ((3097.21 * 12) / 365) * 1.5;
+                $bono = ((250 * 12) / 365) * 7;
             }
 
             $rows->push([
@@ -72,6 +73,7 @@ class FincaPlanillaExport implements FromCollection, WithHeadings, WithTitle, Wi
                 'HORAS' => $employee->hours,
                 'MONTO' => $employee->amount,
                 'SEPTIMO' => $septimo,
+                'BONIFICACIÓN' => $bono,
                 'TOTAL A DEVENGAR' => $employee->amount + $septimo
             ]);
         });
@@ -205,7 +207,7 @@ class FincaPlanillaExport implements FromCollection, WithHeadings, WithTitle, Wi
 
     public function headings(): array
     {
-        return ['CODIGO', 'EMPLEADO', 'HORAS SEMANALES', 'MONTO', 'SEPTIMO', 'TOTAL A DENVEGAR'];
+        return ['CODIGO', 'EMPLEADO', 'HORAS SEMANALES', 'MONTO', 'SEPTIMO', 'BONIFICACIÓN', 'TOTAL A DENVEGAR'];
     }
     public function styles(Worksheet $sheet)
     {
