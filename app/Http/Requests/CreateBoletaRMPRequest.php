@@ -31,11 +31,10 @@ class CreateBoletaRMPRequest extends FormRequest
             'total_baskets' => 'required',
             'weight' => 'required',
             'basket_id' => 'required',
-            'calidad_signature' => 'required',
-            'date' => 'required',
+            'driver_signature' => 'required',
+            'inspector_signature' => 'required',
+            'prod_signature' => 'required',
             'carrier_id' => 'required',
-            'driver_id' => 'required',
-            'ref_doc' => 'required',
             'productor_plantation_control_id' => 'required',
             'plate_id' => 'required'
         ];

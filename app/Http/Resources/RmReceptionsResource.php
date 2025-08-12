@@ -28,9 +28,9 @@ class RmReceptionsResource extends JsonResource
             'status' => $this->status->name,
             'quality_status_id' => $this->quality_status_id,
             'date' => $this->created_at->format('d-m-Y'),
-            'pilot_name' => $this->field_data->driver->name,
+            'pilot_name' => $this->user->name,
             'consignacion' => $this->consignacion ? true : false
-            
+
         ];
     }
 }

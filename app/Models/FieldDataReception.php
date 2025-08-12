@@ -18,12 +18,10 @@ class FieldDataReception extends Model
         'quality_percentage',
         'inspector_signature',
         'prod_signature',
-        'calidad_signature',
-        'driver_id',
+        'driver_signature',
         'plate_id',
         'carrier_id',
         'cdp_id',
-        'ref_doc'
     ];
 
     public function product()
@@ -48,17 +46,11 @@ class FieldDataReception extends Model
 
     public function cdp()
     {
-        return $this->belongsTo(ProductorPlantationControl::class,'cdp_id','id');
+        return $this->belongsTo(ProductorPlantationControl::class, 'cdp_id', 'id');
     }
 
     public function carrier()
     {
         return $this->belongsTo(Carrier::class);
     }
-
-    public function driver()
-    {
-        return $this->belongsTo(Driver::class);
-    }
-    
 }

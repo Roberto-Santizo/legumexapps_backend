@@ -31,6 +31,10 @@ class RmReceptionsController extends Controller
     public function index(Request $request)
     {
         $query = RmReception::query();
+        $payload = JWTAuth::getPayload();
+        $id = $payload->get('id');
+
+        $query->where('user_id', $id);
 
         if ($request->query('quality_status_id')) {
             $query->where('quality_status_id', $request->query('quality_status_id'));
@@ -78,26 +82,42 @@ class RmReceptionsController extends Controller
     public function store(CreateBoletaRMPRequest $request)
     {
         $data = $request->validated();
-        $signature1 = $data['calidad_signature'];
+        $signature1 = $data['driver_signature'];
+        $signature2 = $data['prod_signature'];
+        $signature3 = $data['inspector_signature'];
 
         try {
             list(, $signature1) = explode(',', $signature1);
+            list(, $signature2) = explode(',', $signature2);
+            list(, $signature3) = explode(',', $signature3);
 
             $signature1 = base64_decode($signature1);
-
             $filename1 = 'signatures/' . uniqid() . '.png';
-
             Storage::disk('public')->put($filename1, $signature1);
+
+            $signature2 = base64_decode($signature2);
+            $filename2 = 'signatures/' . uniqid() . '.png';
+            Storage::disk('public')->put($filename2, $signature2);
+
+            $signature3 = base64_decode($signature3);
+            $filename3 = 'signatures/' . uniqid() . '.png';
+            Storage::disk('public')->put($filename3, $signature3);
+
+
+            $payload = JWTAuth::getPayload();
+            $id = $payload->get('id');
+
 
             $product = Product::find($data['product_id']);
             $basket = Basket::find($data['basket_id']);
             $finca = Finca::find($data['finca_id']);
-            $date = Carbon::parse($data['date']);
+
             $rm_reception = RmReception::create([
-                'doc_date' => $date,
+                'doc_date' => Carbon::now(),
                 'finca_id' => $finca->id,
                 'consignacion' => 0,
-                'quality_status_id' => 1
+                'quality_status_id' => 1,
+                'user_id' => $id,
             ]);
 
             $producer = Producer::find($data['producer_id']);
@@ -118,29 +138,19 @@ class RmReceptionsController extends Controller
                 'weight_baskets' => round(($basket->weight * $data['total_baskets']), 2),
                 'quality_percentage' => $data['quality_percentage'],
                 'basket_id' => $basket->id,
-                'calidad_signature' => $filename1,
+                'driver_signature' => $filename1,
+                'prod_signature' => $filename2,
+                'inspector_signature' => $filename3,
                 'plate_id' => $data['plate_id'],
                 'cdp_id' => $data['productor_plantation_control_id'],
                 'carrier_id' => $data['carrier_id'],
-                'driver_id' => $data['driver_id'],
-                'ref_doc' => $data['ref_doc']
             ]);
 
-            $field_data = new RmReceptionDetailResource($rm_reception->load('field_data'));
-
-            return response()->json([
-                'status' => $rm_reception->quality_status_id,
-                'finca' => $rm_reception->finca->name,
-                'consignacion' => $rm_reception->consignacion ? true : false,
-                'grn' => $rm_reception->grn,
-                'field_data' => $field_data,
-                'prod_data' => null,
-                'quality_doc_data' => null,
-                'transport_data' => null
-            ]);
+            return response()->json('Boleta Creada Correctamente');
+            // return response()->json(['msg' => 'mensaje'], 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'errors' => 'Hubo un error al crear la boleta'
+                'msg' => $th->getMessage()
             ], 500);
         }
     }
@@ -200,7 +210,7 @@ class RmReceptionsController extends Controller
             return response()->json('Boleta de Recepción Creada Correctamente');
         } catch (\Throwable $th) {
             return response()->json([
-                'errors' => 'Hubo un error al crear la boleta'
+                'errors' => $th->getMessage()
             ], 500);
         }
     }
