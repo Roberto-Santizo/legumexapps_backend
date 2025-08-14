@@ -24,19 +24,26 @@ class TaskProductionPlanDetailsResource extends JsonResource
         $employees = $this->employees;
 
         static $presentPositions = null;
+
         if (is_null($presentPositions)) {
-            $presentCodes = BiometricTransaction::whereDate('event_time', $today)
-                ->pluck('pin')
-                ->toArray();
+            $presentCodes = BiometricTransaction::whereDate('event_time', $today)->pluck('pin')->toArray();
         }
 
-        $filteredEmployees = $employees->filter(function ($employee) use ($presentCodes) {
-            return !in_array($employee->code, $presentCodes);
+        $validated_employees = $employees->map(function ($employee) use ($presentCodes) {
+            $flag = in_array($employee->code,$presentCodes);
+
+            return [
+                'id' => strval($employee->id),
+                'name' => $employee->name,
+                'code' => $employee->code,
+                'position' => $employee->position,
+                'flag' => $flag
+            ];
         });
 
-        $unassignedPositions = $positions->filter(function ($position) use ($employees) {
-            return $employees->contains('position', $position->name);
-        });
+        // $unassignedPositions = $positions->filter(function ($position) use ($employees) {
+        //     return $employees->contains('position', $position->name);
+        // });
 
         $lastTask = TaskProductionPlan::where('line_id', $this->line_id)
             ->whereNotNull('start_date')
@@ -49,14 +56,11 @@ class TaskProductionPlanDetailsResource extends JsonResource
             'line' => $line->code,
             'operation_date' => $this->operation_date,
             'start_date' => $this->start_date,
-            'assigned_employees' => $employees->count(),
-            'flag' => $employees->count() < $positions->count(),
-            'total_lbs' => $this->total_lbs,
             'sku' => new SKUResource($this->line_sku->sku),
-            'filtered_employees' => TaskProductionEmployeeResource::collection($filteredEmployees),
-            'all_employees' => TaskProductionEmployeeResource::collection($employees),
+            'total_lbs' => $this->total_lbs,
+            'employees' => $validated_employees,
             'exists_previuos_config' => $lastTask !== null,
-            'positions' => PositionResource::collection($unassignedPositions)
+            // 'positions' => PositionResource::collection($unassignedPositions)
         ];
     }
 }

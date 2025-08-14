@@ -17,7 +17,7 @@ class TaskProductionDraftResource extends JsonResource
         return [
             'id' => strval($this->id),
             'total_lbs' => $this->total_lbs,
-            'line' => $this->line->name,
+            'line' => $this->line_id ? $this->line->name : 'SIN ASIGNACIÓN A LINEA',
             'sku' => $this->sku->code,
             'destination' => $this->destination,
             'product_name' => $this->sku->product_name

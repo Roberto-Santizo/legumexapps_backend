@@ -43,6 +43,7 @@ class TaskProductionPlanByLineResource extends JsonResource
             'id' => strval($this->id),
             'line' => $this->line_sku->line->code,
             'sku' => $this->line_sku->sku->code,
+            'client_name' => $this->line_sku->sku->client_name,
             'product' => $this->line_sku->sku->product_name,
             'total_lbs' => $this->total_lbs,
             'operation_date' => $this->operation_date ? $this->operation_date->format('d-m-Y') : 'SIN FECHA DE OPERACIÓN',

@@ -7,7 +7,9 @@ use App\Exports\InsumosExport;
 use App\Exports\PackingMaterialNecessityExport;
 use App\Exports\PlanillaProductionExport;
 use App\Exports\WeeklyPlanExport;
+use App\Exports\WeeklyProductionDraftTasksExport;
 use App\Exports\WeeklyProductionExport;
+use App\Models\DraftWeeklyProductionPlan;
 use App\Models\Line;
 use App\Models\TaskProductionPlan;
 use App\Models\WeeklyPlan;
@@ -153,6 +155,32 @@ class ReportController extends Controller
             $file = Excel::raw(new WeeklyProductionExport($weekly_production_plan), \Maatwebsite\Excel\Excel::XLSX);
 
             $fileName = 'Programación Producción S' . $weekly_production_plan->week . '.xlsx';
+
+            return response()->json([
+                'fileName' => $fileName,
+                'file' => base64_encode($file)
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function DownloadWeeklyProductionDraftTasks(Request $request, string $weekly_production_draft_id)
+    {
+        $draft = DraftWeeklyProductionPlan::find($weekly_production_draft_id);
+
+        if (!$draft) {
+            return response()->json([
+                'msg' => 'El Plan Semanal no Existe'
+            ], 404);
+        }
+
+        try {
+            $file = Excel::raw(new WeeklyProductionDraftTasksExport($draft), \Maatwebsite\Excel\Excel::XLSX);
+
+            $fileName = 'Draft Producción S' . $draft->week . '.xlsx';
 
             return response()->json([
                 'fileName' => $fileName,

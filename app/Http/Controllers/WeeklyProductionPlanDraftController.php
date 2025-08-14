@@ -104,6 +104,7 @@ class WeeklyProductionPlanDraftController extends Controller
         try {
             $query = TaskProductionDraft::query();
             $query->where('draft_weekly_production_plan_id', $draft->id);
+            $query->whereNotNull('line_id');
 
             if ($request->query('line')) {
                 $query->where('line_id', $request->query('line'));
@@ -156,6 +157,7 @@ class WeeklyProductionPlanDraftController extends Controller
         try {
             $query = TaskProductionDraft::query();
             $query->where('draft_weekly_production_plan_id', $draft->id);
+            $query->whereNotNull('line_id');
 
             if ($request->query('line')) {
                 $query->where('line_id', $request->query('line'));
@@ -240,6 +242,7 @@ class WeeklyProductionPlanDraftController extends Controller
         try {
             $query = TaskProductionDraft::query();
             $query->where('draft_weekly_production_plan_id', $draft->id);
+            $query->whereNotNull('line_id');
 
             if ($request->query('line')) {
                 $query->where('line_id', $request->query('line'));

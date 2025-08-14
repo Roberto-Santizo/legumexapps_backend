@@ -20,6 +20,7 @@ class EmployeeTaskProductionDetailResource extends JsonResource
             'name' => $this->name,
             'code' => $this->code,
             'position' => $this->position,
+            'flag' => true,
             'bitacoras' => TaskProductionEmployeeBitacoraResource::collection($this->bitacoras)
         ];
     }

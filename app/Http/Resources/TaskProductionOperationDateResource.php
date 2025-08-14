@@ -27,7 +27,7 @@ class TaskProductionOperationDateResource extends JsonResource
         $total_lbs =  $this->total_lbs;
         $has_employees = $this->employees->count() > 0 ? true : false;
 
-        $devolution_flag = ($this->end_date && !$this->transactions()->where('type', 2)->first() && $this->total_lbs_bascula < $this->total_lbs) ? true : false;
+        $devolution_flag = ($this->end_date && !$this->transactions()->where('type', 2)->first() && $this->total_lbs_bascula < $this->total_lbs && $this->line_sku->sku->items->count() > 0) ? true : false;
 
         return [
             'id' => strval($this->id),

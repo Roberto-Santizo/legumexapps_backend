@@ -9,4 +9,5 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/report/planilla/{id}', [ReportController::class, 'DownloadReportPlanilla']);
     
     Route::get('/report-production/{weekly_production_plan}/{line_id}', [ReportController::class, 'PlanillaProduccion']);
+    Route::get('/report-production/{weekly_production_draft_id}', [ReportController::class, 'DownloadWeeklyProductionDraftTasks']);
 });

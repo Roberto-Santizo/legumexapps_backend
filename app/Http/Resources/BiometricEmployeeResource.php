@@ -21,6 +21,7 @@ class BiometricEmployeeResource extends JsonResource
             'name' => $this->name,
             'code' => $this->pin,
             'position' => $this->last_name,
+            'flag' => true
         ];
     }
 }

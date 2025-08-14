@@ -80,6 +80,7 @@ Route::middleware('jwt.auth')->group(function () {
 
     //DRAFT PLANES SEMANALES
     Route::apiResource('/weekly-production-plans-drafts', WeeklyProductionPlanDraftController::class);
+    
     Route::get('/weekly-production-plans-drafts/{id}/tasks', [WeeklyProductionPlanDraftController::class, 'GetTasks']);
     Route::get('/weekly-production-plans-drafts/{id}/packing-material-necessity', [WeeklyProductionPlanDraftController::class, 'GetPackingMaterialNecessity']);
     Route::get('/weekly-production-plans-drafts/{id}/raw-material-necessity', [WeeklyProductionPlanDraftController::class, 'GetRawMaterialNecessity']);

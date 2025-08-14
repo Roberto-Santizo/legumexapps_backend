@@ -25,7 +25,7 @@ class TaskProductionDraftController extends Controller
         }
 
         try {
-            $tasks = $draft->tasks()->with('line_performance')->with('sku')->get();
+            $tasks = $draft->tasks()->whereNotNull('line_id')->with('line_performance')->with('sku')->get();
 
             $data = [];
 
@@ -77,7 +77,7 @@ class TaskProductionDraftController extends Controller
         try {
             TaskProductionDraft::create([
                 'draft_weekly_production_plan_id' => $draft_plan->id,
-                'line_id' => $data['line_id'],
+                'line_id' => $data['line_id'] ?? null,
                 'stock_keeping_unit_id' => $data['stock_keeping_unit_id'],
                 'total_lbs' => $data['total_lbs'],
                 'destination' => $data['destination']

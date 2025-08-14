@@ -61,6 +61,7 @@ class FincaPlanillaExport implements FromCollection, WithHeadings, WithTitle, Wi
 
         $employees_finca->map(function ($employee) use ($rows) {
             $septimo = 0;
+            $bono = 0;
 
             if ($employee->hours >= 44) {
                 $septimo = ((3097.21 * 12) / 365) * 1.5;
@@ -74,7 +75,7 @@ class FincaPlanillaExport implements FromCollection, WithHeadings, WithTitle, Wi
                 'MONTO' => $employee->amount,
                 'SEPTIMO' => $septimo,
                 'BONIFICACIÓN' => $bono,
-                'TOTAL A DEVENGAR' => $employee->amount + $septimo
+                'TOTAL A DEVENGAR' => $employee->amount + $septimo + $bono
             ]);
         });
 
@@ -211,7 +212,7 @@ class FincaPlanillaExport implements FromCollection, WithHeadings, WithTitle, Wi
     }
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('A1:F1')->applyFromArray([
+        $sheet->getStyle('A1:G1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFF']],
             'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => '5564eb']],
         ]);
