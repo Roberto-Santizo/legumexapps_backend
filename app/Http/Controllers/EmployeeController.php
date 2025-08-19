@@ -53,7 +53,7 @@ class EmployeeController extends Controller
         return new EmployeeCollection($filter_employees);
     }
 
-   public function getComodines()
+    public function getComodines()
     {
         $today = Carbon::today();
 
@@ -75,12 +75,12 @@ class EmployeeController extends Controller
             $comodin->temp_id = $index + 10;
 
             $hasEntrance = $entrances->has($comodin->pin);
-            $isAssigned = $assigned->has($comodin->last_name);
+            // $isAssigned = $assigned->has($comodin->last_name);
 
-            return $hasEntrance && !$isAssigned;
+            // return $hasEntrance && !$isAssigned;
+            return $hasEntrance;
         });
 
         return BiometricEmployeeResource::collection($comodinesFiltrados);
     }
-
 }

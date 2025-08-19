@@ -40,21 +40,9 @@ class TaskProductionDraftImport implements ToCollection, WithHeadingRow
                 throw new Exception("Sku no encontrado " . $row['sku']);
             }
 
-            $line = $lines->get($row['linea']);
-
-            if (!$line) {
-                throw new Exception("Linea no encontrada.");
-            }
-
-            $performance = $performances->where('line_id', $line->id)->where('sku_id', $sku->id)->first();
-
-            if (!$performance) {
-                throw new Exception("Rendimiento no encontrado " . $row['linea']);
-            }
-
             TaskProductionDraft::create([
                 'draft_weekly_production_plan_id' => $this->draft->id,
-                'line_id' => $line->id,
+                'line_id' => null,
                 'stock_keeping_unit_id' => $sku->id,
                 'total_lbs' => $row['libras'],
                 'destination' => $row['destino']

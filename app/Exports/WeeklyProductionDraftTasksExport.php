@@ -28,12 +28,16 @@ class WeeklyProductionDraftTasksExport implements FromCollection, WithHeadings, 
         $tasks = $this->draft->tasks;
 
         foreach ($tasks as $task) {
+            $boxes = $task->sku->presentation ? $task->total_lbs / $task->sku->presentation : '';
+            $pallets = $task->sku->boxes_pallet ? ($boxes / $task->sku->boxes_pallet) : '';
             $rows->push([
                 'SKU' => $task->sku->code,
                 'PRODUCTO' => $task->sku->product_name,
                 'LINEA' => $task->line_id ? $task->line->name : 'SIN LINEA ASOCIADA',
                 'TOTAL LIBRAS' => $task->total_lbs,
-                'TOTAL CAJAS' => $task->total_lbs / $task->sku->presentation,
+                'PRESENTACIÓN' => $task->sku->presentation ? $task->sku->presentation : 0,
+                'TOTAL CAJAS' => $task->sku->presentation ? $task->total_lbs / $task->sku->presentation : 0,
+                'PALLETS' => $pallets,
                 'DESTINO' => $task->destination,
                 'CLIENTE' => $task->sku->client_name,
             ]);
@@ -44,13 +48,13 @@ class WeeklyProductionDraftTasksExport implements FromCollection, WithHeadings, 
 
     public function headings(): array
     {
-        return ['SKU', 'PRODUCTO', 'LINEA', 'TOTAL LIBRAS', 'TOTAL CAJAS', 'DESTINO', 'CLIENTE'];
+        return ['SKU', 'PRODUCTO', 'LINEA', 'TOTAL LIBRAS', 'PRESENTACIÓN', 'TOTAL CAJAS', 'PALLETS', 'DESTINO', 'CLIENTE'];
     }
 
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('A1:G1')->applyFromArray([
+        $sheet->getStyle('A1:H1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['argb' => 'FFFFFF'],

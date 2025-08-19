@@ -19,6 +19,7 @@ class TaskProductionEmployeeResource extends JsonResource
             'name' => $this->name,
             'code' => $this->code,
             'position' => $this->position,
+            'flag' => true
         ];
     }
 }

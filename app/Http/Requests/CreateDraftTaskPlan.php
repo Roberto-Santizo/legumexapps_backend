@@ -22,7 +22,7 @@ class CreateDraftTaskPlan extends FormRequest
     public function rules(): array
     {
         return [
-            'line_id' => ['exists:lines,id'],
+            'line_id' => ['sometimes'],
             'stock_keeping_unit_id' => ['required', 'exists:stock_keeping_units,id'],
             'total_lbs' => ['required'],
             'destination' => ['required']
