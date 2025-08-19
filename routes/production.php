@@ -68,6 +68,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::patch('/tasks-production/{id}/end', [TaskProductionController::class, 'EndTaskProduction']);
     Route::patch('/tasks-production/{id}/unassign', [TaskProductionController::class, 'UnassignTaskProduction']);
     Route::patch('/tasks-production/{id}/delete-assignments', [TaskProductionController::class, 'DeleteTaskProductionAssigments']);
+    Route::patch('/tasks-production/{id}/update-status', [TaskProductionController::class, 'UpdateTaskProductionStatus']);
 
     //MATERIA PRIMA
     Route::apiResource('/raw-material-items', RawMaterialItemController::class);
@@ -80,7 +81,7 @@ Route::middleware('jwt.auth')->group(function () {
 
     //DRAFT PLANES SEMANALES
     Route::apiResource('/weekly-production-plans-drafts', WeeklyProductionPlanDraftController::class);
-    
+
     Route::get('/weekly-production-plans-drafts/{id}/tasks', [WeeklyProductionPlanDraftController::class, 'GetTasks']);
     Route::get('/weekly-production-plans-drafts/{id}/packing-material-necessity', [WeeklyProductionPlanDraftController::class, 'GetPackingMaterialNecessity']);
     Route::get('/weekly-production-plans-drafts/{id}/raw-material-necessity', [WeeklyProductionPlanDraftController::class, 'GetRawMaterialNecessity']);

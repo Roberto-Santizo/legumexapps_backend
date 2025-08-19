@@ -1053,4 +1053,30 @@ class TaskProductionController extends Controller
             ], 500);
         }
     }
+
+    public function UpdateTaskProductionStatus(Request $request, string $id)
+    {
+        $data = $request->validate([
+            'status' => 'required'
+        ]);
+
+        $task = TaskProductionPlan::find($id);
+
+        if (!$task) {
+            return response()->json([
+                'msg' => 'Tarea no Encontrada'
+            ], 404);
+        }
+
+        try {
+            $task->status = $data['status'];
+            $task->save();
+
+            return response()->json('Estado de Tarea Actualizado Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
 }
