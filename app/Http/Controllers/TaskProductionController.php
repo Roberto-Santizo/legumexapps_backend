@@ -154,6 +154,7 @@ class TaskProductionController extends Controller
             }
 
             $data['line_sku'] = $line_sku->id;
+            $data['line_id'] = $line_sku->line_id;
 
             $task_production_plan->update($data);
 
