@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Events\UpdateProductionPlanification;
+use App\Exports\DraftWeeklyProductionPlanUpdateFileExport;
 use App\Http\Resources\DraftProductionPlanResourceDetails;
 use App\Http\Resources\DraftWeeklyProductionPlanResource;
 use App\Imports\TaskProductionDraftImport;
+use App\Imports\UpdateDraftWeeklyProductionPlanTasksImport;
 use App\Models\DraftWeeklyProductionPlan;
 use App\Models\LineStockKeepingUnits;
 use App\Models\RawMaterialSkuRecipe;
@@ -372,6 +374,56 @@ class WeeklyProductionPlanDraftController extends Controller
 
             broadcast(new UpdateProductionPlanification());
             return response()->json('Plan Creado Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function DownloadUpdateFile(Request $request, string $id)
+    {
+        $draft = DraftWeeklyProductionPlan::find($id);
+
+        if (!$draft) {
+            return response()->json([
+                'msg' => 'Draft No Encontrado'
+            ], 404);
+        }
+
+        try {
+            $file = Excel::raw(new DraftWeeklyProductionPlanUpdateFileExport($draft), \Maatwebsite\Excel\Excel::XLSX);
+
+            $fileName = 'Actualización Draft Producción S' . $draft->week . '.xlsx';
+
+            return response()->json([
+                'fileName' => $fileName,
+                'file' => base64_encode($file)
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function UpdateDraftWeeklyProductionTasks(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv'
+        ]);
+
+        try {
+            try {
+                Excel::import(new UpdateDraftWeeklyProductionPlanTasksImport(), $request->file('file'));
+
+                broadcast(new UpdateProductionPlanification());
+                return response()->json('Tareas Actualizadas Correctamente', 200);
+            } catch (\Throwable $th) {
+                return response()->json([
+                    'msg' => $th->getMessage()
+                ], 500);
+            }
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()

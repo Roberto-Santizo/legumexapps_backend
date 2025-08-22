@@ -85,8 +85,10 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/weekly-production-plans-drafts/{id}/tasks', [WeeklyProductionPlanDraftController::class, 'GetTasks']);
     Route::get('/weekly-production-plans-drafts/{id}/packing-material-necessity', [WeeklyProductionPlanDraftController::class, 'GetPackingMaterialNecessity']);
     Route::get('/weekly-production-plans-drafts/{id}/raw-material-necessity', [WeeklyProductionPlanDraftController::class, 'GetRawMaterialNecessity']);
+    Route::get('/weekly-production-plans-drafts/{id}/dowload-update-file', [WeeklyProductionPlanDraftController::class, 'DownloadUpdateFile']);
     Route::post('/weekly-production-plans-drafts/{id}/upload-tasks', [WeeklyProductionPlanDraftController::class, 'UploadTasks']);
     Route::post('/weekly-production-plans-drafts/{id}/create-plan', [WeeklyProductionPlanDraftController::class, 'CreateWeeklyProductionPlan']);
+    Route::post('/weekly-production-plans-drafts/update-draft-tasks', [WeeklyProductionPlanDraftController::class, 'UpdateDraftWeeklyProductionTasks']);
     Route::patch('/weekly-production-plans-drafts/{id}/confirm', [WeeklyProductionPlanDraftController::class, 'ConfirmPlan']);
 
     Route::get('/tasks-production-drafts/{id}/edit-details', [TaskProductionDraftController::class, 'show']);
