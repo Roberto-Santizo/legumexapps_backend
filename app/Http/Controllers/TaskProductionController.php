@@ -899,7 +899,9 @@ class TaskProductionController extends Controller
                 $last_task = TaskProductionPlan::where('line_id', $task->line_id)
                     ->whereNotNull('start_date')
                     ->whereNotNull('end_date')
-                    ->get()->last();
+                    ->whereDate('operation_date', Carbon::now())
+                    ->orderBy('end_date', 'DESC')
+                    ->first();
 
                 foreach ($last_task->employees as $employee) {
                     TaskProductionEmployee::create([
