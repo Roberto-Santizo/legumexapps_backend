@@ -2,8 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Models\BiometricTransaction;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -17,10 +15,10 @@ class BiometricEmployeeResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => strval($this->temp_id),
-            'name' => $this->name,
-            'code' => $this->pin,
-            'position' => $this->last_name,
+            'id' => strval($this['temp_id']),
+            'name' => $this['name'],
+            'code' => $this['code'],
+            'position' => $this['position'],
             'flag' => true
         ];
     }

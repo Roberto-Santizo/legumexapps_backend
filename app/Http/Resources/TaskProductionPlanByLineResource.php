@@ -2,10 +2,9 @@
 
 namespace App\Http\Resources;
 
-use App\Models\BiometricTransaction;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Http;
 
 class TaskProductionPlanByLineResource extends JsonResource
 {
@@ -16,13 +15,7 @@ class TaskProductionPlanByLineResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        static $presentPositions = null;
-
-        if (is_null($presentPositions)) {
-            $presentPositions = BiometricTransaction::whereDate('event_time', Carbon::today())
-                ->pluck('pin')
-                ->toArray();
-        }
+        static $presentPositions = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get(env('BIOMETRICO_URL'))->collect()->pluck('code')->toArray();
 
         $total_hours = 0;
         $paused = false;

@@ -13,6 +13,7 @@ use App\Models\Finca;
 use App\Models\TaskProductionEmployee;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class EmployeeController extends Controller
 {
@@ -55,32 +56,14 @@ class EmployeeController extends Controller
 
     public function getComodines()
     {
-        $today = Carbon::today();
+        $response = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get(env('BIOMETRICO_URL'));
 
-        $comodines = BiometricEmployee::where('last_name', 'LIKE', '%LDC%')->get();
-
-        $entrances = BiometricTransaction::whereDate('event_time', $today)
-            ->whereIn('pin', $comodines->pluck('pin'))
-            ->get()
-            ->groupBy('pin');
-
-        $assigned = TaskProductionEmployee::whereIn('position', $comodines->pluck('last_name'))
-            ->whereHas('TaskProduction', function ($query) use ($today) {
-                $query->whereDate('operation_date', $today);
-            })
-            ->get()
-            ->groupBy('position');
-
-        $comodinesFiltrados = $comodines->filter(function ($comodin, $index) use ($entrances, $assigned) {
-            $comodin->temp_id = $index + 10;
-
-            $hasEntrance = $entrances->has($comodin->pin);
-            // $isAssigned = $assigned->has($comodin->last_name);
-
-            // return $hasEntrance && !$isAssigned;
-            return $hasEntrance;
+        $data = $response->collect()->map(function ($employee, $index) {
+            $employee['temp_id'] = $index;
+            $index += 10;
+            return $employee;
         });
 
-        return BiometricEmployeeResource::collection($comodinesFiltrados);
+        return BiometricEmployeeResource::collection($data);
     }
 }
