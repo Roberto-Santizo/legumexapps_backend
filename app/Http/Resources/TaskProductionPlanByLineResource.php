@@ -15,7 +15,7 @@ class TaskProductionPlanByLineResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        static $presentPositions = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get(env('BIOMETRICO_URL'))->collect()->pluck('code')->toArray();
+        static $presentPositions = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get(env('BIOMETRICO_URL_PERSONAL'))->collect()->pluck('code')->toArray();
 
         $total_hours = 0;
         $paused = false;

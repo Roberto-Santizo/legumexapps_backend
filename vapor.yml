@@ -2,6 +2,7 @@ id: 72773
 name: legumexappsapitesting
 environments:
     production:
+        storage: legumexappsapitesting-storage
         database: legumexappsapitestingdb
         memory: 1024
         cli-memory: 512
@@ -13,5 +14,5 @@ environments:
             - 'php artisan event:cache'
             - 'php artisan config:clear'
             - 'php artisan config:cache'
-            - 'php artisan migrate --force'
+            # - 'php artisan migrate --force'
             # - 'npm ci && npm run build && rm -rf node_modules'

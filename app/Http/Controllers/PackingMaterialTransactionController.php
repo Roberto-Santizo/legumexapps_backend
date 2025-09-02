@@ -73,12 +73,12 @@ class PackingMaterialTransactionController extends Controller
             list(, $signature1) = explode(',', $signature1);
             $signature1 = base64_decode($signature1);
             $filename1 = 'signatures/' . uniqid() . '.png';
-            Storage::disk('public')->put($filename1, $signature1);
+            Storage::disk('s3')->put($filename1, $signature1, 'public');
 
             list(, $signature2) = explode(',', $signature2);
             $signature2 = base64_decode($signature2);
             $filename2 = 'signatures/' . uniqid() . '.png';
-            Storage::disk('public')->put($filename2, $signature2);
+            Storage::disk('s3')->put($filename2, $signature2, 'public');
 
 
             $dispatch = PackingMaterialTransaction::create([
