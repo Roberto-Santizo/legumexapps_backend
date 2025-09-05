@@ -1,9 +1,9 @@
 id: 72773
-name: legumexappsapitesting
+name: legumexappsapi
 environments:
     production:
-        storage: legumexappsapitesting-storage
-        database: legumexappsapitestingdb
+        storage: legumexappsapi_storage
+        database: legumexappsapi_db
         memory: 1024
         cli-memory: 512
         runtime: 'php-8.4:al2'
