@@ -1,9 +1,8 @@
-id: 72773
+id: 72943
 name: legumexappsapi
 environments:
     production:
-        domain: legumexappsapi.com
-        storage: legumexappsapi_storage
+        storage: legumexappsapi-storage
         database: legumexappsapi_db
         memory: 1024
         cli-memory: 512
