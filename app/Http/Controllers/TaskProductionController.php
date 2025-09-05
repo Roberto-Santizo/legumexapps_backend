@@ -896,12 +896,12 @@ class TaskProductionController extends Controller
                 $this->emailService->sendNotification($data['data'], $task);
             } else if ($data['previous_config']) {
                 $task->employees()->delete();
-                $last_task = TaskProductionPlan::where('line_id', $task->line_id)
+               $last_task = TaskProductionPlan::where('line_id', $task->line_id)
                     ->whereNotNull('start_date')
                     ->whereNotNull('end_date')
-                    ->whereDate('operation_date', Carbon::now())
-                    ->orderBy('end_date', 'DESC')
+                    ->orderByDesc('end_date')
                     ->first();
+
 
                 foreach ($last_task->employees as $employee) {
                     TaskProductionEmployee::create([

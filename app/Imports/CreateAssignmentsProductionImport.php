@@ -39,7 +39,11 @@ class CreateAssignmentsProductionImport implements ToCollection, WithHeadingRow
                     throw new Exception("No existe linea " . $line);
                 }
 
-                $tasks = TaskProductionPlan::where('line_id', $line->id)->where('weekly_production_plan_id', $this->weekly_plan->id)->whereNull('start_date')->get();
+                $tasks = TaskProductionPlan::where('line_id', $line->id)
+                    ->where('weekly_production_plan_id', $this->weekly_plan->id)
+                    ->whereDoesntHave('employees')
+                    ->get();
+
 
                 foreach ($assigments as $employee) {
                     foreach ($tasks as $task) {
