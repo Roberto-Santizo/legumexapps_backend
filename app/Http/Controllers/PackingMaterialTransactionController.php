@@ -45,10 +45,20 @@ class PackingMaterialTransactionController extends Controller
         if ($request->query('type')) {
             $query->where('type', $request->query('type'));
         }
+        if ($request->query('sku')) {
+            $query->whereHas('task', function ($query) use ($request) {
+                $query->whereHas('line_sku', function ($q) use ($request) {
+                    $q->whereHas('sku', function ($q2) use ($request) {
+                        $q2->where('code', 'LIKE', $request->query('sku'));
+                    });
+                });
+            });
+        }
 
         if ($request->query('paginated')) {
             return PackingMaterialTransactionResource::collection($query->paginate(10));
         }
+
 
         return PackingMaterialTransactionResource::collection($query->get());
     }
