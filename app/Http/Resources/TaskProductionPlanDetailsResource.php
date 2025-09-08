@@ -7,6 +7,7 @@ use App\Models\TaskProductionPlan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Http;
 
 class TaskProductionPlanDetailsResource extends JsonResource
 {
@@ -17,20 +18,17 @@ class TaskProductionPlanDetailsResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $today = Carbon::today();
-
         $line = $this->line_sku->line;
-        $positions = $line->positions;
         $employees = $this->employees;
 
         static $presentPositions = null;
 
         if (is_null($presentPositions)) {
-            $presentCodes = BiometricTransaction::whereDate('event_time', $today)->pluck('pin')->toArray();
+            $presentCodes = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get(env('BIOMETRICO_URL_PERSONAL'))->collect()->pluck('code')->toArray();
         }
 
         $validated_employees = $employees->map(function ($employee) use ($presentCodes) {
-            $flag = in_array($employee->code,$presentCodes);
+            $flag = in_array($employee->code, $presentCodes);
 
             return [
                 'id' => strval($employee->id),
