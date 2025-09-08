@@ -1,10 +1,12 @@
-id: 72943
-name: legumexappsapi
+id: 72956
+name: legumexapps-api
 environments:
     production:
+        domain: legumexappsapi.com
         storage: legumexappsapi-storage
         database: legumexappsapi_db
         memory: 1024
+        timeout: 90
         cli-memory: 512
         runtime: 'php-8.4:al2'
         files:

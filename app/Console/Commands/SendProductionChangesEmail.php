@@ -36,8 +36,7 @@ class SendProductionChangesEmail extends Command
 
     public function handle()
     {
-        $today = Carbon::now();
-        $changes = ProductionOperationChange::whereDate('created_at', $today)->whereNull('notified_at')->get()->groupBy('user_id');
+        $changes = ProductionOperationChange::whereNull('notified_at')->get()->groupBy('user_id');
 
         foreach ($changes as $value) {
             if (count($value) > 0) {
@@ -47,10 +46,11 @@ class SendProductionChangesEmail extends Command
                     $change->notified_at = Carbon::now();
                     $change->save();
                 }
+                $this->info('Correo Enviado');
             } else {
+                $this->info('No existen cambios pendientes');
                 return;
             }
         }
-         $this->info('Correo Enviado');
     }
 }
