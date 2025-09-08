@@ -32,24 +32,11 @@ use App\Services\AssignEmployeeNotificationService;
 use App\Services\ChangeEmployeeNotificationService;
 use App\Services\ReturnPackingMaterialNotificationService;
 use Carbon\Carbon;
-use Illuminate\Console\View\Components\Task;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class TaskProductionController extends Controller
 {
-    protected $emailService;
-    protected $emailCreateAssigneeService;
-    protected $emailReturnPackingMaterialService;
-
-    public function __construct(ChangeEmployeeNotificationService $emailService, AssignEmployeeNotificationService $emailCreateAssigneeService, ReturnPackingMaterialNotificationService $emailReturnPackingMaterialService)
-    {
-        $this->emailService = $emailService;
-        $this->emailCreateAssigneeService = $emailCreateAssigneeService;
-        $this->emailReturnPackingMaterialService = $emailReturnPackingMaterialService;
-    }
-
-
     /**
      * Display a listing of the resource.
      */
@@ -325,7 +312,7 @@ class TaskProductionController extends Controller
             $task_production->save();
 
             if ($task_production->total_lbs_bascula < $task_production->total_lbs) {
-                $this->emailReturnPackingMaterialService->sendNotification($task_production);
+                ReturnPackingMaterialNotificationService::sendEmailNotification($task_production);
             }
 
 
@@ -723,7 +710,7 @@ class TaskProductionController extends Controller
                         ]);
                     }
                 }
-                $this->emailCreateAssigneeService->sendNotification($data['data'], $task);
+                AssignEmployeeNotificationService::sendEmailNotification($data['data'], $task);
             }
 
             return response()->json('Asignaciónes creadas correctamente', 200);
@@ -893,10 +880,10 @@ class TaskProductionController extends Controller
                     $assignment->position = $NewChange->new_position;
                     $assignment->save();
                 }
-                $this->emailService->sendNotification($data['data'], $task);
+                ChangeEmployeeNotificationService::sendEmailNotification($data['data'], $task);
             } else if ($data['previous_config']) {
                 $task->employees()->delete();
-               $last_task = TaskProductionPlan::where('line_id', $task->line_id)
+                $last_task = TaskProductionPlan::where('line_id', $task->line_id)
                     ->whereNotNull('start_date')
                     ->whereNotNull('end_date')
                     ->orderByDesc('end_date')

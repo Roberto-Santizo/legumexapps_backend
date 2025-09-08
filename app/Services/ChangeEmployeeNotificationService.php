@@ -6,16 +6,11 @@ use Beta\Microsoft\Graph\Model\EmailAddress;
 use Beta\Microsoft\Graph\Model\Recipient;
 use Microsoft\Graph\Graph;
 
-class ChangeEmployeeNotificationService
+abstract class ChangeEmployeeNotificationService
 {
-    public function sendNotification($changes, $task)
+    static function sendEmailNotification($changes, $task)
     {
-        $this->sendEmailNotification($changes, $task);
-    }
-
-    private function sendEmailNotification($changes, $task)
-    {
-        $accessToken = $this->getAccessToken();
+        $accessToken = static::getAccessToken();
 
         $graph = new Graph();
         $graph->setAccessToken($accessToken);
@@ -35,7 +30,7 @@ class ChangeEmployeeNotificationService
                 'subject' => 'Cambios de Empleados ' . $task->line->name,
                 'body' => [
                     'contentType' => 'HTML',
-                    'content' => $this->buildMessageBody($changes, $task),
+                    'content' => static::buildMessageBody($changes, $task),
                 ],
                 'toRecipients' => $recipients,
             ],
@@ -47,7 +42,7 @@ class ChangeEmployeeNotificationService
             ->execute();
     }
 
-    private function getAccessToken()
+    private static function getAccessToken()
     {
         $guzzle = new \GuzzleHttp\Client();
 
@@ -66,7 +61,7 @@ class ChangeEmployeeNotificationService
     }
 
 
-    private function buildMessageBody($changes, $task)
+    private static function buildMessageBody($changes, $task)
     {
         $rows = '';
         $line = $task->line->name;

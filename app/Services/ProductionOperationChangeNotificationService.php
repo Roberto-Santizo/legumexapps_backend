@@ -3,20 +3,14 @@
 namespace App\Services;
 
 use Beta\Microsoft\Graph\Model\EmailAddress;
-use Beta\Microsoft\Graph\Model\Message;
 use Beta\Microsoft\Graph\Model\Recipient;
 use Microsoft\Graph\Graph;
 
-class ProductionOperationChangeNotificationService
+abstract class ProductionOperationChangeNotificationService
 {
-    public function sendNotification($changes)
+    static function sendEmailNotification($changes)
     {
-        $this->sendEmailNotification($changes);
-    }
-
-    private function sendEmailNotification($changes)
-    {
-        $accessToken = $this->getAccessToken();
+        $accessToken = static::getAccessToken();
 
         $graph = new Graph();
         $graph->setAccessToken($accessToken);
@@ -36,7 +30,7 @@ class ProductionOperationChangeNotificationService
                 'subject' => 'Cambios Plan Producción',
                 'body' => [
                     'contentType' => 'HTML',
-                    'content' => $this->buildMessageBody($changes),
+                    'content' => static::buildMessageBody($changes),
                 ],
                 'toRecipients' => $recipients,
             ],
@@ -48,7 +42,7 @@ class ProductionOperationChangeNotificationService
             ->execute();
     }
 
-    private function getAccessToken()
+    private static function getAccessToken()
     {
         $guzzle = new \GuzzleHttp\Client();
 
@@ -67,7 +61,7 @@ class ProductionOperationChangeNotificationService
     }
 
 
-    private function buildMessageBody($changes)
+    private static function buildMessageBody($changes)
     {
         $rows = '';
         foreach ($changes as $change) {

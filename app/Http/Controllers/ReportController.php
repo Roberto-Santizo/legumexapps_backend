@@ -9,6 +9,7 @@ use App\Exports\PlanillaProductionExport;
 use App\Exports\WeeklyPlanExport;
 use App\Exports\WeeklyProductionDraftTasksExport;
 use App\Exports\WeeklyProductionExport;
+use App\Jobs\FincaPlanillaJob;
 use App\Models\DraftWeeklyProductionPlan;
 use App\Models\Line;
 use App\Models\TaskProductionPlan;
@@ -16,6 +17,7 @@ use App\Models\WeeklyPlan;
 use App\Models\WeeklyProductionPlan;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ReportController extends Controller
 {
@@ -60,6 +62,9 @@ class ReportController extends Controller
     public function DownloadReportPlanilla(string $id)
     {
         $weekly_plan = WeeklyPlan::find($id);
+        $payload = JWTAuth::getPayload();
+        $user_id = $payload->get('id');
+
 
         if (!$weekly_plan) {
             return response()->json([
@@ -68,13 +73,11 @@ class ReportController extends Controller
         }
 
         try {
-            $file = Excel::raw(new FincaPlanillaExport($weekly_plan), \Maatwebsite\Excel\Excel::XLSX);
 
-            $fileName = 'Planilla Semana ' . $weekly_plan->week . '.xlsx';
+            FincaPlanillaJob::dispatch($user_id, $weekly_plan->id);
 
             return response()->json([
-                'fileName' => $fileName,
-                'file' => base64_encode($file)
+                'msg' => 'Tu reporte esta siendo generado, se enviará por correo electronico',
             ]);
         } catch (\Throwable $th) {
             return response()->json([

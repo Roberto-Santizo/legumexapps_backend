@@ -26,21 +26,13 @@ class SendProductionChangesEmail extends Command
      * Execute the console command.
      */
 
-    protected ProductionOperationChangeNotificationService $notificationService;
-
-    public function __construct(ProductionOperationChangeNotificationService $notificationService)
-    {
-        parent::__construct();
-        $this->notificationService = $notificationService;
-    }
-
     public function handle()
     {
         $changes = ProductionOperationChange::whereNull('notified_at')->get()->groupBy('user_id');
 
         foreach ($changes as $value) {
             if (count($value) > 0) {
-                $this->notificationService->sendNotification($value);
+                ProductionOperationChangeNotificationService::sendEmailNotification($changes);
 
                 foreach ($value as $change) {
                     $change->notified_at = Carbon::now();

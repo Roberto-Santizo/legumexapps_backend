@@ -7,16 +7,11 @@ use Beta\Microsoft\Graph\Model\Message;
 use Beta\Microsoft\Graph\Model\Recipient;
 use Microsoft\Graph\Graph;
 
-class ReturnPackingMaterialNotificationService
+abstract class ReturnPackingMaterialNotificationService
 {
-    public function sendNotification($task_production)
+    static function sendEmailNotification($task_production)
     {
-        $this->sendEmailNotification($task_production);
-    }
-
-    private function sendEmailNotification($task_production)
-    {
-        $accessToken = $this->getAccessToken();
+        $accessToken = static::getAccessToken();
 
         $graph = new Graph();
         $graph->setAccessToken($accessToken);
@@ -39,7 +34,7 @@ class ReturnPackingMaterialNotificationService
         $message = new Message();
         $message->setSubject('Devolución de material de empaque en línea ' . $task_production->line_sku->line->name . ' - ' . $task_production->line_sku->sku->code);
         $message->setBody([
-            'content' => $this->buildMessageBody($task_production),
+            'content' => static::buildMessageBody($task_production),
             'contentType' => 'HTML'
         ]);
         $message->setToRecipients([$recipient1, $recipient2, $recipient3, $recipient4]);
@@ -52,7 +47,7 @@ class ReturnPackingMaterialNotificationService
             ->execute();
     }
 
-    private function getAccessToken()
+    private static function getAccessToken()
     {
         $guzzle = new \GuzzleHttp\Client();
 
@@ -71,7 +66,7 @@ class ReturnPackingMaterialNotificationService
     }
 
 
-    private function buildMessageBody($task_production)
+    private static function buildMessageBody($task_production)
     {
         $url = 'https://legumexapps.com/planes-produccion/' . $task_production->weeklyPlan->id . '/' . $task_production->line->id . '?devolutionTaskId=' . $task_production->id;
 

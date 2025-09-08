@@ -6,16 +6,11 @@ use Beta\Microsoft\Graph\Model\EmailAddress;
 use Beta\Microsoft\Graph\Model\Recipient;
 use Microsoft\Graph\Graph;
 
-class AssignEmployeeNotificationService
+abstract class AssignEmployeeNotificationService
 {
-    public function sendNotification($changes, $task)
+    static function sendEmailNotification($changes, $task)
     {
-        $this->sendEmailNotification($changes, $task);
-    }
-
-    private function sendEmailNotification($changes, $task)
-    {
-        $accessToken = $this->getAccessToken();
+        $accessToken = static::getAccessToken();
 
         $graph = new Graph();
         $graph->setAccessToken($accessToken);
@@ -35,7 +30,7 @@ class AssignEmployeeNotificationService
                 'subject' => 'Asignación de comodines ' . $task->line->name,
                 'body' => [
                     'contentType' => 'HTML',
-                    'content' => $this->buildMessageBody($changes, $task),
+                    'content' => static::buildMessageBody($changes, $task),
                 ],
                 'toRecipients' => $recipients,
             ],
@@ -47,7 +42,7 @@ class AssignEmployeeNotificationService
             ->execute();
     }
 
-    private function getAccessToken()
+    private static function getAccessToken()
     {
         $guzzle = new \GuzzleHttp\Client();
 
@@ -66,7 +61,7 @@ class AssignEmployeeNotificationService
     }
 
 
-    private function buildMessageBody($changes, $task)
+    private static function buildMessageBody($changes, $task)
     {
         $line = $task->line->name;
         $date = $task->operation_date->format('d-m-Y');
