@@ -24,7 +24,7 @@ class TaskProductionPlanDetailsResource extends JsonResource
         static $presentPositions = null;
 
         if (is_null($presentPositions)) {
-            $presentCodes = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get(env('BIOMETRICO_URL_PERSONAL'))->collect()->pluck('code')->toArray();
+            $presentCodes = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get(env('BIOMETRICO_URL').'/personal')->collect()->pluck('code')->toArray();
         }
 
         $validated_employees = $employees->map(function ($employee) use ($presentCodes) {

@@ -4,13 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\BiometricEmployeeResource;
 use App\Http\Resources\EmployeeCollection;
-use App\Models\BiometricEmployee;
-use App\Models\BiometricTransaction;
-use App\Models\Employee;
-use App\Models\EmployeeTask;
-use App\Models\EmployeeTaskCrop;
 use App\Models\Finca;
-use App\Models\TaskProductionEmployee;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -27,36 +21,31 @@ class EmployeeController extends Controller
         ]);
 
         $finca = Finca::find($data['id']);
+        $date = Carbon::now()->format('Y-m-d');
+
         if ($finca->id === 2) {
-            $employees = Employee::where(function ($query) {
-                $query->where('terminal_id', 1008)->orWhere('terminal_id', 1009);
-            })
-                ->whereDate('punch_time', Carbon::now())
-                ->get();
+            $url = env('BIOMETRICO_URL') . "/transactions/1008";
+            $url2 = env('BIOMETRICO_URL') . "/transactions/1009";
+
+            $chunck1 = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url, ['start_date' => $date, 'end_date' => $date]);
+            $chunck2 = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url2, ['start_date' => $date, 'end_date' => $date]);
+
+            $response = collect();
+            $response->push($chunck1->collect());
+            $response->push($chunck2->collect());
+            $response->flatten(1);
         } else {
-            $employees = Employee::where('terminal_id', $finca->terminal_id)->whereDate('punch_time', Carbon::now())->get();
+            $url = env('BIOMETRICO_URL') . "/transactions/{$finca->terminal_id}";
+            $response = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url, ['start_date' => $date, 'end_date' => $date])->collect();
         }
 
-        $filter_employees = $employees->filter(function ($employee) {
-            $assignment = EmployeeTask::where('employee_id', $employee->emp_id)->whereDate('created_at', Carbon::now())->whereHas('task_weekly_plan', function ($query) {
-                $query->where('end_date', null);
-            })->first();
-
-            $assignmentCrop = EmployeeTaskCrop::where('employee_id', $employee->emp_id)->whereDate('created_at', Carbon::now())->whereHas('assignment', function ($query) {
-                $query->where('end_date', null);
-            })->first();
-
-            if (!$assignment && !$assignmentCrop) {
-                return $employee;
-            }
-        });
-
-        return new EmployeeCollection($filter_employees);
+        return new EmployeeCollection($response);
     }
 
     public function getComodines()
     {
-        $response = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get(env('BIOMETRICO_URL'));
+        $url = env('BIOMETRICO_URL') . '/comodines';
+        $response = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url);
 
         $data = $response->collect()->map(function ($employee, $index) {
             $employee['temp_id'] = $index;

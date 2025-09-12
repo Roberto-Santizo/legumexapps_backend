@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\EmployeeTaskDetailExport;
 use App\Exports\FincaPlanillaExport;
 use App\Exports\InsumosExport;
 use App\Exports\PackingMaterialNecessityExport;
@@ -9,7 +10,6 @@ use App\Exports\PlanillaProductionExport;
 use App\Exports\WeeklyPlanExport;
 use App\Exports\WeeklyProductionDraftTasksExport;
 use App\Exports\WeeklyProductionExport;
-use App\Jobs\FincaPlanillaJob;
 use App\Models\DraftWeeklyProductionPlan;
 use App\Models\Line;
 use App\Models\TaskProductionPlan;
@@ -21,18 +21,21 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ReportController extends Controller
 {
-    public function DownloadReport(Request $request)
+    public function DownloadPlanificationReport(string $id)
     {
-        $data = $request->validate([
-            'data' => 'required'
-        ]);
-
-        $fileName = 'Reporte Plan Semanal.xlsx';
-
         try {
-            $file = Excel::raw(new WeeklyPlanExport($data['data']), \Maatwebsite\Excel\Excel::XLSX);
+            $weekly_plan = WeeklyPlan::find($id);
+
+            if (!$weekly_plan) {
+                return response()->json([
+                    'msg' => 'Plan no Encontrado'
+                ], 404);
+            }
+
+            $file = Excel::raw(new WeeklyPlanExport($weekly_plan), \Maatwebsite\Excel\Excel::XLSX);
+            $filename = "Planificación " . $weekly_plan->week . " " . $weekly_plan->finca->name;
             return response()->json([
-                'fileName' => $fileName,
+                'fileName' => $filename,
                 'file' => base64_encode($file)
             ]);
         } catch (\Throwable $th) {
@@ -42,12 +45,48 @@ class ReportController extends Controller
         }
     }
 
+    public function DownloadPersonalDetailsReport(string $id)
+    {
+        try {
+            $weekly_plan = WeeklyPlan::find($id);
+
+            if (!$weekly_plan) {
+                return response()->json([
+                    'msg' => 'Plan no Encontrado'
+                ], 404);
+            }
+
+            $file = Excel::raw(new EmployeeTaskDetailExport($weekly_plan), \Maatwebsite\Excel\Excel::XLSX);
+
+            $filename = "Detalle de Personal S{$weekly_plan->week} {$weekly_plan->finca->name}";
+            return response()->json([
+                'fileName' => $filename,
+                'file' => base64_encode($file)
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+
     public function DownloadReportInsumos(string $id)
     {
         $weekly_plan = WeeklyPlan::find($id);
-        $fileName = 'Reporte Insumo.xlsx';
+
+
+        if (!$weekly_plan) {
+            return response()->json([
+                'msg' => 'Plan no Encontrado'
+            ], 404);
+        }
+
         try {
             $file = Excel::raw(new InsumosExport($weekly_plan), \Maatwebsite\Excel\Excel::XLSX);
+
+            $fileName = "Reporte Insumos S{$weekly_plan->week} {$weekly_plan->finca->name}.xlsx";
+
             return response()->json([
                 'fileName' => $fileName,
                 'file' => base64_encode($file)
@@ -62,9 +101,6 @@ class ReportController extends Controller
     public function DownloadReportPlanilla(string $id)
     {
         $weekly_plan = WeeklyPlan::find($id);
-        $payload = JWTAuth::getPayload();
-        $user_id = $payload->get('id');
-
 
         if (!$weekly_plan) {
             return response()->json([
@@ -74,10 +110,12 @@ class ReportController extends Controller
 
         try {
 
-            FincaPlanillaJob::dispatch($user_id, $weekly_plan->id);
+            $file = Excel::raw(new FincaPlanillaExport($weekly_plan), \Maatwebsite\Excel\Excel::XLSX);
+            $filename = "Planilla S{$weekly_plan->week} {$weekly_plan->finca->name}.xlsx";
 
             return response()->json([
-                'msg' => 'Tu reporte esta siendo generado, se enviará por correo electronico',
+                'fileName' => $filename,
+                'file' => base64_encode($file),
             ]);
         } catch (\Throwable $th) {
             return response()->json([
