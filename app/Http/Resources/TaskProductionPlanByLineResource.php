@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Http;
@@ -15,7 +16,9 @@ class TaskProductionPlanByLineResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        static $presentPositions = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get(env('BIOMETRICO_URL_PERSONAL'))->collect()->pluck('code')->toArray();
+        $date = Carbon::now()->format('Y-m-d');
+        $url = env('BIOMETRICO_URL') . "/personal?date={$date}";
+        static $presentPositions = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url)->collect()->pluck('code')->toArray();
 
         $total_hours = 0;
         $paused = false;

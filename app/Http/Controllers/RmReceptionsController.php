@@ -93,15 +93,15 @@ class RmReceptionsController extends Controller
 
             $signature1 = base64_decode($signature1);
             $filename1 = 'signatures/' . uniqid() . '.png';
-            Storage::disk('public')->put($filename1, $signature1);
+            Storage::disk('s3')->put($filename1, $signature1, 'public');
 
             $signature2 = base64_decode($signature2);
             $filename2 = 'signatures/' . uniqid() . '.png';
-            Storage::disk('public')->put($filename2, $signature2);
+            Storage::disk('s3')->put($filename2, $signature2, 'public');
 
             $signature3 = base64_decode($signature3);
             $filename3 = 'signatures/' . uniqid() . '.png';
-            Storage::disk('public')->put($filename3, $signature3);
+            Storage::disk('s3')->put($filename3, $signature3, 'public');
 
 
             $payload = JWTAuth::getPayload();
@@ -183,7 +183,7 @@ class RmReceptionsController extends Controller
             list(, $signature1) = explode(',', $signature1);
             $signature1 = base64_decode($signature1);
             $filename1 = 'signatures/' . uniqid() . '.png';
-            Storage::disk('public')->put($filename1, $signature1);
+            Storage::disk('s3')->put($filename1, $signature1, 'public');
 
             $basket = Basket::find($data['basket_id']);
             $rm_reception = RmReception::find($id);
@@ -245,7 +245,7 @@ class RmReceptionsController extends Controller
             $signature1 = base64_decode($signature1);
             $filename1 = 'signatures/' . uniqid() . '.png';
 
-            Storage::disk('public')->put($filename1, $signature1);
+            Storage::disk('s3')->put($filename1, $signature1, 'public');
             $doc = QualityControlDoc::create([
                 'rm_reception_id' => $rm_reception->id,
                 'producer_id' => $rm_reception->field_data->producer->id,

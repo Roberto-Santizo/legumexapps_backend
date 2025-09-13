@@ -14,13 +14,9 @@ class EmployeeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(string $id)
     {
-        $data = $request->validate([
-            'id' => 'required|string',
-        ]);
-
-        $finca = Finca::find($data['id']);
+        $finca = Finca::find($id);
         $date = Carbon::now()->format('Y-m-d');
 
         if ($finca->id === 2) {
@@ -33,7 +29,7 @@ class EmployeeController extends Controller
             $response = collect();
             $response->push($chunck1->collect());
             $response->push($chunck2->collect());
-            $response->flatten(1);
+            $response = $response->flatten(1);
         } else {
             $url = env('BIOMETRICO_URL') . "/transactions/{$finca->terminal_id}";
             $response = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url, ['start_date' => $date, 'end_date' => $date])->collect();
@@ -44,7 +40,8 @@ class EmployeeController extends Controller
 
     public function getComodines()
     {
-        $url = env('BIOMETRICO_URL') . '/comodines';
+        $date = Carbon::now()->format('Y-m-d');
+        $url = env('BIOMETRICO_URL') . "/comodines?date={$date}";
         $response = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url);
 
         $data = $response->collect()->map(function ($employee, $index) {

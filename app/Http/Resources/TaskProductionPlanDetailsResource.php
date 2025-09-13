@@ -20,12 +20,10 @@ class TaskProductionPlanDetailsResource extends JsonResource
     {
         $line = $this->line_sku->line;
         $employees = $this->employees;
+        $date = Carbon::now()->format('Y-m-d');
+        $url = env('BIOMETRICO_URL') . "/personal?date={$date}";
 
-        static $presentPositions = null;
-
-        if (is_null($presentPositions)) {
-            $presentCodes = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get(env('BIOMETRICO_URL').'/personal')->collect()->pluck('code')->toArray();
-        }
+        $presentCodes = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url)->collect()->pluck('code')->toArray();
 
         $validated_employees = $employees->map(function ($employee) use ($presentCodes) {
             $flag = in_array($employee->code, $presentCodes);
@@ -38,10 +36,6 @@ class TaskProductionPlanDetailsResource extends JsonResource
                 'flag' => $flag
             ];
         });
-
-        // $unassignedPositions = $positions->filter(function ($position) use ($employees) {
-        //     return $employees->contains('position', $position->name);
-        // });
 
         $lastTask = TaskProductionPlan::where('line_id', $this->line_id)
             ->whereNotNull('start_date')
@@ -58,7 +52,6 @@ class TaskProductionPlanDetailsResource extends JsonResource
             'total_lbs' => $this->total_lbs,
             'employees' => $validated_employees,
             'exists_previuos_config' => $lastTask !== null,
-            // 'positions' => PositionResource::collection($unassignedPositions)
         ];
     }
 }

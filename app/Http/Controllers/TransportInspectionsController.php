@@ -38,7 +38,7 @@ class TransportInspectionsController extends Controller
             list(, $signature2) = explode(',', $signature2);
             $signature2 = base64_decode($signature2);
             $filename2 = 'signatures/' . uniqid() . '.png';
-            Storage::disk('public')->put($filename2, $signature2);
+            Storage::disk('s3')->put($filename2, $signature2, 'public');
 
             $transport_inspection = TransportInspection::create([
                 'planta_id' => $data['planta_id'],
