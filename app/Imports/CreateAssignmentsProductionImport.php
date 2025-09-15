@@ -28,16 +28,11 @@ class CreateAssignmentsProductionImport implements ToCollection, WithHeadingRow
     public function collection(Collection $rows)
     {
         $rowsGroupedByDepartment = $rows->groupBy('departamento');
-        foreach ($rowsGroupedByDepartment as $line => $assigments) {
+        foreach ($rowsGroupedByDepartment as $cell_line => $assigments) {
             try {
-                $line = Line::where('code', $line)->first();
-                if (empty($line)) {
-                    return null;
-                }
+                $line = Line::where('code', $cell_line)->first();
 
-                if (!$line) {
-                    throw new Exception("No existe linea " . $line);
-                }
+                if (!$line) continue;
 
                 $tasks = TaskProductionPlan::where('line_id', $line->id)
                     ->where('weekly_production_plan_id', $this->weekly_plan->id)
