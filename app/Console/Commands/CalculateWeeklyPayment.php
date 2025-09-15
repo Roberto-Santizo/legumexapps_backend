@@ -18,7 +18,7 @@ class CalculateWeeklyPayment extends Command
      *
      * @var string
      */
-    protected $signature = 'app:calculate-weekly-payment';
+    protected $signature = 'app:calculate-weekly-payment {--id= : ID del plan semanal}';
     protected $id;
     protected $entries;
 
@@ -34,8 +34,13 @@ class CalculateWeeklyPayment extends Command
      */
     public function handle()
     {
-        $id = $this->ask('Ingrese el ID del plan semanal');
-        $this->id = $id;
+
+        $id = $this->option('id');
+
+        if (!$id) {
+            $this->error('Debe proporcionar el ID con --id=');
+            return;
+        }
 
         $weekly_plan = WeeklyPlan::find($id);
         if (!$weekly_plan) return;
