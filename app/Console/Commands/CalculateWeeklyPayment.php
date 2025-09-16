@@ -35,16 +35,16 @@ class CalculateWeeklyPayment extends Command
     public function handle()
     {
 
-        $id = $this->option('id');
+        $this->id = $this->option('id');
 
-        if (!$id) {
+        if (!$this->id) {
             $this->error('Debe proporcionar el ID con --id=');
             return;
         }
-
-        $weekly_plan = WeeklyPlan::find($id);
+        
+        $weekly_plan = WeeklyPlan::find($this->id);
         if (!$weekly_plan) return;
-
+        
         $startOfWeek = Carbon::now()->setISODate($weekly_plan->year, $weekly_plan->week)->startOfWeek();
         $endOfWeek = Carbon::now()->setISODate($weekly_plan->year, $weekly_plan->week)->endOfWeek();
         $url = env('BIOMETRICO_URL') . "/transactions/{$weekly_plan->finca->terminal_id}";
