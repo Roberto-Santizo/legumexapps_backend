@@ -95,16 +95,18 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
             ->sortBy('punch_time')
             ->values();
 
+        $firstRecord = $records->first();
+        $lastRecord = $records->last();
         return [
-            'entrance' => optional($records->first()['punch_time'])
-                ? Carbon::parse($records->first()['punch_time'])
-                ->timezone('America/Guatemala')
-                ->format('d-m-Y h:i:s A')
+            'entrance' => $firstRecord
+                ? Carbon::parse($firstRecord['punch_time'])
+                    ->timezone('America/Guatemala')
+                    ->format('d-m-Y h:i:s A')
                 : '',
-            'exit' => optional($records->last()['punch_time'])
-                ? Carbon::parse($records->last()['punch_time'])
-                ->timezone('America/Guatemala')
-                ->format('d-m-Y h:i:s A')
+            'exit' => $lastRecord
+                ? Carbon::parse($lastRecord['punch_time'])
+            ->timezone('America/Guatemala')
+            ->format('d-m-Y h:i:s A')
                 : '',
         ];
     }
