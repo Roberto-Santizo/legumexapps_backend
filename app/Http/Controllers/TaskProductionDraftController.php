@@ -74,10 +74,17 @@ class TaskProductionDraftController extends Controller
             ], 404);
         }
 
+        $performances = LineStockKeepingUnits::where('sku_id',$data['stock_keeping_unit_id'])->get();
+        $line = null;
+
+        if($performances->count() == 1){
+            $line = $performances->first()->line;
+        }
+
         try {
             TaskProductionDraft::create([
                 'draft_weekly_production_plan_id' => $draft_plan->id,
-                'line_id' => $data['line_id'] ?? null,
+                'line_id' => $line ? $line->id : null,
                 'stock_keeping_unit_id' => $data['stock_keeping_unit_id'],
                 'total_lbs' => $data['total_lbs'],
                 'destination' => $data['destination']
