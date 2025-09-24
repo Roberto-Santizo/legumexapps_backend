@@ -14,7 +14,13 @@ class EmployeePaymentWeeklySummary extends Model
         'amount',
         'task_weekly_plan_id',
         'daily_assignment_id',
-        'weekly_plan_id'
+        'weekly_plan_id',
+        'date',
+        'theorical_hours'
+    ];
+
+    protected $casts = [
+        'date' => 'datetime'
     ];
 
     public function plan()

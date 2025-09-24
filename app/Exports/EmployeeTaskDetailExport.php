@@ -2,11 +2,8 @@
 
 namespace App\Exports;
 
-use App\Models\Employee;
 use App\Models\EmployeePaymentWeeklySummary;
-use App\Models\WeeklyPlan;
 use Carbon\Carbon;
-use Error;
 use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -42,9 +39,7 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                 ? $assignment->task
                 : $assignment->assigment;
 
-            $real_hours = $taskData->start_date->diffInHours($taskData->end_date);
-
-            $biometric_data = $this->getEmployeeRegistration($assignment->emp_id, $taskData->start_date);
+            $biometric_data = $this->getEmployeeRegistration($assignment->code, $assignment->date);
 
             $lote = $assignment->task_weekly_plan_id
                 ? $taskData->lotePlantationControl->lote->name
@@ -54,9 +49,6 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                 ? $taskData->task->name
                 : $taskData->TaskCropWeeklyPlan->task->name;
 
-            $theoretical_hours = $assignment->task_weekly_plan_id
-                ? $taskData->hours / $taskData->employees->count()
-                : 'HORAS TEORICAS';
 
             return [
                 'CODIGO' => $assignment->code,
@@ -65,20 +57,20 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                 'TAREA REALIZADA' => $taskName,
                 'PLAN' => $weekly_plan->week,
                 'MONTO GANADO' => $assignment->amount,
-                'HORAS REALES' => $real_hours,
-                'HORAS TEORICAS' => $theoretical_hours,
+                'HORAS REALES' => $assignment->hours,
+                'HORAS TEORICAS' => $assignment->theorical_hours,
                 'HORAS BIOMETRICO' => 'HORAS BIOMETRICO',
                 'ENTRADA BIOMETRICO' => $biometric_data['entrance'],
                 'SALIDA BIOMETRICO' => $biometric_data['exit'],
-                'DIA' => $taskData->start_date->translatedFormat('l'),
+                'DIA' => $assignment->date->translatedFormat('l'),
             ];
         });
     }
 
 
-    public function getEmployeeRegistration($emp_id, $date)
+    public function getEmployeeRegistration($code, $date)
     {
-        $employee = $this->entries->firstWhere('id', $emp_id);
+        $employee = $this->entries->firstWhere('code', $code);
 
         if (!$employee || empty($employee['transactions'])) {
             return [
@@ -90,6 +82,7 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
         $records = collect($employee['transactions'])
             ->filter(function ($transaction) use ($date) {
                 $punch_time = Carbon::parse($transaction['punch_time'])->format('Y-m-d');
+                $date = Carbon::parse($date);
                 return $punch_time === $date->format('Y-m-d');
             })
             ->sortBy('punch_time')

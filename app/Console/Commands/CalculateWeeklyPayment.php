@@ -2,8 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Resources\EmployeeTaskCropSummaryResource;
-use App\Models\Employee;
 use App\Models\EmployeePaymentWeeklySummary;
 use App\Models\WeeklyPlan;
 use Carbon\Carbon;
@@ -78,7 +76,8 @@ class CalculateWeeklyPayment extends Command
     public function calculateTasksWithNoClosures($task)
     {
         try {
-            $hours = $task->hours / $task->employees->count();
+            $theorical_hours = $task->hours / $task->employees->count();
+            $hours = $task->start_date->diffInHours($task->end_date);
             $amount = $task->budget / $task->employees->count();
 
             foreach ($task->employees as $employee) {
@@ -90,7 +89,8 @@ class CalculateWeeklyPayment extends Command
                     'amount' => $amount,
                     'task_weekly_plan_id' => $task->id,
                     'weekly_plan_id' => $this->id,
-                    ''
+                    'date' => $task->start_date,
+                    'theorical_hours' => $theorical_hours
                 ]);
             }
         } catch (\Throwable $th) {
@@ -147,6 +147,7 @@ class CalculateWeeklyPayment extends Command
             foreach ($task->employees as $employeeAssignment) {
                 foreach ($employeeAssignment->dates as $day => $hours) {
                     $percentage = array_sum($hours) / $total_hours;
+                    $date = Carbon::parse($day);
                     EmployeePaymentWeeklySummary::create([
                         'code' => $employeeAssignment->code,
                         'name' => $employeeAssignment->name,
@@ -154,7 +155,9 @@ class CalculateWeeklyPayment extends Command
                         'hours' => ($task->hours * $percentage),
                         'amount' => ($task->budget * $percentage),
                         'task_weekly_plan_id' => $task->id,
-                        'weekly_plan_id' => $this->id
+                        'weekly_plan_id' => $this->id,
+                        'date' => $date,
+                        'theorical_hours' => $task->hours / $task->employees()->count()
                     ]);
                 }
             }
@@ -178,7 +181,9 @@ class CalculateWeeklyPayment extends Command
                 'amount' => $amount,
                 'emp_id' => $employee->employee_id,
                 'daily_assignment_id' => $assignment->id,
-                'weekly_plan_id' => $this->id
+                'weekly_plan_id' => $this->id,
+                'date' => $assignment->start_date,
+                'theorical_hours' => 0
             ]);
         }
     }
