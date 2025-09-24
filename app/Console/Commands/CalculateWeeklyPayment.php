@@ -44,6 +44,10 @@ class CalculateWeeklyPayment extends Command
         
         $weekly_plan = WeeklyPlan::find($this->id);
         if (!$weekly_plan) return;
+
+        if($weekly_plan->summaries->count() > 0){
+            $weekly_plan->summaries()->delete();
+        }
         
         $startOfWeek = Carbon::now()->setISODate($weekly_plan->year, $weekly_plan->week)->startOfWeek();
         $endOfWeek = Carbon::now()->setISODate($weekly_plan->year, $weekly_plan->week)->endOfWeek();
@@ -55,7 +59,7 @@ class CalculateWeeklyPayment extends Command
         $harvest_tasks = $weekly_plan->tasks_crops()->with('assigments')->get();
 
         foreach ($tasks as $task) {
-            if ($task->closures->count() > 1) {
+            if ($task->closures->count() > 0) {
                 $this->calculateTasksWithClosures($task);
             } else {
                 $this->calculateTasksWithNoClosures($task);
@@ -70,7 +74,6 @@ class CalculateWeeklyPayment extends Command
             }
         }
     }
-
 
     public function calculateTasksWithNoClosures($task)
     {
@@ -114,29 +117,29 @@ class CalculateWeeklyPayment extends Command
                 $carry[$date][] = $datetime->toDateTimeString();
                 return $carry;
             }, []);
-
+            
             foreach ($groupedByDay as $key => $dayDates) {
                 $first_date = Carbon::parse($dayDates[0]);
                 $second_date = Carbon::parse($dayDates[1]);
                 $groupedByDay[$key] = $first_date->diffInHours($second_date);
             }
-
+            
             $task->employees->map(function ($employeeAssignment) use ($groupedByDay) {
                 $employeeAssignment->total_hours = 0;
                 $employeeAssignment->dates = [];
                 $dates = [];
                 foreach ($groupedByDay as $day => $hours) {
-                    $flag = count($this->getEmployeeRegistration($employeeAssignment->employee_id, $day)) > 1;
+                    $flag = count($this->getEmployeeRegistration($employeeAssignment->code, $day)) > 1;
                     if ($flag) {
                         $dates[$day][] = $hours;
                         $employeeAssignment->dates = $dates;
                         $employeeAssignment->total_hours += $hours;
                     }
                 }
-
+                
                 return $employeeAssignment;
             });
-
+            
             $total_hours = $task->employees->reduce(function ($carry, $emp) {
                 return $carry + array_sum(array_merge(...array_values($emp->dates ?? [])));
             }, 0);
@@ -180,9 +183,9 @@ class CalculateWeeklyPayment extends Command
         }
     }
 
-    public function getEmployeeRegistration($emp_id, $date)
+    public function getEmployeeRegistration($code, $date)
     {
-        $employee = $this->entries->firstWhere('id', $emp_id);
+        $employee = $this->entries->firstWhere('code', $code);
 
         if (!$employee || empty($employee['transactions'])) {
             return [
@@ -190,15 +193,16 @@ class CalculateWeeklyPayment extends Command
                 'exit'     => '',
             ];
         }
-
+        
         $records = collect($employee['transactions'])
-            ->filter(function ($transaction) use ($date) {
-                $punch_time = Carbon::parse($transaction['punch_time'])->format('Y-m-d');
-                return $punch_time === $date->format('Y-m-d');
-            })
-            ->sortBy('punch_time')
-            ->values();
-
+        ->filter(function ($transaction) use ($date) {
+            $punch_time = Carbon::parse($transaction['punch_time'])->format('Y-m-d');
+            $date = Carbon::parse($date);
+            return $punch_time === $date->format('Y-m-d');
+        })
+        ->sortBy('punch_time')
+        ->values();
+        
         return [
             'entrance' => optional($records->first()['punch_time'])
                 ? Carbon::parse($records->first()['punch_time'])

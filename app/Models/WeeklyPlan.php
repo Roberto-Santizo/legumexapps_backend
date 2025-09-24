@@ -27,4 +27,9 @@ class WeeklyPlan extends Model
     {
         return  $this->hasMany(TaskCropWeeklyPlan::class);
     }
+
+    public function summaries()
+    {
+        return $this->hasMany(EmployeePaymentWeeklySummary::class);
+    }
 }
