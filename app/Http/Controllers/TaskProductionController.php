@@ -280,7 +280,8 @@ class TaskProductionController extends Controller
     {
         $data = $request->validate([
             'total_tarimas' => 'sometimes',
-            'total_lbs_bascula' => 'required'
+            'total_lbs_bascula' => 'required',
+            'total_boxes_produced' => 'required'
         ]);
 
         $task_production = TaskProductionPlan::find($id);
@@ -292,7 +293,8 @@ class TaskProductionController extends Controller
         }
 
         try {
-            $percentage = $data['total_lbs_bascula'] / $task_production->total_lbs;
+            $total_lbs = ($data['total_boxes_produced'] > 0) ? $task_production->line_sku->sku->presentation * $data['total_boxes_produced'] : $data['total_lbs_bascula'];
+            $percentage = $total_lbs / $task_production->total_lbs;
 
             if ($percentage < ($task_production->line_sku->accepted_percentage / 100)) {
                 $task_production->is_minimum_require = false;
@@ -301,20 +303,20 @@ class TaskProductionController extends Controller
                 $task_production->is_minimum_require = true;
                 $task_production->is_justified = true;
             };
-
-            $lbs_produced = $data['total_tarimas'] ? (($data['total_tarimas'] * $task_production->line_sku->sku->boxes_pallet) * $task_production->line_sku->sku->presentation) : $data['total_lbs_bascula'];
+            $sku = $task_production->line_sku->sku;
+            $lbs_produced = ($sku->presentation && $data['total_boxes_produced'] > 0) ? ($sku->presentation * $data['total_boxes_produced']) : $data['total_lbs_bascula'];
 
             $task_production->finished_tarimas = $data['total_tarimas'] ?? 0;
             $task_production->total_lbs_bascula = $data['total_lbs_bascula'];
+            $task_production->total_boxes_produced = $data['total_boxes_produced'];
             $task_production->total_lbs_produced = $lbs_produced;
             $task_production->end_date = Carbon::now();
             $task_production->status = 5;
             $task_production->save();
 
-            if ($task_production->total_lbs_bascula < $task_production->total_lbs) {
+            if (($lbs_produced < $task_production->total_lbs) && $sku->items->count() > 0) {
                 ReturnPackingMaterialNotificationService::sendEmailNotification($task_production);
             }
-
 
             return response()->json('Tarea Cerrada Correctamente', 200);
         } catch (\Throwable $th) {
@@ -336,7 +338,8 @@ class TaskProductionController extends Controller
     {
         $data = $request->validate([
             'tarimas_produced' => 'sometimes',
-            'lbs_bascula' => 'required'
+            'lbs_bascula' => 'required',
+            'total_boxes' => 'required'
         ]);
 
         $task_production = TaskProductionPlan::find($id);
@@ -351,7 +354,8 @@ class TaskProductionController extends Controller
             TaskProductionPerformance::create([
                 'task_production_plan_id' => $task_production->id,
                 'tarimas_produced' => $data['tarimas_produced'] ?? null,
-                'lbs_bascula' => $data['lbs_bascula']
+                'lbs_bascula' => $data['lbs_bascula'],
+                'total_boxes' => $data['total_boxes']
             ]);
 
             return response()->json('Rendimiento Tomado Correctamente', 200);

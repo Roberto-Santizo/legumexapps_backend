@@ -19,6 +19,7 @@ class TaskProductionPerformaceResource extends JsonResource
             'take_date' => $this->created_at->format('d-m-Y h:i:s A'),
             'tarimas_produced' => $this->tarimas_produced,
             'lbs_bascula' => $this->lbs_bascula,
+            'total_boxes' => $this->total_boxes
         ];
     }
 }

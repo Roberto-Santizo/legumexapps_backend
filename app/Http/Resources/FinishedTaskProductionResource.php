@@ -16,9 +16,10 @@ class FinishedTaskProductionResource extends JsonResource
     {
         $line_hours = round($this->start_date->diffInHours($this->end_date), 2);
         $hours_timeout = 0;
+        $sku = $this->line_sku->sku;
 
         if (!$this->line_sku->payment_method) {
-            $performance_hours = $this->total_lbs_bascula / $this->line_sku->lbs_performance;
+            $performance_hours = (($sku->presentation && $this->total_boxes_produced > 0) ? ($this->total_boxes_produced * $sku->presentation) : $this->total_lbs_produced) / $this->line_sku->lbs_performance;
         } else {
             $performance_hours = $line_hours;
         }

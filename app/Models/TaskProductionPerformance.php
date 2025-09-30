@@ -9,6 +9,7 @@ class TaskProductionPerformance extends Model
     protected $fillable = [
         'task_production_plan_id',
         'tarimas_produced',
-        'lbs_bascula'
+        'lbs_bascula',
+        'total_boxes'
     ];
 }

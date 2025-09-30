@@ -35,8 +35,10 @@ class TaskProductionPlanDetailResource extends JsonResource
 
             return $performance;
         });
-
-        $total_produced = $this->performances->sum('lbs_bascula');
+        
+        $sku = $this->line_sku->sku;
+        $total_boxes = $this->performances->sum('total_boxes');
+        $total_produced = ($sku->presentation && $total_boxes > 0) ? ($sku->presentation * $this->performances->sum('total_boxes')) : $this->performances->sum('lbs_bascula');
         $percentage = ($total_produced / $this->total_lbs) * 100;
 
         return [

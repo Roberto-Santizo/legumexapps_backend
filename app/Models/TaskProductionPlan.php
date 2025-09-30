@@ -24,7 +24,8 @@ class TaskProductionPlan extends Model
         'is_minimum_require',
         'is_justified',
         'destination',
-        'total_lbs'
+        'total_lbs',
+        'total_boxes_produced'
     ];
 
     public function line()

@@ -75,7 +75,7 @@ abstract class ReturnPackingMaterialNotificationService
         $sku = $task_production->line_sku->sku->code;
         $product_name = $task_production->line_sku->sku->product_name;
         $operation_date = $task_production->operation_date->format('d-m-Y');
-        $difference = $task_production->total_lbs - $task_production->total_lbs_bascula;
+        $difference = ($task_production->total_boxes_produced > 0) ? $task_production->line_sku->sku->presentation * $task_production->total_boxes_produced : $task_production->total_lbs_bascula;
         $recipe = $task_production->line_sku->sku->items;
 
         foreach ($recipe as $item) {
