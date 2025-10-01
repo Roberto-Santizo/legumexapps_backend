@@ -39,14 +39,14 @@ class CalculateWeeklyPayment extends Command
             $this->error('Debe proporcionar el ID con --id=');
             return;
         }
-        
+
         $weekly_plan = WeeklyPlan::find($this->id);
         if (!$weekly_plan) return;
 
-        if($weekly_plan->summaries->count() > 0){
+        if ($weekly_plan->summaries->count() > 0) {
             $weekly_plan->summaries()->delete();
         }
-        
+
         $startOfWeek = Carbon::now()->setISODate($weekly_plan->year, $weekly_plan->week)->startOfWeek();
         $endOfWeek = Carbon::now()->setISODate($weekly_plan->year, $weekly_plan->week)->endOfWeek();
         $url = env('BIOMETRICO_URL') . "/transactions/{$weekly_plan->finca->terminal_id}";
@@ -144,13 +144,17 @@ class CalculateWeeklyPayment extends Command
             });
 
             $total_hours = $task->employees->reduce(function ($carry, $emp) {
-                return $carry + array_sum(array_merge(...array_values($emp->dates ?? [])));
+                if (empty($emp->dates)) {
+                    return $carry;
+                }
+                return $carry + array_sum(array_merge(...array_values($emp->dates)));
             }, 0);
+
 
             foreach ($task->employees as $employeeAssignment) {
                 foreach ($employeeAssignment->dates as $day => $hours) {
                     if (empty($hours)) {
-                       throw new Exception("Empleado {$employeeAssignment->code} no tiene horas válidas en {$day}");
+                        throw new Exception("Empleado {$employeeAssignment->code} no tiene horas válidas en {$day}");
                     }
                     $percentage = array_sum($hours) / $total_hours;
                     $date = Carbon::parse($day);
@@ -204,16 +208,16 @@ class CalculateWeeklyPayment extends Command
                 'exit'     => '',
             ];
         }
-        
+
         $records = collect($employee['transactions'])
-        ->filter(function ($transaction) use ($date) {
-            $punch_time = Carbon::parse($transaction['punch_time'])->format('Y-m-d');
-            $date = Carbon::parse($date);
-            return $punch_time === $date->format('Y-m-d');
-        })
-        ->sortBy('punch_time')
-        ->values();
-        
+            ->filter(function ($transaction) use ($date) {
+                $punch_time = Carbon::parse($transaction['punch_time'])->format('Y-m-d');
+                $date = Carbon::parse($date);
+                return $punch_time === $date->format('Y-m-d');
+            })
+            ->sortBy('punch_time')
+            ->values();
+
         return [
             'entrance' => optional($records->first()['punch_time'])
                 ? Carbon::parse($records->first()['punch_time'])
