@@ -117,13 +117,16 @@ class CalculateWeeklyPayment extends Command
                 $carry[$date][] = $datetime->toDateTimeString();
                 return $carry;
             }, []);
-            
+
             foreach ($groupedByDay as $key => $dayDates) {
+                if (count($dayDates) < 2) {
+                    throw new Exception("El día {$key} no tiene 2 fechas. Datos: " . json_encode($dayDates));
+                }
                 $first_date = Carbon::parse($dayDates[0]);
                 $second_date = Carbon::parse($dayDates[1]);
                 $groupedByDay[$key] = $first_date->diffInHours($second_date);
             }
-            
+
             $task->employees->map(function ($employeeAssignment) use ($groupedByDay) {
                 $employeeAssignment->total_hours = 0;
                 $employeeAssignment->dates = [];
@@ -136,16 +139,19 @@ class CalculateWeeklyPayment extends Command
                         $employeeAssignment->total_hours += $hours;
                     }
                 }
-                
+
                 return $employeeAssignment;
             });
-            
+
             $total_hours = $task->employees->reduce(function ($carry, $emp) {
                 return $carry + array_sum(array_merge(...array_values($emp->dates ?? [])));
             }, 0);
 
             foreach ($task->employees as $employeeAssignment) {
                 foreach ($employeeAssignment->dates as $day => $hours) {
+                    if (empty($hours)) {
+                       throw new Exception("Empleado {$employeeAssignment->code} no tiene horas válidas en {$day}");
+                    }
                     $percentage = array_sum($hours) / $total_hours;
                     $date = Carbon::parse($day);
                     EmployeePaymentWeeklySummary::create([
