@@ -18,7 +18,8 @@ class FincaResource extends JsonResource
             'id'=> strval($this->id),
             'name' => $this->name,
             'code' => $this->code,
-            'terminal_id' => $this->terminal_id
+            'terminal_id' => $this->terminal_id,
+            'cdps' => ProductorCDPResource::collection($this->cdps)
         ];
     }
 }
