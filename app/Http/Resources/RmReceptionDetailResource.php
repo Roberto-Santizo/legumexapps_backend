@@ -15,9 +15,9 @@ class RmReceptionDetailResource extends JsonResource
     public function toArray(Request $request): array
     {
         $net_weight = $this->field_data->weight -  $this->field_data->weight_baskets;
-        $driver_signature = base64_encode(file_get_contents(storage_path("app/public/{$this->field_data->driver_signature}")));
-        $inspector_signature = base64_encode(file_get_contents(storage_path("app/public/{$this->field_data->inspector_signature}")));
-        $producer_signature = base64_encode(file_get_contents(storage_path("app/public/{$this->field_data->prod_signature}")));
+        // $driver_signature = base64_encode(file_get_contents(storage_path("app/public/{$this->field_data->driver_signature}")));
+        // $inspector_signature = base64_encode(file_get_contents(storage_path("app/public/{$this->field_data->inspector_signature}")));
+        // $producer_signature = base64_encode(file_get_contents(storage_path("app/public/{$this->field_data->prod_signature}")));
 
         return [
             'id' => strval($this->id),
@@ -49,9 +49,9 @@ class RmReceptionDetailResource extends JsonResource
             'driver_signature' => $this->field_data->driver_signature,
             'inspector_signature' => $this->field_data->inspector_signature,
             'producer_signature' => $this->field_data->prod_signature,
-            'driver_pdf_signature' => $driver_signature,
-            'inspector_pdf_signature' => $inspector_signature,
-            'producer_pdf_signature' => $producer_signature,
+            'driver_pdf_signature' => "",
+            'inspector_pdf_signature' => "",
+            'producer_pdf_signature' => "",
 
         ];
     }

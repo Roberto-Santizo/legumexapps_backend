@@ -14,7 +14,7 @@ class RmReceptionProdDataResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $receptor_signature = base64_encode(file_get_contents(storage_path("app/public/{$this->prod_data->receptor_signature}")));
+        // $receptor_signature = base64_encode(file_get_contents(storage_path("app/public/{$this->prod_data->receptor_signature}")));
         return [
             'id' => $this->prod_data->id,
             'total_baskets' => $this->prod_data->total_baskets,
@@ -23,7 +23,7 @@ class RmReceptionProdDataResource extends JsonResource
             'tara' => $this->prod_data->total_baskets * $this->field_data->basket->weight,
             'net_weight' => $this->prod_data->net_weight,
             'receptor_signature' => $this->prod_data->receptor_signature,
-            'receptor_pdf_signature' => $receptor_signature
+            'receptor_pdf_signature' => ""
         ];
     }
 }

@@ -27,7 +27,6 @@ class CreateBoletaRMPRequest extends FormRequest
             'finca_id'=> 'required',
             'inspector_name' => 'required',
             'product_id' => 'required',
-            'quality_percentage' => 'required',
             'total_baskets' => 'required',
             'weight' => 'required',
             'basket_id' => 'required',
@@ -35,7 +34,6 @@ class CreateBoletaRMPRequest extends FormRequest
             'inspector_signature' => 'required',
             'prod_signature' => 'required',
             'carrier_id' => 'required',
-            'productor_plantation_control_id' => 'required',
             'plate_id' => 'required'
         ];
     }

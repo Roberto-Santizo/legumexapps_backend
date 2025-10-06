@@ -18,7 +18,8 @@ class TaskPackingMaterialReturnDetailsResource extends JsonResource
         $rows = [];
 
         foreach ($first_transaction->items as $item) {
-            $difference = $this->total_lbs - $this->total_lbs_bascula;
+            $total_lbs_produced = $this->total_boxes_produced ? ($this->total_boxes_produced * $this->line_sku->sku->presentation) : $this->total_lbs_bascula;
+            $difference = $this->total_lbs - $total_lbs_produced;
             $item_recipe = $this->line_sku->sku->items()->where('item_id',$item->packing_material_id)->first();
             $quantity = $difference/$item_recipe->lbs_per_item;
             

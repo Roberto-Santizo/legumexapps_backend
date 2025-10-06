@@ -68,14 +68,15 @@ abstract class ReturnPackingMaterialNotificationService
 
     private static function buildMessageBody($task_production)
     {
-        $url = 'https://legumexapps.com/planes-produccion/' . $task_production->weeklyPlan->id . '/' . $task_production->line->id . '?devolutionTaskId=' . $task_production->id;
+        $url = "https://legumexapps.com/planes-produccion/calendario/{$task_production->weeklyPlan->id}?date={$task_production->operation_date->format('Y-m-d')}&line={$task_production->line->id}&devolutionTaskId={$task_production->id}";
 
         $rows = '';
         $line = $task_production->line_sku->line->name;
         $sku = $task_production->line_sku->sku->code;
         $product_name = $task_production->line_sku->sku->product_name;
         $operation_date = $task_production->operation_date->format('d-m-Y');
-        $difference = ($task_production->total_boxes_produced > 0) ? $task_production->line_sku->sku->presentation * $task_production->total_boxes_produced : $task_production->total_lbs_bascula;
+        $total_lbs_produced = ($task_production->total_boxes_produced > 0) ? ($task_production->line_sku->sku->presentation * $task_production->total_boxes_produced) : $task_production->total_lbs_bascula;
+        $difference = $task_production->total_lbs - $total_lbs_produced;
         $recipe = $task_production->line_sku->sku->items;
 
         foreach ($recipe as $item) {

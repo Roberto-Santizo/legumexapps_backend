@@ -87,21 +87,17 @@ class RmReceptionsController extends Controller
         $signature3 = $data['inspector_signature'];
 
         try {
-            list(, $signature1) = explode(',', $signature1);
-            list(, $signature2) = explode(',', $signature2);
-            list(, $signature3) = explode(',', $signature3);
-
             $signature1 = base64_decode($signature1);
             $filename1 = 'signatures/' . uniqid() . '.png';
-            Storage::disk('s3')->put($filename1, $signature1, 'public');
+            Storage::disk('s3')->put($filename1, $signature1);
 
             $signature2 = base64_decode($signature2);
             $filename2 = 'signatures/' . uniqid() . '.png';
-            Storage::disk('s3')->put($filename2, $signature2, 'public');
+            Storage::disk('s3')->put($filename2, $signature2);
 
             $signature3 = base64_decode($signature3);
             $filename3 = 'signatures/' . uniqid() . '.png';
-            Storage::disk('s3')->put($filename3, $signature3, 'public');
+            Storage::disk('s3')->put($filename3, $signature3);
 
 
             $payload = JWTAuth::getPayload();
@@ -125,7 +121,7 @@ class RmReceptionsController extends Controller
             if (!$producer) {
                 return response()->json([
                     'message' => 'Producer Not Found'
-                ], 404);
+                ], 404); 
             }
 
             FieldDataReception::create([
@@ -136,7 +132,7 @@ class RmReceptionsController extends Controller
                 'weight' => $data['weight'],
                 'total_baskets' => $data['total_baskets'],
                 'weight_baskets' => round(($basket->weight * $data['total_baskets']), 2),
-                'quality_percentage' => $data['quality_percentage'],
+                'quality_percentage' => 100,
                 'basket_id' => $basket->id,
                 'driver_signature' => $filename1,
                 'prod_signature' => $filename2,
@@ -147,7 +143,6 @@ class RmReceptionsController extends Controller
             ]);
 
             return response()->json('Boleta Creada Correctamente');
-            // return response()->json(['msg' => 'mensaje'], 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
