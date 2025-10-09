@@ -10,6 +10,7 @@ use App\Http\Controllers\LoteController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\TareaController;
 use App\Http\Controllers\TaskCropController;
+use App\Http\Controllers\TaskGuidelinesController;
 use App\Http\Controllers\TasksCropController;
 use App\Http\Controllers\TasksLoteController;
 use App\Http\Controllers\WeeklyPlanController;
@@ -18,8 +19,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('jwt.auth')->group(function () {
     Route::get('/employees/{id}', [EmployeeController::class, 'index']);
 
-    Route::get('/recipes', [RecipeController::class, 'index']);
-    Route::get('/crops', [CropController::class, 'index']);
+    Route::apiResource('/recipes', RecipeController::class);
+    Route::apiResource('/crops', CropController::class);
 
     Route::apiResource('/fincas', FincaController::class);
 
@@ -71,4 +72,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/dashboard/agricola/finished-tasks', [DashboardAgricolaController::class, 'GetFinishedTasks']);
     Route::get('/dashboard/agricola/finished-tasks-crop', [DashboardAgricolaController::class, 'GetFinishedTasksCrop']);
     Route::get('/dashboard/agricola/finished-total-tasks-finca', [DashboardAgricolaController::class, 'GetFinishedTasksByFinca']);
+
+    //PLAN DE SIEMBRAS
+    Route::apiResource('/task-guidelines', TaskGuidelinesController::class);
 });

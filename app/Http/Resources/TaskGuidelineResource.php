@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CropResource extends JsonResource
+class TaskGuidelineResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,9 +15,13 @@ class CropResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => strval($this->id),
-            'name' => $this->name,
-            'code' => $this->code,
+            'id' => $this->id,
+            'task' => $this->task->name,
+            'recipe' => $this->recipe->name,
+            'crop' => $this->crop->name,
+            'budget' => $this->budget,
+            'hours' => $this->hours,
+            'week' => $this->week
         ];
     }
 }

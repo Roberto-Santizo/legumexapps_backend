@@ -12,8 +12,11 @@ class RecipeCollection extends ResourceCollection
      *
      * @return array<int|string, mixed>
      */
-    public function toArray(Request $request): array
+    public function toArray(Request $request)
     {
-        return parent::toArray($request);
+        return [
+            'statusCode' => 200,
+            'data' => $this->collection
+        ];
     }
 }
