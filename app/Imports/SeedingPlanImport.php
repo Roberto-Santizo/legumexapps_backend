@@ -48,6 +48,10 @@ class SeedingPlanImport implements ToCollection, WithHeadingRow
         foreach ($groupedRows as $key => $rows) {
             $finca = $this->fincas->where('code', $key)->first();
 
+            if (!$key) {
+                continue;
+            }
+
             if (!$finca) {
                 throw new HttpException(404, "Finca {$finca} no encotrada");
             }
@@ -69,8 +73,12 @@ class SeedingPlanImport implements ToCollection, WithHeadingRow
                     $tasks = $this->getTasks($recipe->id, $crop->id, $index + 1);
 
                     foreach ($tasks as $task) {
+                        $slots = $task->hours / 8;
                         TaskWeeklyPlanDraft::create([
                             'task_guideline_id' => $task->id,
+                            'hours' => $task->hours,
+                            'budget' => $task->budget,
+                            'slots' => $slots < 0 ? 1 : floor($slots),
                             'draft_weekly_plan_id' => $draftWeeklyPlan->id,
                             'plantation_control_id' => $cdp->id
                         ]);

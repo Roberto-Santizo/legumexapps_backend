@@ -3,6 +3,7 @@
 use App\Http\Controllers\CDPController;
 use App\Http\Controllers\CropController;
 use App\Http\Controllers\DashboardAgricolaController;
+use App\Http\Controllers\DraftTaskWeeklyPlanController;
 use App\Http\Controllers\SeedingPlanController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\FincaController;
@@ -79,4 +80,7 @@ Route::middleware('jwt.auth')->group(function () {
 
     //WEEKLYPLANS
     Route::apiResource('/seeding-plan', SeedingPlanController::class);
+
+    //DRAFT TASK WEEKLY PLAN
+    Route::apiResource('/draft-task-weekly-plans', DraftTaskWeeklyPlanController::class);
 });

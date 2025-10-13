@@ -9,7 +9,11 @@ class TaskWeeklyPlanDraft extends Model
     protected $fillable = [
         'task_guideline_id',
         'draft_weekly_plan_id',
-        'plantation_control_id'
+        'plantation_control_id',
+        'hours',
+        'budget',
+        'slots',
+        'tags'
     ];
 
     public function finca()

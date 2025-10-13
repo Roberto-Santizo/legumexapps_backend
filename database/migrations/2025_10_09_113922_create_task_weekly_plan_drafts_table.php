@@ -16,6 +16,9 @@ return new class extends Migration
             $table->foreignId('task_guideline_id')->constrained();
             $table->foreignId('draft_weekly_plan_id')->constrained();
             $table->foreignId('plantation_control_id')->constrained();
+            $table->float('hours');
+            $table->float('budget');
+            $table->integer('slots');
             $table->timestamps();
         });
     }
