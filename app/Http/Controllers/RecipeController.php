@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateRecipeRequest;
 use App\Http\Resources\RecipeCollection;
 use App\Models\Recipe;
+use Illuminate\Http\Client\Request;
 
 class RecipeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         return new RecipeCollection(Recipe::all());
     }

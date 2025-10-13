@@ -10,9 +10,9 @@ class TaskGuideline extends Model
         "task_id",
         "recipe_id",
         "crop_id",
+        "week",
         "budget",
         "hours",
-        "week",
     ];
 
     public function task()

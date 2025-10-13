@@ -3,6 +3,7 @@
 use App\Http\Controllers\CDPController;
 use App\Http\Controllers\CropController;
 use App\Http\Controllers\DashboardAgricolaController;
+use App\Http\Controllers\SeedingPlanController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\FincaController;
 use App\Http\Controllers\InsumosController;
@@ -75,4 +76,7 @@ Route::middleware('jwt.auth')->group(function () {
 
     //PLAN DE SIEMBRAS
     Route::apiResource('/task-guidelines', TaskGuidelinesController::class);
+
+    //WEEKLYPLANS
+    Route::apiResource('/seeding-plan', SeedingPlanController::class);
 });
