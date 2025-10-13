@@ -18,4 +18,9 @@ class PlantationControl extends Model
         'start_date' => 'datetime',
         'end_date' => 'datetime'
     ];
+
+    public function lote()
+    {
+        return $this->belongsTo(Lote::class);
+    }
 }

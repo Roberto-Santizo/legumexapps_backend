@@ -17,10 +17,11 @@ class TasksSeedingPlanResource extends JsonResource
         return [
             "id" => $this->id,
             "task" => $this->taskGuide->task->name,
-            "cdp" => $this->cdp->name,
+            "lote" => $this->cdp->lote->name,
             "recipe" => $this->taskGuide->recipe->name,
             "budget" => $this->taskGuide->budget,
             "hours" => $this->taskGuide->hours
+
         ];
     }
 }
