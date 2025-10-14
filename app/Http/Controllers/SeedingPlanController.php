@@ -19,8 +19,12 @@ class SeedingPlanController extends Controller
     public function index(Request $request)
     {
         try {
-            $limit = $request->query('limit') ?? 10;
-            return new SeedingPlansCollection(DraftWeeklyPlan::paginate($limit));
+            $limit = $request->query('limit');
+            if($limit){
+                return new SeedingPlansCollection(DraftWeeklyPlan::paginate($limit));
+            }else{
+                return new SeedingPlansCollection(DraftWeeklyPlan::all());
+            }
         } catch (\Throwable $th) {
             return response()->json([
                 "statusCode" => 500,
@@ -54,11 +58,11 @@ class SeedingPlanController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
         try {
             $draft = DraftWeeklyPlan::find($id);
-            $data = new SeedingPlanResource($draft);
+            $data = (new SeedingPlanResource($draft))->additional(['filter' => $request->query('cdp')]);
 
             return response()->json([
                 "statusCode" => 200,

@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use stdClass;
 
 class SeedingPlanResource extends JsonResource
 {
@@ -14,11 +15,22 @@ class SeedingPlanResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $cdp = $this->additional['filter'];
+        $tasks = [];
+        if ($cdp) {
+            $tasks = $this->tasks()->whereHas('cdp', function ($q) use ($cdp) {
+                $q->where('name', 'LIKE', '%' . $cdp . '%');
+            })->get();
+
+        } else {
+            $tasks = $this->tasks;
+        }
+
         return [
             "id" => $this->id,
             "finca" => $this->finca->name,
             "week" => $this->week,
-            "tasks" => TasksSeedingPlanResource::collection($this->tasks)->groupBy('cdp.name')
+            "tasks" =>  ($tasks->count() > 0) ? TasksSeedingPlanResource::collection($tasks)->groupBy('cdp.name') : new stdClass()
         ];
     }
 }

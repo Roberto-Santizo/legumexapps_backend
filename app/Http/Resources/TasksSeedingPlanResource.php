@@ -22,7 +22,8 @@ class TasksSeedingPlanResource extends JsonResource
             "budget" => $this->budget,
             "hours" => $this->hours,
             "tags" => $this->tags,
-            "slots" => $this->slots
+            "slots" => $this->slots,
+            "draft_weekly_plan_id" => $this->draft_weekly_plan_id
 
         ];
     }

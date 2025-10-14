@@ -23,7 +23,7 @@ class DraftTaskWeeklyPlanController extends Controller
             return response()->json([
                 "statusCode" => 200,
                 "data" => [
-                    "draft_weekly_plan_id" => $draft->id,
+                    "draft_weekly_plan_id" => $draft->draft_weekly_plan_id,
                     "hours" => $draft->hours,
                     "budget" => $draft->budget,
                     "slots" => $draft->slots,
@@ -54,6 +54,9 @@ class DraftTaskWeeklyPlanController extends Controller
                 ], 404);
             }
 
+            $slots = $data['hours'] / 8;
+            $data['slots'] = ($slots) < 1 ? 1 :  floor($slots);
+
             $draft->update($data);
 
             return response()->json([
@@ -66,13 +69,5 @@ class DraftTaskWeeklyPlanController extends Controller
                 "message" => "Hubo un error"
             ], 500);
         }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }
