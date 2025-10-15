@@ -600,7 +600,6 @@ class TaskProductionController extends Controller
                     ], 500);
                 }
                 
-                dd('No entro');
                 if ($diff < 0) {
                     return response()->json([
                         'msg' => 'No puede asignar tareas a días anteriores'
