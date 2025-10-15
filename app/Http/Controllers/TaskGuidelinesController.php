@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateTaskGuidelineRequest;
+use App\Http\Resources\TaskGuidelineCollection;
 use App\Http\Resources\TaskGuidelineResource;
 use App\Models\TaskGuideline;
 use Illuminate\Http\Request;
@@ -29,12 +30,13 @@ class TaskGuidelinesController extends Controller
                 $query->where('variety_id', $request->query('variety'));
             }
 
-            $data = TaskGuidelineResource::collection($query->get());
+            $limit = $request->query('limit');
 
-            return response()->json([
-                'statusCode' => 200,
-                'data' => $data
-            ], 200);
+            if ($limit) {
+                return new TaskGuidelineCollection($query->paginate($limit));
+            } else {
+                return new TaskGuidelineCollection($query->get());
+            }
         } catch (\Throwable $th) {
             return response()->json([
                 'statusCode' => 500,
