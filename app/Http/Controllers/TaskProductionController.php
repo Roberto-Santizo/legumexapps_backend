@@ -416,7 +416,7 @@ class TaskProductionController extends Controller
         $now_week = Carbon::now()->weekOfYear;
 
         if ($role != 'admin') {
-            if ($today === $new_date) {
+            if ($today->format('d-m-Y') === $new_date->format('d-m-Y')) {
                 return response()->json([
                     'msg' => 'No puede asignar tareas a el día en curso'
                 ], 500);
@@ -521,7 +521,7 @@ class TaskProductionController extends Controller
 
 
             if ($role != 'admin') {
-                if ($today === $new_date) {
+                if ($today->format('d-m-Y') === $new_date->format('d-m-Y')) {
                     return response()->json([
                         'msg' => 'No puede asignar tareas a el día en curso'
                     ], 500);
@@ -584,9 +584,9 @@ class TaskProductionController extends Controller
         $role = $payload->get('role');
 
         try {
-
             $today = Carbon::today();
             $new_date = Carbon::parse($data['data'][0]['operation_date']);
+
             $limit_hour = Carbon::createFromTime(15, 0, 0);
             $hour = Carbon::now();
             $diff = $today->diffInDays($new_date);
@@ -594,12 +594,13 @@ class TaskProductionController extends Controller
             $now_week = Carbon::now()->weekOfYear;
 
             if ($role != 'admin') {
-                if ($today === $new_date) {
+                if ($today->format('d-m-Y') === $new_date->format('d-m-Y')) {
                     return response()->json([
                         'msg' => 'No puede asignar tareas a el día en curso'
                     ], 500);
                 }
-
+                
+                dd('No entro');
                 if ($diff < 0) {
                     return response()->json([
                         'msg' => 'No puede asignar tareas a días anteriores'
