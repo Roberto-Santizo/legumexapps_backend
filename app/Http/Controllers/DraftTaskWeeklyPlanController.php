@@ -54,9 +54,6 @@ class DraftTaskWeeklyPlanController extends Controller
                 ], 404);
             }
 
-            $slots = $data['hours'] / 8;
-            $data['slots'] = ($slots) < 1 ? 1 :  floor($slots);
-
             $draft->update($data);
 
             return response()->json([

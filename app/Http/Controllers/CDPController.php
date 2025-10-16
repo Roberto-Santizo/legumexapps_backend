@@ -77,17 +77,15 @@ class CDPController extends Controller
         try {
             PlantationControl::create([
                 'name' => $data['name'],
-                'density' => $data['density'],
-                'size' => $data['size'],
                 'start_date' => $data['start_date'],
-                'crop_id' => $data['crop_id'],
-                'recipe_id' => $data['recipe_id']
+                'end_date' => $data['end_date'],
             ]);
 
             return response()->json('CDP Creado Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'errors' => 'Hubo un error al crear el cdp'
+                'statusCode' => 500,
+                'message' => $th->getMessage()
             ], 500);
         }
     }

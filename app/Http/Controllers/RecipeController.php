@@ -12,7 +12,7 @@ class RecipeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
         return new RecipeCollection(Recipe::all());
     }

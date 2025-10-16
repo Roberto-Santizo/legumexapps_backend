@@ -24,7 +24,6 @@ class CreateLoteRequest extends FormRequest
         return [
             'name' => ['required','unique:lotes,name'],
             'finca_id' => ['required'],
-            'cdp_id'=> ['required']
         ];
     }
     
@@ -34,7 +33,6 @@ class CreateLoteRequest extends FormRequest
             'name.required' => 'El nombre del lote es obligatorio',
             'name.unique' => 'El lote ya existe',
             'finca_id.required' => 'La finca relacionada es obligatoria',
-            'cdp_id.required' => 'Seleccione el CDP activo relacionado al lote'
         ];
     }
 }

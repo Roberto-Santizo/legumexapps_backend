@@ -69,7 +69,7 @@ class SeedingPlanImport implements ToCollection, WithHeadingRow
                     $crop = $this->getCrop($row['cultivo']);
                     $draftWeeklyPlan = $this->getOrCreateDraftWeeklyPlan($week, $finca->id, $row['year']);
                     $lote = $this->getLote($row['lote']);
-                    $cdp = $this->getCdp($row['cdp'], $lote, $startDate, $endDate, $row['plantas']);
+                    $cdp = $this->getCdp($row['cdp'], $lote, $startDate, $endDate);
                     $tasks = $this->getTasks($recipe->id, $crop->id, $finca->id, $index + 1);
 
                     foreach ($tasks as $task) {
@@ -98,6 +98,7 @@ class SeedingPlanImport implements ToCollection, WithHeadingRow
                 'finca_id' => $finca_id,
                 'year' => $year
             ]);
+            $this->plans->push($plan);
         }
 
         return $plan;
