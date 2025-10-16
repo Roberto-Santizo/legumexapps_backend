@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateTaskGuidelineRequest;
+use App\Http\Requests\UploadTasksGuidelinesRequest;
 use App\Http\Resources\TaskGuidelineCollection;
-use App\Http\Resources\TaskGuidelineResource;
+use App\Imports\TasksGuidelinesImport;
 use App\Models\TaskGuideline;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class TaskGuidelinesController extends Controller
 {
@@ -23,11 +26,15 @@ class TaskGuidelinesController extends Controller
             }
 
             if ($request->query('recipe')) {
-                $query->where('recipe_id', $request->query('recipe'));
+                $query->whereHas('recipe', function ($q) use ($request) {
+                    $q->where('name',  'LIKE', '%' . $request->query('recipe') . '%');
+                });
             }
 
-            if ($request->query('variety')) {
-                $query->where('variety_id', $request->query('variety'));
+            if ($request->query('crop')) {
+                $query->whereHas('crop', function ($q) use ($request) {
+                    $q->where('name', 'LIKE', '%' . $request->query('crop') . '%');
+                });
             }
 
             $limit = $request->query('limit');
@@ -94,6 +101,25 @@ class TaskGuidelinesController extends Controller
                 'statusCode' => 500,
                 'message' => 'Hubo un error'
             ], 500);
+        }
+    }
+
+    public function upload(UploadTasksGuidelinesRequest $request)
+    {
+        $data = $request->validated();
+
+        try {
+            Excel::import(new TasksGuidelinesImport, $data['file']);
+
+            return response()->json([
+                "statusCode" => 201,
+                "message" => "Tareas Creadas Correctamente"
+            ], 201);
+        } catch (HttpException $th) {
+            return response()->json([
+                "statusCode" => $th->getStatusCode(),
+                'msg' => $th->getMessage()
+            ], $th->getStatusCode());
         }
     }
 }

@@ -70,7 +70,7 @@ class SeedingPlanImport implements ToCollection, WithHeadingRow
                     $draftWeeklyPlan = $this->getOrCreateDraftWeeklyPlan($week, $finca->id, $row['year']);
                     $lote = $this->getLote($row['lote']);
                     $cdp = $this->getCdp($row['cdp'], $lote, $startDate, $endDate, $row['plantas']);
-                    $tasks = $this->getTasks($recipe->id, $crop->id, $index + 1);
+                    $tasks = $this->getTasks($recipe->id, $crop->id, $finca->id, $index + 1);
 
                     foreach ($tasks as $task) {
                         $slots = $task->hours / 8;
@@ -151,9 +151,9 @@ class SeedingPlanImport implements ToCollection, WithHeadingRow
         return $this->lotes->where('name')->first();
     }
 
-    private function getTasks(int $recipe_id, int $crop_id, int $week)
+    private function getTasks(int $recipe_id, int $crop_id, int $finca_id, int $week)
     {
-        $tasks = $this->tasks->where('recipe_id', $recipe_id)->where('crop_id', $crop_id)->where('week', $week);
+        $tasks = $this->tasks->where('recipe_id', $recipe_id)->where('crop_id', $crop_id)->where('finca_id', $finca_id)->where('week', $week);
 
         return $tasks;
     }

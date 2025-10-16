@@ -10,6 +10,7 @@ class TaskGuideline extends Model
         "task_id",
         "recipe_id",
         "crop_id",
+        "finca_id",
         "week",
         "budget",
         "hours",
@@ -23,6 +24,11 @@ class TaskGuideline extends Model
     public function recipe()
     {
         return $this->belongsTo(Recipe::class);
+    }
+
+    public function finca()
+    {
+        return $this->belongsTo(Finca::class);
     }
 
     public function crop()

@@ -19,6 +19,7 @@ class TaskGuidelineResource extends JsonResource
             'task' => $this->task->name,
             'recipe' => $this->recipe->name,
             'crop' => $this->crop->name,
+            'finca' => $this->finca->name,
             'budget' => $this->budget,
             'hours' => $this->hours,
             'week' => $this->week
