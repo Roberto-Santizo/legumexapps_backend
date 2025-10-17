@@ -13,6 +13,7 @@ use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\TareaController;
 use App\Http\Controllers\TaskCropController;
 use App\Http\Controllers\TaskGuidelinesController;
+use App\Http\Controllers\TaskInsumoRecipeController;
 use App\Http\Controllers\TasksCropController;
 use App\Http\Controllers\TasksLoteController;
 use App\Http\Controllers\WeeklyPlanController;
@@ -84,4 +85,7 @@ Route::middleware('jwt.auth')->group(function () {
 
     //DRAFT TASK WEEKLY PLAN
     Route::apiResource('/draft-task-weekly-plans', DraftTaskWeeklyPlanController::class);
+
+    //INSUMOS RECIPE
+    Route::apiResource('/task-insumo-recipes',TaskInsumoRecipeController::class);
 });

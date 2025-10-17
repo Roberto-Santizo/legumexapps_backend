@@ -35,4 +35,9 @@ class TaskGuideline extends Model
     {
         return $this->belongsTo(Crop::class);
     }
+
+    public function insumos()
+    {
+        return $this->hasMany(TaskInsumoRecipe::class);
+    }
 }

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateTaskWeeklyPlanDraftRequest;
+use App\Http\Resources\TaskWeeklyPlanDraftCollection;
+use App\Http\Resources\TaskWeeklyPlanDraftResource;
+use App\Http\Resources\TaskWeeklyPlanResource;
 use App\Models\TaskWeeklyPlanDraft;
 
 class DraftTaskWeeklyPlanController extends Controller
@@ -20,20 +23,16 @@ class DraftTaskWeeklyPlanController extends Controller
                 ], 404);
             }
 
+            $data = new TaskWeeklyPlanDraftResource($draft);
+
             return response()->json([
-                "statusCode" => 200,
-                "data" => [
-                    "draft_weekly_plan_id" => $draft->draft_weekly_plan_id,
-                    "hours" => $draft->hours,
-                    "budget" => $draft->budget,
-                    "slots" => $draft->slots,
-                    "tags" => $draft->tags
-                ]
+                "statusCode" =>  200,
+                "data" => $data
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([
                 "statusCode" =>  500,
-                "message" => "Hubo un error"
+                "message" => $th->getMessage()
             ], 500);
         }
     }
