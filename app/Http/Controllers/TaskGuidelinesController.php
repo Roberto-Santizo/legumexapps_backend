@@ -7,6 +7,7 @@ use App\Http\Requests\UploadTasksGuidelinesRequest;
 use App\Http\Resources\TaskGuidelineCollection;
 use App\Imports\TasksGuidelinesImport;
 use App\Models\TaskGuideline;
+use App\Models\TaskInsumoRecipe;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -60,7 +61,15 @@ class TaskGuidelinesController extends Controller
         $data = $request->validated();
 
         try {
-            TaskGuideline::create($data);
+            $task = TaskGuideline::create($data);
+
+            foreach ($data['insumos'] as $insumo) {
+                TaskInsumoRecipe::create([
+                    'insumo_id' => $insumo['insumo_id'],
+                    'quantity' => $insumo['quantity'],
+                    'task_guideline_id' => $task->id
+                ]);
+            }
 
             return response()->json([
                 'statusCode' => 201,
@@ -69,7 +78,7 @@ class TaskGuidelinesController extends Controller
         } catch (\Throwable $th) {
             return response()->json([
                 'statusCode' => 500,
-                'message' => 'Hubo un error'
+                'message' => $th->getMessage()
             ], 500);
         }
     }
