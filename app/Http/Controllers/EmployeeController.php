@@ -18,7 +18,6 @@ class EmployeeController extends Controller
     {
         $finca = Finca::find($id);
         $date = Carbon::now()->format('Y-m-d');
-
         if ($finca->id === 2) {
             $url = env('BIOMETRICO_URL') . "/transactions/1008";
             $url2 = env('BIOMETRICO_URL') . "/transactions/1009";

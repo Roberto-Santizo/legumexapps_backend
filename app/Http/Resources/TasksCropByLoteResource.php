@@ -16,7 +16,7 @@ class TasksCropByLoteResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'lote_id' => $this->cdp->lote->id,
+            'cdp_id' => $this->cdp->id,
             'lote' => $this->cdp->lote->name
         ];
     }

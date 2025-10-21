@@ -8,6 +8,7 @@ use App\Http\Resources\SeedingPlanResource;
 use App\Imports\SeedingPlanImport;
 use App\Models\DraftWeeklyPlan;
 use App\Models\TaskCropWeeklyPlan;
+use App\Models\TaskInsumos;
 use App\Models\TaskWeeklyPlan;
 use App\Models\WeeklyPlan;
 use Illuminate\Http\Request;
@@ -127,7 +128,7 @@ class SeedingPlanController extends Controller
                         'tarea_id' => $task->taskGuide->task->id,
                     ]);
                 } else {
-                    TaskWeeklyPlan::create([
+                    $auxtask = TaskWeeklyPlan::create([
                         'weekly_plan_id' => $plan->id,
                         'tarea_id' => $task->taskGuide->task->id,
                         'plantation_control_id' => $task->plantation_control_id,
@@ -137,6 +138,16 @@ class SeedingPlanController extends Controller
                         'slots' => $task->slots,
                         'extraordinary' => 0,
                     ]);
+
+                    if ($task->taskGuide->insumos->count() > 0) {
+                        foreach ($task->taskGuide->insumos as $insumo) {
+                            TaskInsumos::create([
+                                'insumo_id' => $insumo->insumo_id,
+                                'task_weekly_plan_id' => $auxtask->id,
+                                'assigned_quantity' => $insumo->quantity,
+                            ]);
+                        }
+                    }
                 }
             }
 
