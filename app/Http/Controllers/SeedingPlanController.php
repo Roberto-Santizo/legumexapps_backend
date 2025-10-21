@@ -7,6 +7,9 @@ use App\Http\Resources\SeedingPlansCollection;
 use App\Http\Resources\SeedingPlanResource;
 use App\Imports\SeedingPlanImport;
 use App\Models\DraftWeeklyPlan;
+use App\Models\TaskCropWeeklyPlan;
+use App\Models\TaskWeeklyPlan;
+use App\Models\WeeklyPlan;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -19,11 +22,27 @@ class SeedingPlanController extends Controller
     public function index(Request $request)
     {
         try {
+            $query = DraftWeeklyPlan::query();
+
+            if ($request->query('finca')) {
+                $query->whereHas('finca', function ($q) use ($request) {
+                    $q->where('name', 'LIKE', '%' . $request->query('finca') . '%');
+                });
+            }
+
+            if ($request->query('week')) {
+                $query->where('week', $request->query('week'));
+            }
+            if ($request->query('year')) {
+                $query->where('year', $request->query('year'));
+            }
+
             $limit = $request->query('limit');
-            if($limit){
-                return new SeedingPlansCollection(DraftWeeklyPlan::paginate($limit));
-            }else{
-                return new SeedingPlansCollection(DraftWeeklyPlan::all());
+
+            if ($limit) {
+                return new SeedingPlansCollection($query->paginate($limit));
+            } else {
+                return new SeedingPlansCollection($query->get());
             }
         } catch (\Throwable $th) {
             return response()->json([
@@ -69,7 +88,10 @@ class SeedingPlanController extends Controller
                 "data" => $data
             ], 200);
         } catch (\Throwable $th) {
-            //throw $th;
+            return response()->json([
+                "statusCode" => 500,
+                "message" => 'Hubo un error'
+            ], 500);
         }
     }
 
@@ -78,6 +100,55 @@ class SeedingPlanController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        try {
+            $draft_plan = DraftWeeklyPlan::find($id);
+
+            if (!$draft_plan) {
+                return response()->json([
+                    "statusCode" => 404,
+                    "message" => 'Plan no encontrado'
+                ], 404);
+            }
+
+            $tasks = $draft_plan->tasks;
+
+            $plan = WeeklyPlan::create([
+                'finca_id' => $draft_plan->finca_id,
+                'week' => $draft_plan->week,
+                'year' => $draft_plan->year,
+            ]);
+
+            foreach ($tasks as $task) {
+                $task_name = $task->taskGuide->task->name;
+                if (str_contains($task_name, 'COSECHA')) {
+                    TaskCropWeeklyPlan::create([
+                        'weekly_plan_id' => $plan->id,
+                        'plantation_control_id' => $task->plantation_control_id,
+                        'tarea_id' => $task->taskGuide->task->id,
+                    ]);
+                } else {
+                    TaskWeeklyPlan::create([
+                        'weekly_plan_id' => $plan->id,
+                        'tarea_id' => $task->taskGuide->task->id,
+                        'plantation_control_id' => $task->plantation_control_id,
+                        'workers_quantity' => $task->slots,
+                        'budget' => $task->budget,
+                        'hours' => $task->hours,
+                        'slots' => $task->slots,
+                        'extraordinary' => 0,
+                    ]);
+                }
+            }
+
+            return response()->json([
+                'statusCode' => 201,
+                'message' => 'Plan confirmado correctamente'
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json([
+                "statusCode" => $th->getMessage(),
+                "message" => 'Hubo un error'
+            ], 500);
+        }
     }
 }

@@ -32,7 +32,11 @@ class TasksLoteController extends Controller
 
         $query = TaskWeeklyPlan::query();
 
-        $query->where('lote_plantation_control_id', $request->query('cdp'));
+        $query->whereHas('cdp', function ($q) use ($request) {
+            $q->whereHas('lote', function ($qq) use ($request) {
+                $qq->where('name', $request->query('lote'));
+            });
+        });
         $query->where('weekly_plan_id', $request->query('weekly_plan'));
 
         $task_without_filter = $query->get()->first();
@@ -84,7 +88,7 @@ class TasksLoteController extends Controller
         return [
             'week' => $task_without_filter->plan->week,
             'finca' => $task_without_filter->plan->finca->name,
-            'lote' => $task_without_filter->lotePlantationControl->lote->name,
+            'lote' => $task_without_filter->cdp->lote->name,
             'data' => TaskWeeklyPlanResource::collection($tasks_filterd),
         ];
     }

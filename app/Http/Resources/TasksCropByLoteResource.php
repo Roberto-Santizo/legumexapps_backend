@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class TasksNoOperationDateResource extends JsonResource
+class TasksCropByLoteResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,11 +15,9 @@ class TasksNoOperationDateResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => strval($this->id),
-            'task' => $this->task->name,
-            'finca' => $this->plan->finca->name,
-            'lote' =>  $this->cdp ? $this->cdp->lote->name : '',
-            'bg_color' => 'bg-blue-100',
+            'id' => $this->id,
+            'lote_id' => $this->cdp->lote->id,
+            'lote' => $this->cdp->lote->name
         ];
     }
 }

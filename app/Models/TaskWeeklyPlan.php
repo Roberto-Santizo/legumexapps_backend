@@ -8,7 +8,6 @@ class TaskWeeklyPlan extends Model
 {
     protected $fillable = [
         'weekly_plan_id',
-        'lote_plantation_control_id',
         'tarea_id',
         'workers_quantity',
         'budget',
@@ -18,6 +17,7 @@ class TaskWeeklyPlan extends Model
         'start_date',
         'end_date',
         'operation_date',
+        'plantation_control_id'
     ];
 
     protected $casts = [
@@ -36,9 +36,9 @@ class TaskWeeklyPlan extends Model
         return $this->belongsTo(WeeklyPlan::class, 'weekly_plan_id', 'id');
     }
 
-    public function lotePlantationControl()
+    public function cdp()
     {
-        return $this->belongsTo(LotePlantationControl::class, 'lote_plantation_control_id', 'id');
+        return $this->belongsTo(PlantationControl::class,'plantation_control_id','id');
     }
 
     public function closures()

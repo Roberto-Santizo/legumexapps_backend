@@ -39,6 +39,8 @@ Route::middleware('jwt.auth')->group(function () {
     Route::post('/lotes-all/update', [LoteController::class, 'UpdateLotes']);
 
     Route::apiResource('/plans', WeeklyPlanController::class);
+    Route::get('/plans/summary-tasks/{id}', [WeeklyPlanController::class, 'SummaryTasksLote']);
+    Route::get('/plans/summary-tasks-crops/{id}', [WeeklyPlanController::class, 'SummaryTasksCrop']);
     Route::get('/plans/tasks-no-planification-date/{id}', [WeeklyPlanController::class, 'GetTasksWithNoPlanificationDate']);
     Route::get('/plans/tasks-for-calendar/{id}', [WeeklyPlanController::class, 'GetTasksForCalendar']);
     Route::get('/plans/tasks-planned-by-date/finca', [WeeklyPlanController::class, 'GetTasksPlannedByDate']);
