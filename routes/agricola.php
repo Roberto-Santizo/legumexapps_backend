@@ -80,7 +80,9 @@ Route::middleware('jwt.auth')->group(function () {
 
     //PLAN DE SIEMBRAS
     Route::apiResource('/task-guidelines', TaskGuidelinesController::class);
+    Route::post('/task-guidelines/export', [TaskGuidelinesController::class, 'export']);
     Route::post('/task-guidelines/upload', [TaskGuidelinesController::class, 'upload']);
+    Route::post('/task-guidelines/upload/insumos-recipes', [TaskGuidelinesController::class, 'uploadInsumosRecipe']);
 
     //WEEKLYPLANS
     Route::apiResource('/seeding-plan', SeedingPlanController::class);

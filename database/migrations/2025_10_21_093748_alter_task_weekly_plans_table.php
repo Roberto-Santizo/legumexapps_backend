@@ -15,7 +15,7 @@ return new class extends Migration
             $table->dropForeign('task_weekly_plans_lote_plantation_control_id_foreign');
             $table->dropColumn('lote_plantation_control_id');
 
-            $table->foreignId('plantation_control_id')->nullable()->constrained();
+            $table->foreignId('plantation_control_id')->default(1)->constrained();
         });
     }
 

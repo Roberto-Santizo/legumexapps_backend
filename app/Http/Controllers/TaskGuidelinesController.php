@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\TaskGuidelinesExport;
 use App\Http\Requests\CreateTaskGuidelineRequest;
+use App\Http\Requests\UploadFileRequest;
 use App\Http\Requests\UploadTasksGuidelinesRequest;
 use App\Http\Resources\TaskGuidelineCollection;
 use App\Imports\TasksGuidelinesImport;
@@ -113,6 +115,25 @@ class TaskGuidelinesController extends Controller
         }
     }
 
+    public function export(Request $request)
+    {
+        try {
+            $file = Excel::raw(new TaskGuidelinesExport(), \Maatwebsite\Excel\Excel::XLSX);
+
+            $fileName = "Manual de Tareas.xlsx";
+
+            return response()->json([
+                'fileName' => $fileName,
+                'file' => base64_encode($file)
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'statusCode' => 500,
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
     public function upload(UploadTasksGuidelinesRequest $request)
     {
         $data = $request->validated();
@@ -129,6 +150,16 @@ class TaskGuidelinesController extends Controller
                 "statusCode" => $th->getStatusCode(),
                 'msg' => $th->getMessage()
             ], $th->getStatusCode());
+        }
+    }
+
+    public function uploadInsumosRecipe(UploadFileRequest $request)
+    {
+        $data = $request->validated();
+        try {
+            dd($data);
+        } catch (\Throwable $th) {
+            //throw $th;
         }
     }
 }

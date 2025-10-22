@@ -18,8 +18,8 @@ return new class extends Migration
             $table->dropForeign('task_crop_weekly_plans_task_crop_id_foreign');
             $table->dropColumn('task_crop_id');
 
-            $table->foreignId('plantation_control_id')->nullable()->constrained();
-            $table->foreignId('tarea_id')->nullable()->constrained();
+            $table->foreignId('plantation_control_id')->default(1)->constrained();
+            $table->foreignId('tarea_id')->default(1)->constrained();
         });
     }
 
