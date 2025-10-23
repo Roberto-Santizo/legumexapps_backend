@@ -165,4 +165,31 @@ class SeedingPlanController extends Controller
             ], 500);
         }
     }
+
+    public function destroy(string $id)
+    {
+        try {
+            $draft_plan = DraftWeeklyPlan::find($id);
+
+            if (!$draft_plan) {
+                return response()->json([
+                    "statusCode" => 404,
+                    "message" => 'Plan no encontrado'
+                ], 404);
+            }
+
+            $draft_plan->tasks()->delete();
+            $draft_plan->delete();
+
+            return response()->json([
+                'statusCode' => 200,
+                'message' => 'Plan eliminado correctamente'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                "statusCode" => $th->getMessage(),
+                "message" => 'Hubo un error'
+            ], 500);
+        }
+    }
 }

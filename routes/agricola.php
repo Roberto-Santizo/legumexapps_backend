@@ -91,5 +91,5 @@ Route::middleware('jwt.auth')->group(function () {
     Route::apiResource('/draft-task-weekly-plans', DraftTaskWeeklyPlanController::class);
 
     //INSUMOS RECIPE
-    Route::apiResource('/task-insumo-recipes',TaskInsumoRecipeController::class);
+    Route::apiResource('/task-insumo-recipes', TaskInsumoRecipeController::class);
 });
