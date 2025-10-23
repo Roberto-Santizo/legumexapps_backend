@@ -7,6 +7,7 @@ use App\Http\Requests\CreateTaskGuidelineRequest;
 use App\Http\Requests\UploadFileRequest;
 use App\Http\Requests\UploadTasksGuidelinesRequest;
 use App\Http\Resources\TaskGuidelineCollection;
+use App\Imports\TaskGuidelineInsumosRecipeImport;
 use App\Imports\TasksGuidelinesImport;
 use App\Models\TaskGuideline;
 use App\Models\TaskInsumoRecipe;
@@ -156,10 +157,19 @@ class TaskGuidelinesController extends Controller
     public function uploadInsumosRecipe(UploadFileRequest $request)
     {
         $data = $request->validated();
+
         try {
-            dd($data);
-        } catch (\Throwable $th) {
-            //throw $th;
+            Excel::import(new TaskGuidelineInsumosRecipeImport, $data['file']);
+
+            return response()->json([
+                "statusCode" => 201,
+                "message" => "Recetas Cargadas Correctamente"
+            ], 201);
+        } catch (HttpException $th) {
+            return response()->json([
+                "statusCode" => $th->getStatusCode(),
+                'msg' => $th->getMessage()
+            ], $th->getStatusCode());
         }
     }
 }

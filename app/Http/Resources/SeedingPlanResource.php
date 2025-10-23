@@ -30,6 +30,7 @@ class SeedingPlanResource extends JsonResource
             "id" => $this->id,
             "finca" => $this->finca->name,
             "week" => $this->week,
+            "status" => $this->status,
             "tasks" =>  ($tasks->count() > 0) ? TasksSeedingPlanResource::collection($tasks)->groupBy('cdp.name') : new stdClass()
         ];
     }

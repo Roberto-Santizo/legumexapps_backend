@@ -151,6 +151,9 @@ class SeedingPlanController extends Controller
                 }
             }
 
+            $draft_plan->status = 1;
+            $draft_plan->save();
+
             return response()->json([
                 'statusCode' => 201,
                 'message' => 'Plan confirmado correctamente'

@@ -25,6 +25,7 @@ class TaskGuidelinesExport implements FromCollection,  WithHeadings, WithTitle, 
             $rows = $rows->push([
                 'ID' => $task->id,
                 'TAREA' => $task->task->name,
+                'CODIGO' => $task->task->code,
                 'TEMPORADA' => $task->recipe->name,
                 'CULTIVO' => $task->crop->name,
                 'FINCA' => $task->finca->name,
@@ -37,12 +38,12 @@ class TaskGuidelinesExport implements FromCollection,  WithHeadings, WithTitle, 
 
     public function headings(): array
     {
-        return ['ID', 'TAREA','TEMPORADA','CULTIVO','FINCA', 'SEMANA'];
+        return ['ID', 'TAREA','TEMPORADA','CODIGO', 'CULTIVO','FINCA', 'SEMANA'];
     }
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('A1:F1')->applyFromArray([
+        $sheet->getStyle('A1:G1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['argb' => 'FFFFFF'],

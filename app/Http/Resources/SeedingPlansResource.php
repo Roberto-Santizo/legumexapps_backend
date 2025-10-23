@@ -18,7 +18,8 @@ class SeedingPlansResource extends JsonResource
             'id' => $this->id,
             'finca' => $this->finca->name,
             'week' => $this->week,
-            'year' => $this->year
+            'year' => $this->year,
+            'status' => $this->status
         ];
     }
 }
