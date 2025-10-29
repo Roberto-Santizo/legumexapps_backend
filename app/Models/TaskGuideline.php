@@ -12,7 +12,6 @@ class TaskGuideline extends Model
         "crop_id",
         "finca_id",
         "week",
-        "budget",
         "hours",
     ];
 

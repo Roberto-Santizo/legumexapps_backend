@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Models\AnnualSalary;
 use App\Models\Crop;
 use App\Models\DraftWeeklyPlan;
 use App\Models\Finca;
@@ -69,15 +70,16 @@ class SeedingPlanImport implements ToCollection, WithHeadingRow
                     $crop = $this->getCrop($row['cultivo']);
                     $draftWeeklyPlan = $this->getOrCreateDraftWeeklyPlan($week, $finca->id, $row['year']);
                     $lote = $this->getLote($row['lote']);
-                    $cdp = $this->getCdp($row['cdp'], $lote, $startDate, $endDate);
+                    $cdp = $this->getCdp($row['cdp'], $lote, $startDate, $endDate, $recipe, $crop);
                     $tasks = $this->getTasks($recipe->id, $crop->id, $finca->id, $index + 1);
 
                     foreach ($tasks as $task) {
                         $slots = $task->hours / 8;
+                        $hour = AnnualSalary::all();
                         TaskWeeklyPlanDraft::create([
                             'task_guideline_id' => $task->id,
                             'hours' => $task->hours,
-                            'budget' => $task->budget,
+                            'budget' => $task->hours * $hour->last()->amount,
                             'slots' => $slots < 0 ? 1 : floor($slots),
                             'draft_weekly_plan_id' => $draftWeeklyPlan->id,
                             'plantation_control_id' => $cdp->id
@@ -122,7 +124,7 @@ class SeedingPlanImport implements ToCollection, WithHeadingRow
         return $crop;
     }
 
-    private function getCdp(string $cdp_name, $lote, $startDate, $endDate)
+    private function getCdp(string $cdp_name, $lote, $startDate, $endDate, $recipe, $crop)
     {
         try {
             $cdp = $this->cdps->where('name', $cdp_name)->where('lote_id', $lote->id)->first();
@@ -132,6 +134,9 @@ class SeedingPlanImport implements ToCollection, WithHeadingRow
                     'start_date' => $startDate,
                     'end_date' => $endDate,
                     'lote_id' => $lote->id,
+                    'total_plants' => $lote->total_plants,
+                    'recipe_id' => $recipe->id,
+                    'crop_id' => $crop->id,
                     'total_plants' => $lote->total_plants
                 ]);
                 $this->cdps->push($cdp);
@@ -139,7 +144,7 @@ class SeedingPlanImport implements ToCollection, WithHeadingRow
 
             return $cdp;
         } catch (\Throwable $th) {
-            throw new HttpException(500, "Hubo un error");
+            throw new HttpException(500, $th->getMessage());
         }
     }
 

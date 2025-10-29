@@ -6,6 +6,7 @@ use App\Http\Requests\CreateSeedingPlanRequest;
 use App\Http\Resources\SeedingPlansCollection;
 use App\Http\Resources\SeedingPlanResource;
 use App\Imports\SeedingPlanImport;
+use App\Models\AnnualSalary;
 use App\Models\DraftWeeklyPlan;
 use App\Models\TaskCropWeeklyPlan;
 use App\Models\TaskInsumos;
@@ -128,12 +129,14 @@ class SeedingPlanController extends Controller
                         'tarea_id' => $task->taskGuide->task->id,
                     ]);
                 } else {
+                    $amount_per_hour = AnnualSalary::get()->last();
+
                     $auxtask = TaskWeeklyPlan::create([
                         'weekly_plan_id' => $plan->id,
                         'tarea_id' => $task->taskGuide->task->id,
                         'plantation_control_id' => $task->plantation_control_id,
                         'workers_quantity' => $task->slots,
-                        'budget' => $task->budget,
+                        'budget' => $amount_per_hour->amount * $task->hours,
                         'hours' => $task->hours,
                         'slots' => $task->slots,
                         'extraordinary' => 0,

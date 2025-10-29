@@ -11,7 +11,9 @@ class PlantationControl extends Model
         'start_date',
         'end_date',
         'lote_id',
-        'total_plants'
+        'total_plants',
+        'recipe_id',
+        'crop_id'
     ];
 
     protected $casts = [
@@ -22,5 +24,10 @@ class PlantationControl extends Model
     public function lote()
     {
         return $this->belongsTo(Lote::class);
+    }
+
+    public function draftTasks()
+    {
+        return $this->hasMany(TaskWeeklyPlanDraft::class);
     }
 }

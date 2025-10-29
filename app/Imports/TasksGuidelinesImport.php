@@ -45,12 +45,11 @@ class TasksGuidelinesImport implements ToCollection, WithHeadingRow
                     "crop_id" => $crop->id,
                     "finca_id" => $finca->id,
                     "week" => $row['semana'],
-                    "budget" => $row['presupuesto'],
                     "hours" => $row['horas'],
                 ]);
             }
         } catch (HttpException $th) {
-            throw new HttpException(500, 'Hubo un error');
+            throw new HttpException(500, $th->getMessage());
         }
     }
 
