@@ -9,12 +9,15 @@ use App\Http\Resources\RmReceptionQualityDocDataResource;
 use App\Http\Resources\RmReceptionsResource;
 use App\Http\Resources\RmReceptionTransportDataResource;
 use App\Models\Basket;
+use App\Models\Carrier;
 use App\Models\Defect;
 use App\Models\FieldDataReception;
 use App\Models\Finca;
+use App\Models\Plate;
 use App\Models\ProdDataReception;
 use App\Models\Producer;
 use App\Models\Product;
+use App\Models\ProductorPlantationControl;
 use App\Models\QualityControlDefect;
 use App\Models\QualityControlDoc;
 use App\Models\RmReception;
@@ -117,12 +120,34 @@ class RmReceptionsController extends Controller
             ]);
 
             $producer = Producer::find($data['producer_id']);
+            $productor_cdp = ProductorPlantationControl::find($data['productor_plantation_control_id']);
+            $plate = Plate::find($data['plate_id']);
+            $carrier = Carrier::find($data['carrier_id']);
 
             if (!$producer) {
                 return response()->json([
                     'message' => 'Producer Not Found'
-                ], 404); 
+                ], 404);
             }
+
+            if (!$productor_cdp) {
+                return response()->json([
+                    'message' => 'CDP no encontrado'
+                ], 404);
+            }
+
+            if (!$plate) {
+                return response()->json([
+                    'message' => 'Placa no encontrada'
+                ], 404);
+            }
+
+            if (!$carrier) {
+                return response()->json([
+                    'message' => 'Transportista no encontrado'
+                ], 404);
+            }
+
 
             FieldDataReception::create([
                 'producer_id' => $producer->id,
@@ -137,15 +162,15 @@ class RmReceptionsController extends Controller
                 'driver_signature' => $filename1,
                 'prod_signature' => $filename2,
                 'inspector_signature' => $filename3,
-                'plate_id' => $data['plate_id'],
-                'cdp_id' => $data['productor_plantation_control_id'],
-                'carrier_id' => $data['carrier_id'],
+                'plate_id' => $plate->id,
+                'cdp_id' => $productor_cdp->id,
+                'carrier_id' => $carrier->id,
             ]);
 
-            return response()->json('Boleta Creada Correctamente');
+            return response()->json('Boleta Creada Correctamente!!!');
         } catch (\Throwable $th) {
             return response()->json([
-                'msg' => $th->getMessage()
+                'message' => $th->getMessage()
             ], 500);
         }
     }

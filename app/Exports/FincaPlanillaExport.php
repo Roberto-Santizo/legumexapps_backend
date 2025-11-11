@@ -28,10 +28,12 @@ class FincaPlanillaExport implements FromCollection, WithHeadings, WithTitle, Wi
     public function collection()
     {
         $rows = collect();
-        $employees = EmployeePaymentWeeklySummary::where('weekly_plan_id',$this->weekly_plan->id)->get()->groupBy('code');
+        $employees = EmployeePaymentWeeklySummary::where('weekly_plan_id', $this->weekly_plan->id)->get()->groupBy('code');
 
         foreach ($employees as $key => $tasks) {
-            $hours = $tasks->sum('hours');
+            $hours_tasks = $tasks->where('daily_assignment_id', null)->sum('theorical_hours');
+            $hours_harvest = $tasks->where('daily_assignment_id', '!=', null)->sum('hours');
+            $hours = $hours_harvest + $hours_tasks;
             $amount = $tasks->sum('amount');
 
             $rows->push([
