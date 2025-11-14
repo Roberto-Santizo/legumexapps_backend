@@ -306,7 +306,7 @@ class WeeklyProductionPlanDraftController extends Controller
             $payload = JWTAuth::getPayload();
             $role = $payload->get('role');
 
-            if ($role === 'admin') {
+            if ($role === 'admin' || $role == 'auxrrhh') {
                 $draft->production_confirmation = true;
                 $draft->bodega_confirmation = true;
                 $draft->logistics_confirmation = true;
