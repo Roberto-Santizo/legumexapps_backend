@@ -12,6 +12,7 @@ use App\Models\TaskProductionPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Carbon\Carbon;
 
 class PackingMaterialTransactionController extends Controller
 {
@@ -100,6 +101,7 @@ class PackingMaterialTransactionController extends Controller
                 'user_signature' => $filename2,
                 'observations' => $data['observations'],
                 'type' => $data['type'],
+                'created_at' => Carbon::now()
             ]);
 
             foreach ($data['items'] as $item) {

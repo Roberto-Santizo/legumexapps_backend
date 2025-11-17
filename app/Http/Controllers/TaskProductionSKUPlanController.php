@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Resources\TaskProductionSKUPlanResource;
 use App\Models\TaskProductionPlan;
 use App\Models\TaskProductionStockKeepingUnit;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class TaskProductionSKUPlanController extends Controller
