@@ -12,7 +12,7 @@ class TaskGuideline extends Model
         "crop_id",
         "finca_id",
         "week",
-        "hours",
+        "hours_per_size",
     ];
 
     public function task()

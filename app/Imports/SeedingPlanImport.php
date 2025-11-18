@@ -76,10 +76,12 @@ class SeedingPlanImport implements ToCollection, WithHeadingRow
                     foreach ($tasks as $task) {
                         $slots = $task->hours / 8;
                         $hour = AnnualSalary::all();
+                        $hours = $lote->size * $task->hours_per_size;
+
                         TaskWeeklyPlanDraft::create([
                             'task_guideline_id' => $task->id,
-                            'hours' => $task->hours,
-                            'budget' => $task->hours * $hour->last()->amount,
+                            'hours' => $hours,
+                            'budget' => $hours * $hour->last()->amount,
                             'slots' => $slots < 0 ? 1 : floor($slots),
                             'draft_weekly_plan_id' => $draftWeeklyPlan->id,
                             'plantation_control_id' => $cdp->id

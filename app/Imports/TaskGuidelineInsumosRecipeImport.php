@@ -33,13 +33,13 @@ class TaskGuidelineInsumosRecipeImport implements ToCollection, WithHeadingRow
                 $taskguideline = $this->taskguidelines->firstWhere('id', $key);
 
                 if (!$taskguideline) {
-                    continue;
+                    throw new HttpException(404, "Guía de tarea {$key} no encontrada");
                 }
 
                 foreach ($rows as $row) {
                     $insumo = $this->insumos->firstWhere('code', $row['insumo']);
                     if (!$insumo) {
-                        continue;
+                        throw new HttpException(404, "Insumo {$row['insumo']} no encotrado");
                     }
 
                     TaskInsumoRecipe::create([
@@ -50,7 +50,7 @@ class TaskGuidelineInsumosRecipeImport implements ToCollection, WithHeadingRow
                 }
             }
         } catch (\Throwable $th) {
-            throw new HttpException(500, 'Hubo un error');
+            throw new HttpException(500, $th->getMessage());
         }
     }
 }

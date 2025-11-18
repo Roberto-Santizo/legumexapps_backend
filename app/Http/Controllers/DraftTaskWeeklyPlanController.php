@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateTaskWeeklyPlanDraftRequest;
-use App\Http\Resources\TaskWeeklyPlanDraftCollection;
 use App\Http\Resources\TaskWeeklyPlanDraftResource;
-use App\Http\Resources\TaskWeeklyPlanResource;
 use App\Models\TaskWeeklyPlanDraft;
 
 class DraftTaskWeeklyPlanController extends Controller

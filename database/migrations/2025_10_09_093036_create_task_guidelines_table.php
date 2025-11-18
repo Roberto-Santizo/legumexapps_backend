@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('recipe_id')->constrained();
             $table->foreignId('crop_id')->constrained();
             $table->float('budget');
-            $table->float('hours');
+            $table->float('hours_per_size');
             $table->integer('week');
             $table->timestamps();
         });

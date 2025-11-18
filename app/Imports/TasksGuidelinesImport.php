@@ -45,7 +45,7 @@ class TasksGuidelinesImport implements ToCollection, WithHeadingRow
                     "crop_id" => $crop->id,
                     "finca_id" => $finca->id,
                     "week" => $row['semana'],
-                    "hours" => $row['horas'],
+                    "hours_per_size" => $row['horas'],
                 ]);
             }
         } catch (HttpException $th) {
