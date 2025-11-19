@@ -150,13 +150,13 @@ class SeedingPlanImport implements ToCollection, WithHeadingRow
         }
     }
 
-    private function getLote(string $lote)
+    private function getLote(string $lote_name)
     {
-        $lote = $this->lotes->where('name', $lote)->first();
+        $lote = $this->lotes->where('name', $lote_name)->first();
         if (!$lote) {
             throw new HttpException(404, "Lote {$lote} no encontrado");
         }
-        return $this->lotes->where('name')->first();
+        return $lote;
     }
 
     private function getTasks(int $recipe_id, int $crop_id, int $finca_id, int $week)

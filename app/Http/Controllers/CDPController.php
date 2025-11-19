@@ -4,21 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateCDPRequest;
 use App\Http\Requests\UpdateCdpDatesRequest;
-use App\Http\Resources\LotePlantationControlResource;
 use App\Http\Resources\PlantationControlCollection;
-use App\Http\Resources\TaskCDPDetailResource;
-use App\Imports\CDPSImport;
 use App\Models\AnnualSalary;
 use App\Models\DraftWeeklyPlan;
-use App\Models\Lote;
-use App\Models\LotePlantationControl;
 use App\Models\PlantationControl;
 use App\Models\TaskGuideline;
 use App\Models\TaskWeeklyPlanDraft;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
-use Maatwebsite\Excel\Facades\Excel;
 
 class CDPController extends Controller
 {
@@ -61,7 +55,9 @@ class CDPController extends Controller
         return response()->json([
             'statusCode' => 200,
             'response' => [
-                'id' => $cdp->id,
+                'id' => "{$cdp->id}",
+                'name' => $cdp->name,
+                "lote" => $cdp->lote->name,
                 'start_date' => $cdp->start_date->format('Y-m-d'),
                 'end_date' => $cdp->end_date->format('Y-m-d')
             ]
@@ -139,7 +135,8 @@ class CDPController extends Controller
                     if (!$draft_weekly_plan) {
                         $draft_weekly_plan = DraftWeeklyPlan::create([
                             'year' => $year,
-                            'week' => $week
+                            'week' => $week,
+                            'finca_id' => $cdp->lote->finca_id
                         ]);
                     }
 
@@ -149,11 +146,12 @@ class CDPController extends Controller
 
                         $slots = $task->hours / 8;
                         $hour = AnnualSalary::all();
+                        $hours = $cdp->lote->size * $task->hours_per_size;
 
                         TaskWeeklyPlanDraft::create([
                             'task_guideline_id' => $task->id,
-                            'hours' => $task->hours,
-                            'budget' => $task->hours * $hour->last()->amount,
+                            'hours' => $hours,
+                            'budget' => $hours * $hour->last()->amount,
                             'slots' => $slots < 0 ? 1 : floor($slots),
                             'draft_weekly_plan_id' => $draft_weekly_plan->id,
                             'plantation_control_id' => $cdp->id
