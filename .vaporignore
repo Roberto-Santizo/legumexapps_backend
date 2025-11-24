@@ -1,0 +1,9 @@
+node_modules
+vendor
+storage/app
+storage/framework/cache
+storage/logs
+public/storage
+public/uploads
+.vscode
+.idea

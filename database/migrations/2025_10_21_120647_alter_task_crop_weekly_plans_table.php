@@ -19,7 +19,7 @@ return new class extends Migration
             $table->dropColumn('task_crop_id');
 
             $table->foreignId('plantation_control_id')->default(1)->constrained();
-            $table->foreignId('tarea_id')->default(1)->constrained();
+            $table->foreignId('tarea_id')->default(1780)->constrained();
         });
     }
 
