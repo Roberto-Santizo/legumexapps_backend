@@ -167,7 +167,7 @@ class CDPController extends Controller
 
             return response()->json([
                 'statusCode' => 200,
-                'msg' => 'CDP Actualizado Correctamente'
+                'message' => 'CDP Actualizado Correctamente'
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([
