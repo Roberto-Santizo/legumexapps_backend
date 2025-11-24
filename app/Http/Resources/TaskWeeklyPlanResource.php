@@ -15,15 +15,16 @@ class TaskWeeklyPlanResource extends JsonResource
     public function toArray(Request $request): array
     {
         $flag = $this->weeklyPlanChanges->count() > 0 ? true : false;
+        
         return [
             'id' => strval($this->id),
-            'cdp' => $this->lotePlantationControl->cdp->name,
-            'lote' => $this->lotePlantationControl->lote->name,
+            'cdp' => $this->cdp ? $this->cdp->name : '',
+            'lote' => $this->cdp ? $this->cdp->lote->name : '',
             'task' => $this->task->name,
             'week' => $this->plan->week,
             'finca_id' => strval($this->plan->finca->id),
             'weekly_plan_id' => strval($this->plan->id),
-            'lote_plantation_control_id' => strval($this->lotePlantationControl->id),
+            'cdp_id' => strval($this->cdp ? $this->cdp->id : ''),
             'hours' => $this->hours,
             'budget' => $this->budget,
             'minimum_slots' => ceil($this->hours / 12),

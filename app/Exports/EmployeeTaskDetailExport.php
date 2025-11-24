@@ -42,8 +42,8 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
             $biometric_data = $this->getEmployeeRegistration($assignment->code, $assignment->date);
 
             $lote = $assignment->task_weekly_plan_id
-                ? $taskData->lotePlantationControl->lote->name
-                : $taskData->TaskCropWeeklyPlan->lotePlantationControl->lote->name;
+                ? $taskData->cdp->lote->name
+                : $taskData->TaskCropWeeklyPlan->cdp->lote->name;
 
             $taskName = $assignment->task_weekly_plan_id
                 ? $taskData->task->name

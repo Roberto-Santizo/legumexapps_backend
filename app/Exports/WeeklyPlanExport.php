@@ -47,8 +47,8 @@ class WeeklyPlanExport implements FromCollection, WithHeadings, WithTitle, WithS
                 $rows->push([
                     'FINCA' => $weekly_plan->finca->name,
                     'SEMANA CALENDARIO' => $weekly_plan->week,
-                    'LOTE' => $task->lotePlantationControl->lote->name,
-                    'CDP' => $task->lotePlantationControl->cdp->name,
+                    'LOTE' => $task->cdp->lote->name,
+                    'CDP' => $task->cdp->name,
                     'CODIGO TAREA' => $task->task->code,
                     'TAREA' => $task->task->name,
                     'EXTRAORDINARIA' => ($task->extraordinary) ?  'EXTRAORDINARIA' : 'PLANIFICADA',
@@ -74,8 +74,8 @@ class WeeklyPlanExport implements FromCollection, WithHeadings, WithTitle, WithS
                         $rows->push([
                             'FINCA' => $weekly_plan->finca->name,
                             'SEMANA CALENDARIO' => $weekly_plan->week,
-                            'LOTE' => $task_crop->lotePlantationControl->lote->name,
-                            'CDP' => $task_crop->lotePlantationControl->cdp->name,
+                            'LOTE' => $task_crop->cdp->lote->name,
+                            'CDP' => $task_crop->cdp->name,
                             'CODIGO TAREA' => $task_crop->task->code,
                             'TAREA' => $task_crop->task->name,
                             'EXTRAORDINARIA' => '',

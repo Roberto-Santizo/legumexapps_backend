@@ -22,19 +22,23 @@ class CreateLoteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required','unique:lotes,name'],
+            'name' => ['required', 'unique:lotes,name'],
             'finca_id' => ['required'],
-            'cdp_id'=> ['required']
+            'size' => ['required', 'numeric'],
+            'total_plants' => ['required', 'numeric'],
         ];
     }
-    
-    public function messages() : array
+
+    public function messages(): array
     {
         return [
             'name.required' => 'El nombre del lote es obligatorio',
             'name.unique' => 'El lote ya existe',
             'finca_id.required' => 'La finca relacionada es obligatoria',
-            'cdp_id.required' => 'Seleccione el CDP activo relacionado al lote'
+            'size.required' => 'El tamaño del lote es requerido',
+            'size.numeric' => 'El tamaño del lote debe de ser un dato númerico',
+            'total_plants.required' => 'El total de plantas del lote es requerido',
+            'total_plants.numeric' => 'El total de plantas del lote debe de ser un dato númerico',
         ];
     }
 }

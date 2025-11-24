@@ -9,13 +9,13 @@ class TaskCropWeeklyPlan extends Model
 {
     protected $fillable = [
         'weekly_plan_id',
-        'lote_plantation_control_id',
-        'task_crop_id'
+        'plantation_control_id',
+        'tarea_id'
     ];
 
     public function task()
     {
-        return $this->belongsTo(TaskCrop::class, 'task_crop_id', 'id');
+        return $this->belongsTo(Tarea::class, 'tarea_id', 'id');
     }
 
     public function plan()
@@ -23,11 +23,10 @@ class TaskCropWeeklyPlan extends Model
         return $this->belongsTo(WeeklyPlan::class, 'weekly_plan_id', 'id');
     }
 
-    public function lotePlantationControl()
+    public function cdp()
     {
-        return $this->belongsTo(LotePlantationControl::class, 'lote_plantation_control_id', 'id');
+        return $this->belongsTo(PlantationControl::class, 'plantation_control_id', 'id');
     }
-
 
     public function assignment_today()
     {

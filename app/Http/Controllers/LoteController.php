@@ -53,21 +53,18 @@ class LoteController extends Controller
         $data = $request->validated();
 
         try {
-            $lote = Lote::create([
+            Lote::create([
                 'name' => $data['name'],
-                'finca_id' => $data['finca_id']
-            ]);
-
-            LotePlantationControl::create([
-                'lote_id' => $lote->id,
-                'plantation_controls_id' => $data['cdp_id'],
-                'status' => 1
+                'finca_id' => $data['finca_id'],
+                'size' => $data['size'],
+                'total_plants' => $data['total_plants']
             ]);
 
             return response()->json('Lote Creado Correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'msg' => 'Hubo un error al crear el lote'
+                'statusCode' => 500,
+                'msg' => $th->getMessage()
             ], 500);
         }
     }

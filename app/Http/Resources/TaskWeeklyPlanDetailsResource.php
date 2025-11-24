@@ -15,16 +15,8 @@ class TaskWeeklyPlanDetailsResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $aplication_week = 0;
         $diff_hours = 0;
         $passed_hours = (!$this->end_date && $this->start_date) ? $this->start_date->diffInHours(Carbon::now()) : null;
-
-        if($this->lotePlantationControl->cdp->end_date)
-        {
-            $aplication_week = ($this->lotePlantationControl->cdp->end_date->year - $this->lotePlantationControl->cdp->start_date->year) * 52 + ($this->lotePlantationControl->cdp->end_date->weekOfYear - $this->lotePlantationControl->cdp->start_date->weekOfYear );
-        }else{
-            $aplication_week = (Carbon::now()->year - $this->lotePlantationControl->cdp->start_date->year) * 52 + (Carbon::now()->weekOfYear - $this->lotePlantationControl->cdp->start_date->weekOfYear);
-        }
 
         if($this->closures->count() > 0){
             foreach ($this->closures as $closure) {
@@ -34,7 +26,7 @@ class TaskWeeklyPlanDetailsResource extends JsonResource
 
         return [
             'task' => $this->task->name,
-            'lote' => $this->lotePlantationControl->lote->name,
+            'lote' => $this->cdp ? $this->cdp->lote->name : '',
             'week' => $this->plan->week,
             'finca' => $this->plan->finca->name,
             'start_date' => $this->start_date ? $this->start_date->format('d-m-Y h:i:s A'): null,
@@ -43,7 +35,6 @@ class TaskWeeklyPlanDetailsResource extends JsonResource
             'real_hours' => $this->end_date ? round(($this->start_date->diffInHours($this->end_date) - $diff_hours),2)  : null,
             'slots' => $this->slots,
             'total_employees' => $this->employees->count(),
-            'aplication_week' => $aplication_week,
             'employees' => $this->employees->map(function($employee){
                 return [
                     'name' => $employee->name,

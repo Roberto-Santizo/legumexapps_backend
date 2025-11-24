@@ -3,6 +3,8 @@
 use App\Http\Controllers\CDPController;
 use App\Http\Controllers\CropController;
 use App\Http\Controllers\DashboardAgricolaController;
+use App\Http\Controllers\DraftTaskWeeklyPlanController;
+use App\Http\Controllers\SeedingPlanController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\FincaController;
 use App\Http\Controllers\InsumosController;
@@ -10,6 +12,8 @@ use App\Http\Controllers\LoteController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\TareaController;
 use App\Http\Controllers\TaskCropController;
+use App\Http\Controllers\TaskGuidelinesController;
+use App\Http\Controllers\TaskInsumoRecipeController;
 use App\Http\Controllers\TasksCropController;
 use App\Http\Controllers\TasksLoteController;
 use App\Http\Controllers\WeeklyPlanController;
@@ -18,8 +22,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('jwt.auth')->group(function () {
     Route::get('/employees/{id}', [EmployeeController::class, 'index']);
 
-    Route::get('/recipes', [RecipeController::class, 'index']);
-    Route::get('/crops', [CropController::class, 'index']);
+    Route::apiResource('/recipes', RecipeController::class);
+    Route::apiResource('/crops', CropController::class);
 
     Route::apiResource('/fincas', FincaController::class);
 
@@ -27,7 +31,6 @@ Route::middleware('jwt.auth')->group(function () {
     Route::post('/tareas/upload', [TareaController::class, 'UploadTasks']);
 
     Route::apiResource('/cdps', CDPController::class);
-    Route::post('/cdps/upload', [CDPController::class, 'UploadCDPS']);
 
     Route::apiResource('/tasks-crop', TaskCropController::class);
 
@@ -35,6 +38,8 @@ Route::middleware('jwt.auth')->group(function () {
     Route::post('/lotes-all/update', [LoteController::class, 'UpdateLotes']);
 
     Route::apiResource('/plans', WeeklyPlanController::class);
+    Route::get('/plans/summary-tasks/{id}', [WeeklyPlanController::class, 'SummaryTasksLote']);
+    Route::get('/plans/summary-tasks-crops/{id}', [WeeklyPlanController::class, 'SummaryTasksCrop']);
     Route::get('/plans/tasks-no-planification-date/{id}', [WeeklyPlanController::class, 'GetTasksWithNoPlanificationDate']);
     Route::get('/plans/tasks-for-calendar/{id}', [WeeklyPlanController::class, 'GetTasksForCalendar']);
     Route::get('/plans/tasks-planned-by-date/finca', [WeeklyPlanController::class, 'GetTasksPlannedByDate']);
@@ -71,4 +76,19 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/dashboard/agricola/finished-tasks', [DashboardAgricolaController::class, 'GetFinishedTasks']);
     Route::get('/dashboard/agricola/finished-tasks-crop', [DashboardAgricolaController::class, 'GetFinishedTasksCrop']);
     Route::get('/dashboard/agricola/finished-total-tasks-finca', [DashboardAgricolaController::class, 'GetFinishedTasksByFinca']);
+
+    //PLAN DE SIEMBRAS
+    Route::apiResource('/task-guidelines', TaskGuidelinesController::class);
+    Route::post('/task-guidelines/export', [TaskGuidelinesController::class, 'export']);
+    Route::post('/task-guidelines/upload', [TaskGuidelinesController::class, 'upload']);
+    Route::post('/task-guidelines/upload/insumos-recipes', [TaskGuidelinesController::class, 'uploadInsumosRecipe']);
+
+    //WEEKLYPLANS
+    Route::apiResource('/seeding-plan', SeedingPlanController::class);
+
+    //DRAFT TASK WEEKLY PLAN
+    Route::apiResource('/draft-task-weekly-plans', DraftTaskWeeklyPlanController::class);
+
+    //INSUMOS RECIPE
+    Route::apiResource('/task-insumo-recipes', TaskInsumoRecipeController::class);
 });
