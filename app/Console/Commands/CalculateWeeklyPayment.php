@@ -210,6 +210,7 @@ class CalculateWeeklyPayment extends Command
     public function getEmployeeRegistration($code, $date)
     {
         try {
+            dd($code);
             $employee = $this->entries->firstWhere('code', $code);
 
             if (!$employee || empty($employee['transactions'])) {

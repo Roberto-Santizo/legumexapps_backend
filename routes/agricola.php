@@ -16,7 +16,7 @@ use App\Http\Controllers\WeeklyPlanController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('jwt.auth')->group(function () {
-    Route::get('/employees/{id}', [EmployeeController::class, 'index']);
+    Route::get('/employees/{id}/{taskId}', [EmployeeController::class, 'index']);
 
     Route::get('/recipes', [RecipeController::class, 'index']);
     Route::get('/crops', [CropController::class, 'index']);

@@ -13,6 +13,7 @@ use App\Models\Lote;
 use App\Models\PartialClosure;
 use App\Models\TaskInsumos;
 use App\Models\TaskWeeklyPlan;
+use App\Models\WeeklyAssignmentEmployee;
 use App\Models\WeeklyPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -219,8 +220,19 @@ class TasksLoteController extends Controller
                 $task->slots -= count($data);
                 $task->save();
 
-
                 foreach ($data as $item) {
+                    $lote_id =  $task->lotePlantationControl->lote_id;
+                    $assignment = WeeklyAssignmentEmployee::where('code', $item['code'])->where('weekly_plan_id', $task->plan->id)->first();
+
+                    if (!$assignment) {
+                        WeeklyAssignmentEmployee::create([
+                            'lote_id' => $lote_id,
+                            'code' => $item['code'],
+                            'name' => $item['name'],
+                            'weekly_plan_id' => $task->plan->id
+                        ]);
+                    }
+
                     EmployeeTask::create([
                         'task_weekly_plan_id' => $task->id,
                         'employee_id' => $item['emp_id'],
