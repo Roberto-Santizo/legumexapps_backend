@@ -37,7 +37,11 @@ class RmReceptionsController extends Controller
         $payload = JWTAuth::getPayload();
         $id = $payload->get('id');
 
-        $query->where('user_id', $id);
+        $role = $payload->get('role');
+
+        if ($role == 'pcampo') {
+            $query->where('user_id', $id);
+        }
 
         if ($request->query('quality_status_id')) {
             $query->where('quality_status_id', $request->query('quality_status_id'));
