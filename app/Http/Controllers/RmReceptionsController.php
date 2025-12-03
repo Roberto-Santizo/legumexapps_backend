@@ -94,14 +94,17 @@ class RmReceptionsController extends Controller
         $signature3 = $data['inspector_signature'];
 
         try {
+            list(, $signature1) = explode(',', $signature1);
             $signature1 = base64_decode($signature1);
             $filename1 = 'signatures/' . uniqid() . '.png';
             Storage::disk('s3')->put($filename1, $signature1, 'public');
 
+            list(, $signature2) = explode(',', $signature2);
             $signature2 = base64_decode($signature2);
             $filename2 = 'signatures/' . uniqid() . '.png';
             Storage::disk('s3')->put($filename2, $signature2, 'public');
 
+            list(, $signature3) = explode(',', $signature3);
             $signature3 = base64_decode($signature3);
             $filename3 = 'signatures/' . uniqid() . '.png';
             Storage::disk('s3')->put($filename3, $signature3, 'public');
