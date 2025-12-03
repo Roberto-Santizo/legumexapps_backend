@@ -96,20 +96,18 @@ class RmReceptionsController extends Controller
         try {
             $signature1 = base64_decode($signature1);
             $filename1 = 'signatures/' . uniqid() . '.png';
-            Storage::disk('s3')->put($filename1, $signature1);
+            Storage::disk('s3')->put($filename1, $signature1, 'public');
 
             $signature2 = base64_decode($signature2);
             $filename2 = 'signatures/' . uniqid() . '.png';
-            Storage::disk('s3')->put($filename2, $signature2);
+            Storage::disk('s3')->put($filename2, $signature2, 'public');
 
             $signature3 = base64_decode($signature3);
             $filename3 = 'signatures/' . uniqid() . '.png';
-            Storage::disk('s3')->put($filename3, $signature3);
-
+            Storage::disk('s3')->put($filename3, $signature3, 'public');
 
             $payload = JWTAuth::getPayload();
             $id = $payload->get('id');
-
 
             $product = Product::find($data['product_id']);
             $basket = Basket::find($data['basket_id']);
@@ -161,7 +159,7 @@ class RmReceptionsController extends Controller
                 'weight' => $data['weight'],
                 'total_baskets' => $data['total_baskets'],
                 'weight_baskets' => round(($basket->weight * $data['total_baskets']), 2),
-                'quality_percentage' => 100,
+                'quality_percentage' => $data['quality_percentage'],
                 'basket_id' => $basket->id,
                 'driver_signature' => $filename1,
                 'prod_signature' => $filename2,
