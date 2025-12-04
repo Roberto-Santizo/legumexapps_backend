@@ -22,6 +22,7 @@ class FieldDataReception extends Model
         'plate_id',
         'carrier_id',
         'cdp_id',
+        'pilot_name'
     ];
 
     public function product()
