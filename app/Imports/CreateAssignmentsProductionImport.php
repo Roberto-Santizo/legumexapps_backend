@@ -6,7 +6,6 @@ use App\Models\Line;
 use App\Models\TaskProductionEmployee;
 use App\Models\TaskProductionPlan;
 use App\Models\WeeklyProductionPlan;
-use Exception;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;

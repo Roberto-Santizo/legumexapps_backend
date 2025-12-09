@@ -12,4 +12,9 @@ class WeeklyAssignmentEmployee extends Model
         'name',
         'weekly_plan_id'
     ];
+
+    public function lote()
+    {
+        return $this->belongsTo(Lote::class);
+    }
 }
