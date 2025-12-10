@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AssignFincaEmployeesGroupRequest;
 use App\Http\Resources\WeeklyAssignmentEmployeeCollection;
 use App\Http\Resources\WeeklyAssignmentEmployeeResource;
 use App\Imports\WeeklyAssignmentEmployeesImport;
+use App\Models\Finca;
+use App\Models\FincaGroup;
 use App\Models\Lote;
 use App\Models\WeeklyAssignmentEmployee;
 use Illuminate\Http\Request;
@@ -149,6 +152,39 @@ class WeeklyAssignmentEmployeeController extends Controller
             return response()->json([
                 'statusCode' => 200,
                 'message' => 'Asignación eliminada correctamente'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                "statusCode" => 500,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function assignGroup(AssignFincaEmployeesGroupRequest $request, string $id)
+    {
+        $data = $request->validated();
+
+        try {
+            $group = FincaGroup::find($id);
+            $assignments = WeeklyAssignmentEmployee::all();
+
+            if (!$group) {
+                return response()->json([
+                    "statusCode" => 404,
+                    'message' => 'Grupo no Encontrado'
+                ], 404);
+            }
+
+            foreach ($data['data'] as $assignment) {
+                $employee = $assignments->where('id', $assignment['assign_id'])->first();
+                $employee->finca_group_id = $group->id;
+                $employee->save();
+            }
+
+            return response()->json([
+                "statusCode" => 200,
+                'message' => 'Empleados Asignados Correctamente'
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([

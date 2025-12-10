@@ -5,6 +5,7 @@ use App\Http\Controllers\CropController;
 use App\Http\Controllers\DashboardAgricolaController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\FincaController;
+use App\Http\Controllers\FincaGroupController;
 use App\Http\Controllers\InsumosController;
 use App\Http\Controllers\LoteController;
 use App\Http\Controllers\RecipeController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\TasksCropController;
 use App\Http\Controllers\TasksLoteController;
 use App\Http\Controllers\WeeklyAssignmentEmployeeController;
 use App\Http\Controllers\WeeklyPlanController;
+use App\Models\FincaGroup;
 use App\Models\WeeklyAssignmentEmployee;
 use Illuminate\Support\Facades\Route;
 
@@ -74,9 +76,12 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/dashboard/agricola/finished-tasks-crop', [DashboardAgricolaController::class, 'GetFinishedTasksCrop']);
     Route::get('/dashboard/agricola/finished-total-tasks-finca', [DashboardAgricolaController::class, 'GetFinishedTasksByFinca']);
 
-    Route::post('/weekly-assignment-employee/upload/{id}', [WeeklyAssignmentEmployeeController::class,'upload']);
-    Route::get('/weekly-assignment-employee/{id}', [WeeklyAssignmentEmployeeController::class,'index']);
-    Route::get('/weekly-assignment-employee/details/{id}', [WeeklyAssignmentEmployeeController::class,'show']);
-    Route::delete('/weekly-assignment-employee/{id}', [WeeklyAssignmentEmployeeController::class,'destroy']);
-    Route::patch('/weekly-assignment-employee/{id}', [WeeklyAssignmentEmployeeController::class,'update']);
+    Route::post('/weekly-assignment-employee/upload/{id}', [WeeklyAssignmentEmployeeController::class, 'upload']);
+    Route::post('/weekly-assignment-employee/group/{id}', [WeeklyAssignmentEmployeeController::class, 'assignGroup']);
+    Route::get('/weekly-assignment-employee/{id}', [WeeklyAssignmentEmployeeController::class, 'index']);
+    Route::get('/weekly-assignment-employee/details/{id}', [WeeklyAssignmentEmployeeController::class, 'show']);
+    Route::delete('/weekly-assignment-employee/{id}', [WeeklyAssignmentEmployeeController::class, 'destroy']);
+    Route::patch('/weekly-assignment-employee/{id}', [WeeklyAssignmentEmployeeController::class, 'update']);
+
+    Route::apiResource('/finca-groups', FincaGroupController::class);
 });
