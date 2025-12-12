@@ -12,9 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('task_weekly_plans', function (Blueprint $table) {
-            $table->dropForeign('task_weekly_plans_lote_plantation_control_id_foreign');
-            $table->dropColumn('lote_plantation_control_id');
-
             $table->foreignId('plantation_control_id')->default(1)->constrained();
         });
     }
@@ -25,7 +22,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('task_weekly_plans', function (Blueprint $table) {
-            $table->foreignId('lote_plantation_control_id')->constrained();
             $table->dropForeign('task_weekly_plans_plantation_control_id_foreign');
             $table->dropColumn('plantation_control_id');
         });
