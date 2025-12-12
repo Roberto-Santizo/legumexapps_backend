@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateTaskWeeklyPlanRequest;
 use App\Http\Requests\EditTaskWeeklyPlanRequest;
+use App\Http\Requests\UpdateGroupRequest;
 use App\Http\Resources\EditTaskWeeklyPlanResource;
 use App\Http\Resources\TaskWeeklyPlanDetailsResource;
 use App\Http\Resources\TaskWeeklyPlanResource;
 use App\Models\BinnacleTaskWeeklyPlan;
 use App\Models\EmployeeTask;
+use App\Models\FincaGroup;
 use App\Models\Lote;
 use App\Models\PartialClosure;
 use App\Models\TaskInsumos;
@@ -18,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Error;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Http;
 
 class TasksLoteController extends Controller
 {
@@ -208,40 +211,48 @@ class TasksLoteController extends Controller
 
     public function CloseAssigment(Request $request, string $id)
     {
-        $data = $request->input('data');
         $task = TaskWeeklyPlan::find($id);
-
         if (!$task) {
             return response()->json([
-                'msg' => 'Tarea No Encontrada'
+                'statusCode' => 404,
+                'message' => 'Tarea No Encontrada'
             ], 404);
         }
 
         try {
-            if ($data) {
-                $task->start_date = Carbon::now();
-                $task->slots -= count($data);
-                $task->save();
+            $date = Carbon::now();
+            if (!$request->query('dron')) {
+                $url = env('BIOMETRICO_URL') . "/transactions/{$task->plan->finca->terminal_id}";
+                $entries = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url, ['start_date' => $date->format('Y-m-d'), 'end_date' => $date->format('Y-m-d')]);
+                $entries = $entries->collect();
 
-
-                foreach ($data as $item) {
-                    EmployeeTask::create([
-                        'task_weekly_plan_id' => $task->id,
-                        'employee_id' => $item['emp_id'],
-                        'code' => $item['code'],
-                        'name' => $item['name'],
-                    ]);
+                foreach ($task->group->employees as $employee) {
+                    $entry = $entries->firstWhere('code', $employee->code);
+                    if ($entry) {
+                        EmployeeTask::create([
+                            'code' => $employee->code,
+                            'name' => $employee->name,
+                            'employee_id' => $employee->id,
+                            'task_weekly_plan_id' => $task->id
+                        ]);
+                    }
                 }
-            } else {
-                $task->start_date = Carbon::now();
-                $task->use_dron = true;
-                $task->save();
-            }
 
-            return response()->json('Asignación Cerrada Correctamente', 200);
+            } else {
+                $task->use_dron = true;
+            }
+            
+            $task->start_date = $date;
+            $task->save();
+
+            return response()->json([
+                'statusCode' => 200,
+                'message' => 'Tarea Iniciada Correctamente'
+            ], 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'msg' => 'Hubo un error al cerrar la asignación'
+                'statusCode' => 500,
+                'message' => $th->getMessage()
             ], 500);
         }
     }
@@ -424,12 +435,14 @@ class TasksLoteController extends Controller
     {
         $data = $request->validate([
             'date' => 'required',
+            'group_id' => 'required',
             'tasks' => 'required'
         ]);
 
         try {
             $week = Carbon::parse($data['date'])->weekOfYear;
             $now_week = Carbon::now()->weekOfYear;
+            $group = FincaGroup::find($data['group_id']);
 
             if ($week < $now_week || $week > $now_week) {
                 return response()->json([
@@ -437,15 +450,59 @@ class TasksLoteController extends Controller
                 ], 500);
             }
 
+            if (!$group) {
+                return response()->json([
+                    'statusCode' => 404,
+                    'message' => 'Grupo no encontrado'
+                ], 404);
+            }
+
             foreach ($data['tasks'] as $id) {
                 $task_weekly_plan = TaskWeeklyPlan::find($id);
                 $task_weekly_plan->operation_date = $data['date'];
+                $task_weekly_plan->finca_group_id = $group->id;
                 $task_weekly_plan->save();
             }
-            return response()->json('Fecha de operación actualizada correctamente', 200);
+
+            return response()->json([
+                'statusCode' => 200,
+                'message' => 'Tareas Actualizadas Correctamente'
+            ], 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'msg' => $th->getMessage()
+                'statusCode' => 500,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function ChangeGroupAssignment(UpdateGroupRequest $request, string $id)
+    {
+        $data = $request->validated();
+        try {
+            $group = FincaGroup::find($id);
+
+            if (!$group) {
+                return response()->json([
+                    'statusCode' => 404,
+                    'message' => 'El grupo no existe'
+                ], 404);
+            }
+
+            foreach ($data['tasks'] as $task) {
+                $register = TaskWeeklyPlan::find($task['task_id']);
+                $register->finca_group_id = $group->id;
+                $register->save();
+            }
+
+            return response()->json([
+                'statusCode' => 200,
+                'message' => 'Tareas Actualizadas Correctamente'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'statusCode' => 500,
+                'message' => $th->getMessage()
             ], 500);
         }
     }

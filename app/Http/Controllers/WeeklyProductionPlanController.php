@@ -314,7 +314,7 @@ class WeeklyProductionPlanController extends Controller
 
                     return $groupedByLine->map(function ($tasks, $lineName) use ($date) {
                         $hours = $tasks->sum(function ($task) {
-                            return $task->total_lbs / $task->line_sku->lbs_performance;
+                            return ($task->line_sku->lbs_performance > 0) ? ($task->total_lbs / $task->line_sku->lbs_performance) : 0;
                         });
 
                         return [

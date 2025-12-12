@@ -122,9 +122,14 @@ class CalculateWeeklyPayment extends Command
                 if (count($dayDates) < 2) {
                     throw new Exception("El día {$key} no tiene 2 fechas. Datos: " . json_encode($dayDates));
                 }
-                $first_date = Carbon::parse($dayDates[0]);
-                $second_date = Carbon::parse($dayDates[1]);
-                $groupedByDay[$key] = $first_date->diffInHours($second_date);
+
+                try {
+                    $first_date = Carbon::parse($dayDates[0]);
+                    $second_date = Carbon::parse($dayDates[1]);
+                    $groupedByDay[$key] = $first_date->diffInHours($second_date);
+                } catch (\Throwable $th) {
+                    throw new Exception("Error Processing Request 1");
+                }
             }
 
             $task->employees->map(function ($employeeAssignment) use ($groupedByDay) {
@@ -134,9 +139,13 @@ class CalculateWeeklyPayment extends Command
                 foreach ($groupedByDay as $day => $hours) {
                     $flag = count($this->getEmployeeRegistration($employeeAssignment->code, $day)) > 1;
                     if ($flag) {
-                        $dates[$day][] = $hours;
-                        $employeeAssignment->dates = $dates;
-                        $employeeAssignment->total_hours += $hours;
+                        try {
+                            $dates[$day][] = $hours;
+                            $employeeAssignment->dates = $dates;
+                            $employeeAssignment->total_hours += $hours;
+                        } catch (\Throwable $th) {
+                            throw new Exception("Error Processing Request 2");
+                        }
                     }
                 }
 
@@ -200,35 +209,38 @@ class CalculateWeeklyPayment extends Command
 
     public function getEmployeeRegistration($code, $date)
     {
-        $employee = $this->entries->firstWhere('code', $code);
+        try {
+            $employee = $this->entries->firstWhere('code', $code);
 
-        if (!$employee || empty($employee['transactions'])) {
+            if (!$employee || empty($employee['transactions'])) {
+                return [
+                    'entrance' => '',
+                    'exit'     => '',
+                ];
+            }
+
+            $records = collect($employee['transactions'])
+                ->filter(function ($transaction) use ($date) {
+                    $punch_time = Carbon::parse($transaction['punch_time'])->format('Y-m-d');
+                    $date = Carbon::parse($date);
+                    return $punch_time === $date->format('Y-m-d');
+                })
+                ->sortBy('punch_time')
+                ->values();
+
+            $first = $records->first();
+            $last = $records->last();
+
             return [
-                'entrance' => '',
-                'exit'     => '',
+                'entrance' => $first
+                    ? Carbon::parse($first['punch_time'])->timezone('America/Guatemala')->format('d-m-Y h:i:s A')
+                    : '',
+                'exit' => $last
+                    ? Carbon::parse($last['punch_time'])->timezone('America/Guatemala')->format('d-m-Y h:i:s A')
+                    : '',
             ];
+        } catch (\Throwable $th) {
+            throw new Exception("Error Processing Request 3");
         }
-
-        $records = collect($employee['transactions'])
-            ->filter(function ($transaction) use ($date) {
-                $punch_time = Carbon::parse($transaction['punch_time'])->format('Y-m-d');
-                $date = Carbon::parse($date);
-                return $punch_time === $date->format('Y-m-d');
-            })
-            ->sortBy('punch_time')
-            ->values();
-
-        return [
-            'entrance' => optional($records->first()['punch_time'])
-                ? Carbon::parse($records->first()['punch_time'])
-                ->timezone('America/Guatemala')
-                ->format('d-m-Y h:i:s A')
-                : '',
-            'exit' => optional($records->last()['punch_time'])
-                ? Carbon::parse($records->last()['punch_time'])
-                ->timezone('America/Guatemala')
-                ->format('d-m-Y h:i:s A')
-                : '',
-        ];
     }
 }

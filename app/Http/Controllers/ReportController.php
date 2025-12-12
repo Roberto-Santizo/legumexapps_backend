@@ -17,7 +17,6 @@ use App\Models\WeeklyPlan;
 use App\Models\WeeklyProductionPlan;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ReportController extends Controller
 {

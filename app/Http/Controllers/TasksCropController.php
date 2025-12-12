@@ -114,10 +114,10 @@ class TasksCropController extends Controller
             ]);
         }
 
-
         return response()->json([
-            'message' => 'Assignment closed'
-        ]);
+            'statusCode' => 200,
+            'message' => 'Asignación Cerrada Correctamente'
+        ], 200);
     }
 
     public function CloseDailyAssigment(Request $request, string $id)
