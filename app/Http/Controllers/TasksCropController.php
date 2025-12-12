@@ -91,7 +91,7 @@ class TasksCropController extends Controller
             'data' =>  new TaskCropResource($task)
         ]);
     }
-    
+
     public function update(string $id)
     {
         $task = TaskCropWeeklyPlan::find($id);
@@ -123,10 +123,10 @@ class TasksCropController extends Controller
             ]);
         }
 
-
         return response()->json([
-            'message' => 'Assignment closed'
-        ]);
+            'statusCode' => 200,
+            'message' => 'Asignación Cerrada Correctamente'
+        ], 200);
     }
 
     public function CloseDailyAssigment(Request $request, string $id)

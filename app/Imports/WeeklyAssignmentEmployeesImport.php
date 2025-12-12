@@ -31,22 +31,14 @@ class WeeklyAssignmentEmployeesImport implements ToCollection, WithHeadingRow
                     continue;
                 }
 
-                $lote = Lote::where('name', $row['lote'])->first();
-
-                if (!$lote) {
-                    throw new HttpException(404, "Lote {$row['lote']} no encotrado");
-                }
 
                 $exists = WeeklyAssignmentEmployee::where('code', $row['codigo'])->where('weekly_plan_id', $this->weekly_plan->id)->first();
 
                 if ($exists) {
-                    $exists->lote_id = $lote->id;
-                    $exists->save();
                     continue;
                 }
 
                 WeeklyAssignmentEmployee::create([
-                    'lote_id' => $lote->id,
                     'code' => $row['codigo'],
                     'name' => $row['nombre'],
                     'weekly_plan_id' => $this->weekly_plan->id

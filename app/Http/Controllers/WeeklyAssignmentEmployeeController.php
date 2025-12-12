@@ -6,7 +6,6 @@ use App\Http\Requests\AssignFincaEmployeesGroupRequest;
 use App\Http\Resources\WeeklyAssignmentEmployeeCollection;
 use App\Http\Resources\WeeklyAssignmentEmployeeResource;
 use App\Imports\WeeklyAssignmentEmployeesImport;
-use App\Models\Finca;
 use App\Models\FincaGroup;
 use App\Models\Lote;
 use App\Models\WeeklyAssignmentEmployee;
@@ -28,13 +27,21 @@ class WeeklyAssignmentEmployeeController extends Controller
                 $query->where('lote_id', $request->query('lote'));
             }
 
+            if ($request->query('name')) {
+                $query->where('name', 'LIKE', '%' . $request->query('name') . '%');
+            }
+
+            if ($request->query('code')) {
+                $query->where('code', 'LIKE', '%' . $request->query('code') . '%');
+            }
+
             $assignments = $query->where('weekly_plan_id', $id)->get();
 
             return new WeeklyAssignmentEmployeeCollection($assignments);
         } catch (\Throwable $th) {
             return response()->json([
                 "statusCode" => 500,
-                'msg' => $th->getMessage()
+                'message' => $th->getMessage()
             ], 500);
         }
     }

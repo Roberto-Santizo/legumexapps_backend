@@ -50,6 +50,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::post('/tasks-lotes/close-assignment/{id}', [TasksLoteController::class, 'CloseAssigment']);
     Route::patch('/tasks-lotes/close/{id}', [TasksLoteController::class, 'CloseTask']);
     Route::patch('/tasks-lotes/change-operation-date/update', [TasksLoteController::class, 'ChangeOperationDate']);
+    Route::patch('/tasks-lotes/group/update/{id}', [TasksLoteController::class, 'ChangeGroupAssignment']);
     Route::patch('/tasks-lotes/partial-close/close/{id}', [TasksLoteController::class, 'PartialClose']);
     Route::patch('/tasks-lotes/partial-close/open/{id}', [TasksLoteController::class, 'PartialCloseOpen']);
     Route::patch('/tasks-lotes/prepared-insumos/{id}', [TasksLoteController::class, 'PreparedInsumos']);

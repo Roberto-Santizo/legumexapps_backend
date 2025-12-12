@@ -18,6 +18,7 @@ class TaskWeeklyPlan extends Model
         'start_date',
         'end_date',
         'operation_date',
+        'finca_group_id'
     ];
 
     protected $casts = [
@@ -59,4 +60,10 @@ class TaskWeeklyPlan extends Model
     {
         return $this->hasMany(BinnacleTaskWeeklyPlan::class);
     }
+
+    public function group() 
+    {
+        return $this->belongsTo(FincaGroup::class, 'finca_group_id', 'id');
+    }
+
 }

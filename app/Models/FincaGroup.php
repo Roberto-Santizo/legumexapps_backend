@@ -21,4 +21,9 @@ class FincaGroup extends Model
     {
         return $this->belongsTo(Finca::class);
     }
+
+    public function employees()
+    {
+        return $this->hasMany(WeeklyAssignmentEmployee::class);
+    }
 }

@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('weekly_assignment_employees', function (Blueprint $table) {
+        Schema::table('task_weekly_plans', function (Blueprint $table) {
             $table->foreignId('finca_group_id')->nullable()->constrained();
-            $table->dropForeign('weekly_assignment_employees_lote_id_foreign');
-            $table->dropColumn('lote_id');
         });
     }
 
@@ -23,10 +21,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('weekly_assignment_employees', function (Blueprint $table) {
-            $table->dropForeign('weekly_assignment_employees_finca_group_id_foreign');
+        Schema::table('task_weekly_plans', function (Blueprint $table) {
+            $table->dropForeign('task_weekly_plans_finca_group_id_foreign');
             $table->dropColumn('finca_group_id');
-            $table->foreignId('lote_id')->nullable()->constrained();
         });
     }
 };

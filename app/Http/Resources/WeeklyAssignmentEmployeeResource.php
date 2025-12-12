@@ -18,8 +18,6 @@ class WeeklyAssignmentEmployeeResource extends JsonResource
             'id' => $this->id,
             'code' => $this->code,
             'name' => $this->name,
-            'lote' => $this->lote->name,
-            'lote_id' => $this->lote->id,
             'group' => $this->group ? $this->group->code : 'SIN GRUPO ASIGNADO'
         ];
     }
