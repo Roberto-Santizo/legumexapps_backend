@@ -10,6 +10,7 @@ class TaskWeeklyPlan extends Model
         'weekly_plan_id',
         'tarea_id',
         'workers_quantity',
+        'lote_plantation_control_id',
         'budget',
         'hours',
         'slots',
@@ -17,7 +18,7 @@ class TaskWeeklyPlan extends Model
         'start_date',
         'end_date',
         'operation_date',
-        'finca_group_id'
+        'finca_group_id',
         'plantation_control_id'
     ];
 
@@ -39,7 +40,7 @@ class TaskWeeklyPlan extends Model
 
     public function cdp()
     {
-        return $this->belongsTo(PlantationControl::class,'plantation_control_id','id');
+        return $this->belongsTo(PlantationControl::class, 'plantation_control_id', 'id');
     }
 
     public function closures()
@@ -61,9 +62,13 @@ class TaskWeeklyPlan extends Model
         return $this->hasMany(BinnacleTaskWeeklyPlan::class);
     }
 
-    public function group() 
+    public function group()
     {
         return $this->belongsTo(FincaGroup::class, 'finca_group_id', 'id');
     }
-
+    
+    public function lotePlantationControl()
+    {
+        return $this->belongsTo(LotePlantationControl::class, 'lote_plantation_control_id', 'id');
+    }
 }
