@@ -37,7 +37,11 @@ class RmReceptionsController extends Controller
         $payload = JWTAuth::getPayload();
         $id = $payload->get('id');
 
-        $query->where('user_id', $id);
+        $role = $payload->get('role');
+
+        if ($role == 'pcampo') {
+            $query->where('user_id', $id);
+        }
 
         if ($request->query('quality_status_id')) {
             $query->where('quality_status_id', $request->query('quality_status_id'));
@@ -72,6 +76,8 @@ class RmReceptionsController extends Controller
             $query->whereDoesntHave('transport_doc_data');
         }
 
+        $query->orderBy('id','DESC');
+
         if ($request->query('paginated')) {
             return RmReceptionsResource::collection($query->paginate(10));
         } else {
@@ -90,29 +96,30 @@ class RmReceptionsController extends Controller
         $signature3 = $data['inspector_signature'];
 
         try {
+            list(, $signature1) = explode(',', $signature1);
             $signature1 = base64_decode($signature1);
             $filename1 = 'signatures/' . uniqid() . '.png';
-            Storage::disk('s3')->put($filename1, $signature1);
+            Storage::disk('s3')->put($filename1, $signature1, 'public');
 
+            list(, $signature2) = explode(',', $signature2);
             $signature2 = base64_decode($signature2);
             $filename2 = 'signatures/' . uniqid() . '.png';
-            Storage::disk('s3')->put($filename2, $signature2);
+            Storage::disk('s3')->put($filename2, $signature2, 'public');
 
+            list(, $signature3) = explode(',', $signature3);
             $signature3 = base64_decode($signature3);
             $filename3 = 'signatures/' . uniqid() . '.png';
-            Storage::disk('s3')->put($filename3, $signature3);
-
+            Storage::disk('s3')->put($filename3, $signature3, 'public');
 
             $payload = JWTAuth::getPayload();
             $id = $payload->get('id');
-
 
             $product = Product::find($data['product_id']);
             $basket = Basket::find($data['basket_id']);
             $finca = Finca::find($data['finca_id']);
 
             $rm_reception = RmReception::create([
-                'doc_date' => Carbon::now(),
+                'doc_date' => isset($data['doc_date']) ? Carbon::parse($data['doc_date']) : Carbon::now(),
                 'finca_id' => $finca->id,
                 'consignacion' => 0,
                 'quality_status_id' => 1,
@@ -157,7 +164,7 @@ class RmReceptionsController extends Controller
                 'weight' => $data['weight'],
                 'total_baskets' => $data['total_baskets'],
                 'weight_baskets' => round(($basket->weight * $data['total_baskets']), 2),
-                'quality_percentage' => 100,
+                'quality_percentage' => $data['quality_percentage'],
                 'basket_id' => $basket->id,
                 'driver_signature' => $filename1,
                 'prod_signature' => $filename2,
@@ -165,9 +172,10 @@ class RmReceptionsController extends Controller
                 'plate_id' => $plate->id,
                 'cdp_id' => $productor_cdp->id,
                 'carrier_id' => $carrier->id,
+                'pilot_name' => isset($data['pilot_name']) ? $data['pilot_name'] : null
             ]);
 
-            return response()->json('Boleta Creada Correctamente!!!');
+            return response()->json('Boleta Creada Correctamente');
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => $th->getMessage()
