@@ -19,7 +19,7 @@ class TasksNoOperationDateResource extends JsonResource
             'task' => $this->task->name,
             'finca' => $this->plan->finca->name,
             'lote' => $this->lotePlantationControl->lote->name,
-            'bg_color' => $colors[$this->lotePlantationControl->lote->finca_id],
+            'bg_color' => 'indigo',
             'group' => $this->group ? $this->group->code : 'SIN GRUPO ASIGNADO'
         ];
     }

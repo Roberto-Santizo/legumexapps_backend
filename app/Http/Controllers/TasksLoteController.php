@@ -222,26 +222,19 @@ class TasksLoteController extends Controller
         try {
             $date = Carbon::now();
             if (!$request->query('dron')) {
-                $url = env('BIOMETRICO_URL') . "/transactions/{$task->plan->finca->terminal_id}";
-                $entries = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url, ['start_date' => $date->format('Y-m-d'), 'end_date' => $date->format('Y-m-d')]);
-                $entries = $entries->collect();
 
                 foreach ($task->group->employees as $employee) {
-                    $entry = $entries->firstWhere('code', $employee->code);
-                    if ($entry) {
-                        EmployeeTask::create([
-                            'code' => $employee->code,
-                            'name' => $employee->name,
-                            'employee_id' => $employee->id,
-                            'task_weekly_plan_id' => $task->id
-                        ]);
-                    }
+                    EmployeeTask::create([
+                        'code' => $employee->code,
+                        'name' => $employee->name,
+                        'employee_id' => $employee->id,
+                        'task_weekly_plan_id' => $task->id
+                    ]);
                 }
-
             } else {
                 $task->use_dron = true;
             }
-            
+
             $task->start_date = $date;
             $task->save();
 

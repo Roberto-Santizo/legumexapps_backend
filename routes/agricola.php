@@ -19,8 +19,6 @@ use App\Http\Controllers\TasksCropController;
 use App\Http\Controllers\TasksLoteController;
 use App\Http\Controllers\WeeklyAssignmentEmployeeController;
 use App\Http\Controllers\WeeklyPlanController;
-use App\Models\FincaGroup;
-use App\Models\WeeklyAssignmentEmployee;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('jwt.auth')->group(function () {

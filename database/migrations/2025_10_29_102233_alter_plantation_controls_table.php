@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('plantation_controls', function (Blueprint $table) {
-            $table->foreignId('recipe_id')->constrained();
-            $table->foreignId('crop_id')->constrained();
+            $table->foreignId('recipe_id')->default(1)->constrained();
+            $table->foreignId('crop_id')->default(1)->constrained();
         });
     }
 

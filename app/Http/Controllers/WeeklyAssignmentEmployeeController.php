@@ -23,10 +23,6 @@ class WeeklyAssignmentEmployeeController extends Controller
         try {
             $query = WeeklyAssignmentEmployee::query();
 
-            if ($request->query('lote')) {
-                $query->where('lote_id', $request->query('lote'));
-            }
-
             if ($request->query('name')) {
                 $query->where('name', 'LIKE', '%' . $request->query('name') . '%');
             }

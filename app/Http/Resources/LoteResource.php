@@ -18,6 +18,8 @@ class LoteResource extends JsonResource
             'id' => strval($this->id),
             'name' => $this->name,
             'finca' => $this->finca->name,
+            'size' => 0,
+            'total_plants' => 0
         ];
     }
 }
