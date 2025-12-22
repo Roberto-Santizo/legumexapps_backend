@@ -23,6 +23,12 @@ class CDPController extends Controller
     {
         $query = PlantationControl::query();
 
+        if ($request->query('finca')) {
+            $query->whereHas('lote', function ($q) use ($request) {
+                $q->where('finca_id', $request->query('finca'));
+            });
+        }
+
         if ($request->query('cdp')) {
             $query->where('name', $request->query('cdp'));
         }
@@ -34,6 +40,8 @@ class CDPController extends Controller
         if ($request->query('start_date')) {
             $query->whereDate('start_date', $request->query('start_date'));
         }
+
+        $query->where('status', 1);
 
         if ($request->query('paginated')) {
             return new PlantationControlCollection($query->paginate(10));
