@@ -26,4 +26,9 @@ class FincaGroup extends Model
     {
         return $this->hasMany(WeeklyAssignmentEmployee::class);
     }
+
+    public function tasks()
+    {
+        return $this->hasMany(TaskWeeklyPlan::class, 'finca_group_id');
+    }
 }

@@ -80,7 +80,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/dashboard/agricola/finished-tasks-crop', [DashboardAgricolaController::class, 'GetFinishedTasksCrop']);
     Route::get('/dashboard/agricola/finished-total-tasks-finca', [DashboardAgricolaController::class, 'GetFinishedTasksByFinca']);
 
-    Route::post('/weekly-assignment-employee/upload/{id}', [WeeklyAssignmentEmployeeController::class, 'upload']);
+    Route::post('/weekly-assignment-employee/upload', [WeeklyAssignmentEmployeeController::class, 'upload']);
     Route::post('/weekly-assignment-employee/group/{id}', [WeeklyAssignmentEmployeeController::class, 'assignGroup']);
     Route::get('/weekly-assignment-employee/{id}', [WeeklyAssignmentEmployeeController::class, 'index']);
     Route::get('/weekly-assignment-employee/details/{id}', [WeeklyAssignmentEmployeeController::class, 'show']);

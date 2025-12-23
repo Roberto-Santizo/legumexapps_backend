@@ -22,6 +22,10 @@ class FincaGroupController extends Controller
                 $query->where('finca_id', $request->query('fincaId'));
             }
 
+            $query->with(['employees' => function ($q) use ($request) {
+                $q->where('weekly_plan_id', $request->query('plan'));
+            }, 'tasks']);
+
             return new FincaGroupCollection($query->get());
         } catch (\Throwable $th) {
             return response()->json([
