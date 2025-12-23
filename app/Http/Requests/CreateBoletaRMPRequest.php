@@ -34,7 +34,10 @@ class CreateBoletaRMPRequest extends FormRequest
             'inspector_signature' => 'required',
             'prod_signature' => 'required',
             'carrier_id' => 'required',
-            'plate_id' => 'required'
+            'plate_id' => 'required',
+            'quality_percentage' => 'required',
+            'pilot_name' => 'sometimes',
+            'doc_date' => 'sometimes'
         ];
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\EmployeePaymentWeeklySummary;
+use App\Models\TaskWeeklyPlan;
 use App\Models\WeeklyPlan;
 use Carbon\Carbon;
 use Exception;
@@ -49,10 +50,21 @@ class CalculateWeeklyPayment extends Command
 
         $startOfWeek = Carbon::now()->setISODate($weekly_plan->year, $weekly_plan->week)->startOfWeek();
         $endOfWeek = Carbon::now()->setISODate($weekly_plan->year, $weekly_plan->week)->endOfWeek();
-        $url = env('BIOMETRICO_URL') . "/transactions/{$weekly_plan->finca->terminal_id}";
-        $entries = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url, ['start_date' => $startOfWeek->format('Y-m-d'), 'end_date' => $endOfWeek->format('Y-m-d')]);
-        $this->entries = $entries->collect();
+        $entries = collect();
 
+        if ($weekly_plan->finca->id == 2) {
+            $url = env('BIOMETRICO_URL') . "/transactions/{$weekly_plan->finca->terminal_id}?start_date={$startOfWeek->format('Y-m-d')}&end_date={$endOfWeek->format('Y-m-d')}";
+            $entries = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url);
+            $url2 = env('BIOMETRICO_URL') . "/transactions/1009?start_date={$startOfWeek->format('Y-m-d')}&end_date={$endOfWeek->format('Y-m-d')}";
+            $entries2 = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url2);
+
+            $entries = $entries->collect()->merge($entries2->collect());
+        } else {
+            $url = env('BIOMETRICO_URL') . "/transactions/{$weekly_plan->finca->terminal_id}?start_date={$startOfWeek->format('Y-m-d')}&end_date={$endOfWeek->format('Y-m-d')}";
+            $entries = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url);
+        }
+
+        $this->entries = $entries->collect();
         $tasks = $weekly_plan->tasks()->whereNotNull('end_date')->where('use_dron', false)->with('employees')->get();
         $harvest_tasks = $weekly_plan->tasks_crops()->with('assigments')->get();
 
@@ -137,14 +149,15 @@ class CalculateWeeklyPayment extends Command
                 $employeeAssignment->dates = [];
                 $dates = [];
                 foreach ($groupedByDay as $day => $hours) {
-                    $flag = count($this->getEmployeeRegistration($employeeAssignment->code, $day)) > 1;
+                    $flag = $this->getEmployeeRegistration($employeeAssignment->code, $day) ? true : false;
+
                     if ($flag) {
                         try {
                             $dates[$day][] = $hours;
                             $employeeAssignment->dates = $dates;
                             $employeeAssignment->total_hours += $hours;
                         } catch (\Throwable $th) {
-                            throw new Exception("Error Processing Request 2");
+                            throw new Exception($th->getMessage());
                         }
                     }
                 }
@@ -213,10 +226,7 @@ class CalculateWeeklyPayment extends Command
             $employee = $this->entries->firstWhere('code', $code);
 
             if (!$employee || empty($employee['transactions'])) {
-                return [
-                    'entrance' => '',
-                    'exit'     => '',
-                ];
+                return null;
             }
 
             $records = collect($employee['transactions'])
@@ -231,14 +241,14 @@ class CalculateWeeklyPayment extends Command
             $first = $records->first();
             $last = $records->last();
 
-            return [
-                'entrance' => $first
-                    ? Carbon::parse($first['punch_time'])->timezone('America/Guatemala')->format('d-m-Y h:i:s A')
-                    : '',
-                'exit' => $last
-                    ? Carbon::parse($last['punch_time'])->timezone('America/Guatemala')->format('d-m-Y h:i:s A')
-                    : '',
-            ];
+            if ($first && $last) {
+                return [
+                    'entrance' => Carbon::parse($first['punch_time'])->timezone('America/Guatemala')->format('d-m-Y h:i:s A'),
+                    'exit' => Carbon::parse($last['punch_time'])->timezone('America/Guatemala')->format('d-m-Y h:i:s A'),
+                ];
+            } else {
+                return null;
+            }
         } catch (\Throwable $th) {
             throw new Exception("Error Processing Request 3");
         }
