@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\TasksByLoteCollection;
+use App\Http\Resources\TasksCropByLoteCollection;
 use App\Http\Resources\TasksNoOperationDateResource;
 use App\Http\Resources\TasksWeeklyPlanForCalendarResource;
 use App\Http\Resources\TaskWeeklyPlanByDateResource;
-use Exception;
 use App\Models\WeeklyPlan;
 use Illuminate\Http\Request;
 use App\Imports\WeeklyPlanImport;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Http\Resources\WeeklyPlanCollection;
 use App\Http\Resources\WeeklyPlanResource;
-use App\Models\LotePlantationControl;
 use App\Models\TaskWeeklyPlan;
 use Carbon\Carbon;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -87,73 +86,52 @@ class WeeklyPlanController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function SummaryTasksLote(string $id)
     {
         $plan = WeeklyPlan::find($id);
         $payload = JWTAuth::getPayload();
 
         if (!$plan) {
             return response()->json([
-                'msg' => ['El plan no existe']
+                'statusCode' => 404,
+                'msg' => 'El plan no existe'
             ], 404);
         }
 
         $today = Carbon::today();
         $role = $payload->get('role');
+        $query = TaskWeeklyPlan::query();
+        $query->where('weekly_plan_id', $plan->id);
 
         if ($role != 'admin' && $role != 'adminagricola') {
-            $tasks_by_lote = $plan->tasks()
-                ->where(function ($query) use ($today) {
-                    $query->whereDate('operation_date', $today)
-                        ->orWhereHas('closures', function ($q) {
-                            $q->where('end_date', null)->orWhereHas('taskWeeklyPlan', function ($q2) {
-                                $q2->whereNull('end_date');
-                            });
-                        });
-                })
-                ->orderBy('lote_plantation_control_id', 'ASC')
-                ->get()
-                ->groupBy('lote_plantation_control_id');
+            $tasks_by_lote = $query->where(function ($query) use ($today) {
+                $query->whereDate('operation_date', $today)->orWhereHas('closures', function ($q) {
+                    $q->where('end_date', null)->orWhereHas('taskWeeklyPlan', function ($q2) {
+                        $q2->whereNull('end_date');
+                    });
+                });
+            })->orderBy('plantation_control_id', 'ASC')->with('cdp')->get();
         } else {
-            $tasks_by_lote = $plan->tasks->groupBy('lote_plantation_control_id');
+            $tasks_by_lote = $query->with('cdp')->get();
         }
 
+        return new TasksByLoteCollection($tasks_by_lote);
+    }
 
-        $tasks_crop_by_lote = $plan->tasks_crops->groupBy('lote_plantation_control_id');
+    public function SummaryTasksCrop(string $id)
+    {
+        $plan = WeeklyPlan::find($id);
 
-        $summary_tasks = $tasks_by_lote->map(function ($group, $key) {
-            return [
-                'lote' => LotePlantationControl::find($key)->lote->name,
-                'lote_plantation_control_id' => strval($key),
-                'total_budget' => round($group->sum('budget'), 2),
-                'total_workers' => $group->sum('workers_quantity'),
-                'total_hours' => round($group->sum('hours'), 2),
-                'total_tasks' => $group->count(),
-                'finished_tasks' => $group->filter(function ($task) {
-                    return !is_null($task->end_date);
-                })->count(),
-            ];
-        })->values();
+        if (!$plan) {
+            return response()->json([
+                'statusCode' => 404,
+                'msg' => 'El plan no existe'
+            ], 404);
+        }
 
-        $summary_crops = $tasks_crop_by_lote->map(function ($group, $key) {
-            $lote_plantation_control = LotePlantationControl::find($key);
-            return [
-                'id' => strval($key),
-                'lote_plantation_control_id' => strval($lote_plantation_control->id),
-                'lote' => $lote_plantation_control->lote->name,
-            ];
-        })->values();
-
-        return response()->json([
-            'data' => [
-                'id' => strval($plan->id),
-                'finca' => $plan->finca->name,
-                'week' => $plan->week,
-                'year' => $plan->year,
-                'summary_tasks' => $summary_tasks,
-                'summary_crops' => $summary_crops
-            ]
-        ]);
+        $tasks_crops = $plan->tasks_crops()->with('cdp')->get();
+        
+        return new TasksCropByLoteCollection($tasks_crops);
     }
 
     public function GetTasksWithNoPlanificationDate(Request $request, string $id)
@@ -174,12 +152,6 @@ class WeeklyPlanController extends Controller
             return $tasks;
         });
 
-        if ($request->query('lote')) {
-            $all_tasks = $all_tasks->filter(function ($task) use ($request) {
-                return $task->lotePlantationControl && $task->lotePlantationControl->lote_id == $request->query('lote');
-            });
-        }
-
         if ($request->query('finca')) {
             $all_tasks = $all_tasks->filter(function ($task) use ($request) {
                 return $task->plan && $task->plan->finca->id == $request->query('finca');
@@ -189,7 +161,6 @@ class WeeklyPlanController extends Controller
         if ($request->query('task')) {
             $all_tasks = $all_tasks->where('tarea_id', $request->query('task'));
         }
-
 
         return TasksNoOperationDateResource::collection($all_tasks);
     }
@@ -216,7 +187,6 @@ class WeeklyPlanController extends Controller
                 'msg' => 'No se encontraron datos de la semana actual',
             ], 404);
         }
-
 
         $initial_date = Carbon::now()->setISODate($weekly_plan->first()->year, $weekly_plan->first()->week)->startOfWeek();
 

@@ -8,12 +8,12 @@ class PlantationControl extends Model
 {
     protected $fillable = [
         'name',
-        'crop_id',
-        'recipe_id',
-        'density',
-        'size',
         'start_date',
-        'end_date'
+        'end_date',
+        'lote_id',
+        'total_plants',
+        'recipe_id',
+        'crop_id'
     ];
 
     protected $casts = [
@@ -21,14 +21,13 @@ class PlantationControl extends Model
         'end_date' => 'datetime'
     ];
 
-    public function crop()
+    public function lote()
     {
-        return $this->belongsTo(Crop::class);
+        return $this->belongsTo(Lote::class);
     }
 
-    public function recipe()
+    public function draftTasks()
     {
-        return $this->belongsTo(Recipe::class);
+        return $this->hasMany(TaskWeeklyPlanDraft::class);
     }
-
 }

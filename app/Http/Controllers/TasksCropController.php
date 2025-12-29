@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateTaskCropWeeklyPlanRequest;
 use App\Http\Resources\EmployeeTaskCropResource;
 use App\Http\Resources\EmployeeTaskCropSummaryResource;
+use App\Http\Resources\TaskCropByLoteCollection;
 use App\Http\Resources\TaskCropIncomplemeteAssignmentResource;
 use App\Http\Resources\TaskCropResource;
 use App\Http\Resources\TaskCropWeeklyPlanDetailsResource;
@@ -23,18 +24,8 @@ class TasksCropController extends Controller
      */
     public function index(Request $request)
     {
-        $data = $request->validate([
-            'lote_plantation_control_id' => 'required|string',
-            'weekly_plan_id' => 'required|string'
-        ]);
-
-        $tasks = TaskCropWeeklyPlan::where('lote_plantation_control_id', $data['lote_plantation_control_id'])->where('weekly_plan_id', $data['weekly_plan_id'])->get();
-        return [
-            'week' => $tasks->first()->plan->week,
-            'finca' => $tasks->first()->plan->finca->name,
-            'lote' => $tasks->first()->lotePlantationControl->lote->name,
-            'tasks' =>   TaskCropResource::collection($tasks),
-        ];
+        $tasks = TaskCropWeeklyPlan::where('plantation_control_id', $request->query('cdp'))->where('weekly_plan_id', $request->query('weekly_plan_id'))->get();
+        return new TaskCropByLoteCollection($tasks);
     }
 
     /**

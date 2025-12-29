@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Models\Finca;
 use App\Models\Lote;
 use App\Models\WeeklyAssignmentEmployee;
 use App\Models\WeeklyPlan;
@@ -16,32 +17,39 @@ class WeeklyAssignmentEmployeesImport implements ToCollection, WithHeadingRow
     /**
      * @param Collection $collection
      */
-    public $weekly_plan;
+    public $plans;
+    public $fincas;
 
-    public function __construct($id)
+    public function __construct()
     {
-        $this->weekly_plan = WeeklyPlan::find($id);
+        $this->plans = WeeklyPlan::all();
+        $this->fincas = Finca::all();
     }
 
     public function collection(Collection $rows)
     {
         try {
             foreach ($rows as $row) {
-                if (empty($row['codigo'])) {
-                    continue;
+                $finca = $this->fincas->firstWhere('code', $row['finca']);
+
+                if (!$finca) {
+                    throw new HttpException(404, "Finca no encontrada para el codigo: " . $row['finca']);
                 }
 
+                $plan = $this->plans->where('finca_id', $finca->id)->where('week', $row['semana'])->first();
 
-                $exists = WeeklyAssignmentEmployee::where('code', $row['codigo'])->where('weekly_plan_id', $this->weekly_plan->id)->first();
+                if (!$plan) {
+                    throw new HttpException(404, "Plan Semanal no encontrado para la finca: " . $row['finca'] . " y semana: " . $row['semana']);
+                }
 
-                if ($exists) {
+                if (empty($row['codigo'])) {
                     continue;
                 }
 
                 WeeklyAssignmentEmployee::create([
                     'code' => $row['codigo'],
                     'name' => $row['nombre'],
-                    'weekly_plan_id' => $this->weekly_plan->id
+                    'weekly_plan_id' => $plan->id
                 ]);
             }
         } catch (Exception $e) {

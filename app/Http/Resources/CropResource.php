@@ -17,7 +17,7 @@ class CropResource extends JsonResource
         return [
             'id' => strval($this->id),
             'name' => $this->name,
-            'variety' => $this->variety->name,
+            'code' => $this->code,
         ];
     }
 }

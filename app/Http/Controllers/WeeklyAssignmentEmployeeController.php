@@ -23,10 +23,6 @@ class WeeklyAssignmentEmployeeController extends Controller
         try {
             $query = WeeklyAssignmentEmployee::query();
 
-            if ($request->query('lote')) {
-                $query->where('lote_id', $request->query('lote'));
-            }
-
             if ($request->query('name')) {
                 $query->where('name', 'LIKE', '%' . $request->query('name') . '%');
             }
@@ -35,7 +31,7 @@ class WeeklyAssignmentEmployeeController extends Controller
                 $query->where('code', 'LIKE', '%' . $request->query('code') . '%');
             }
 
-            $assignments = $query->where('weekly_plan_id', $id)->get();
+            $assignments = $query->where('weekly_plan_id', $id)->where('finca_group_id', null)->get();
 
             return new WeeklyAssignmentEmployeeCollection($assignments);
         } catch (\Throwable $th) {
@@ -49,14 +45,14 @@ class WeeklyAssignmentEmployeeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function upload(Request $request, string $id)
+    public function upload(Request $request)
     {
         $request->validate([
             'file' => 'required'
         ]);
 
         try {
-            Excel::import(new WeeklyAssignmentEmployeesImport($id), $request->file('file'));
+            Excel::import(new WeeklyAssignmentEmployeesImport(), $request->file('file'));
 
             return response()->json([
                 'statusCode' => 200,

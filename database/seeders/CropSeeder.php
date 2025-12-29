@@ -14,7 +14,7 @@ class CropSeeder extends Seeder
     public function run(): void
     {
         $data = [
-            ['name' => 'BROCOLI', 'variety_id' => 1],
+            ['name' => 'BROCOLI', 'code' => 'BR-1'],
         ];
 
         Crop::insert($data);

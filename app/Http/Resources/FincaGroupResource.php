@@ -18,7 +18,10 @@ class FincaGroupResource extends JsonResource
             'id' => $this->id,
             'code' => $this->code,
             'lote' => $this->lote->name,
-            'finca' => $this->finca->name
+            'finca' => $this->finca->name,
+            'total_employees' => $this->employees->count(),
+            'total_tasks' => $this->tasks->count(),
+            'total_hours' => round($this->tasks->sum('hours'), 2),
         ];
     }
 }

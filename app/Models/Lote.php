@@ -8,7 +8,9 @@ class Lote extends Model
 {
     protected $fillable = [
         'name',
-        'finca_id'
+        'finca_id',
+        'size',
+        'total_plants'
     ];
 
     public function finca()
@@ -18,11 +20,11 @@ class Lote extends Model
 
     public function cdp()
     {
-        return $this->hasOne(LotePlantationControl::class,'lote_id','id')->where('status',1);
+        return $this->hasOne(LotePlantationControl::class, 'lote_id', 'id')->where('status', 1);
     }
 
     public function lote_cdps()
     {
-        return $this->hasMany(LotePlantationControl::class,'lote_id','id');
+        return $this->hasMany(LotePlantationControl::class, 'lote_id', 'id');
     }
 }

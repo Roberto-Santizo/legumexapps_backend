@@ -14,20 +14,12 @@ class TasksNoOperationDateResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $colors = [
-            1 => 'bg-green-100',
-            2 => 'bg-blue-100',
-            4 => 'bg-red-100',
-            5 => 'bg-orange-100',
-            6 => 'bg-gray-100',
-        ];
-
         return [
             'id' => strval($this->id),
             'task' => $this->task->name,
             'finca' => $this->plan->finca->name,
             'lote' => $this->lotePlantationControl->lote->name,
-            'bg_color' => $colors[$this->lotePlantationControl->lote->finca_id],
+            'bg_color' => 'indigo',
             'group' => $this->group ? $this->group->code : 'SIN GRUPO ASIGNADO'
         ];
     }

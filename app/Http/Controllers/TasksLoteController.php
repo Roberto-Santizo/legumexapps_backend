@@ -20,7 +20,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Error;
 use Tymon\JWTAuth\Facades\JWTAuth;
-use Illuminate\Support\Facades\Http;
 
 class TasksLoteController extends Controller
 {
@@ -35,7 +34,11 @@ class TasksLoteController extends Controller
 
         $query = TaskWeeklyPlan::query();
 
-        $query->where('lote_plantation_control_id', $request->query('cdp'));
+        $query->whereHas('cdp', function ($q) use ($request) {
+            $q->whereHas('lote', function ($qq) use ($request) {
+                $qq->where('name', $request->query('lote'));
+            });
+        });
         $query->where('weekly_plan_id', $request->query('weekly_plan'));
 
         $task_without_filter = $query->get()->first();
@@ -87,7 +90,7 @@ class TasksLoteController extends Controller
         return [
             'week' => $task_without_filter->plan->week,
             'finca' => $task_without_filter->plan->finca->name,
-            'lote' => $task_without_filter->lotePlantationControl->lote->name,
+            'lote' => $task_without_filter->cdp->lote->name,
             'data' => TaskWeeklyPlanResource::collection($tasks_filterd),
         ];
     }
@@ -96,35 +99,22 @@ class TasksLoteController extends Controller
     {
         $data = $request->validated();
 
-        $lote = Lote::find($data['data']['lote_id']);
-        $weekly_plan = WeeklyPlan::find($data['data']['weekly_plan_id']);
-        if (!$lote || !$weekly_plan) {
-            return response()->json([
-                'msg' => "Data not found"
-            ], 404);
-        }
-
-        if ($lote->finca_id !== $weekly_plan->finca->id) {
-            return response()->json([
-                'msg' => "Not valid data"
-            ], 500);
-        }
-
         try {
             $task_weekly_plan = TaskWeeklyPlan::create([
-                'weekly_plan_id' => $data['data']['weekly_plan_id'],
-                'lote_plantation_control_id' => $lote->cdp->id,
-                'tarea_id' => $data['data']['tarea_id'],
-                'workers_quantity' => $data['data']['workers_quantity'],
-                'budget' => $data['data']['budget'],
-                'hours' => $data['data']['hours'],
-                'slots' => $data['data']['workers_quantity'],
-                'extraordinary' => $data['data']['extraordinary'],
-                'operation_date' => $data['data']['operation_date']
+                'weekly_plan_id' => $data['weekly_plan_id'],
+                'lote_plantation_control_id' => 1,
+                'tarea_id' => $data['tarea_id'],
+                'workers_quantity' => $data['hours'] > 8 ? max(1, floor($data['hours'] / 8)) : 1,
+                'slots' => $data['slots'],
+                'budget' => $data['budget'],
+                'hours' => $data['hours'],
+                'extraordinary' => true,
+                'operation_date' => $data['operation_date'],
+                'plantation_control_id' => $data['cdp_id'],
             ]);
 
-            if (count($data['data']['insumos']) > 0) {
-                foreach ($data['data']['insumos'] as $insumo) {
+            if (isset($data['insumos']) && count($data['insumos']) > 0) {
+                foreach ($data['insumos'] as $insumo) {
                     TaskInsumos::create([
                         'insumo_id' => $insumo['insumo_id'],
                         'task_weekly_plan_id' => $task_weekly_plan->id,
@@ -133,10 +123,14 @@ class TasksLoteController extends Controller
                 }
             }
 
-            return response()->json('Tarea Creada Correctamente', 200);
+            return response()->json([
+                'statusCode' => 201,
+                'message' => 'Tarea Creada Correctamente'
+            ], 201);
         } catch (\Throwable $th) {
             return response()->json([
-                'errors' => $th->getMessage()
+                'statusCode' => 500,
+                'message' => $th->getMessage()
             ], 500);
         }
     }
@@ -218,26 +212,19 @@ class TasksLoteController extends Controller
         try {
             $date = Carbon::now();
             if (!$request->query('dron')) {
-                $url = env('BIOMETRICO_URL') . "/transactions/{$task->plan->finca->terminal_id}";
-                $entries = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url, ['start_date' => $date->format('Y-m-d'), 'end_date' => $date->format('Y-m-d')]);
-                $entries = $entries->collect();
 
                 foreach ($task->group->employees as $employee) {
-                    $entry = $entries->firstWhere('code', $employee->code);
-                    if ($entry) {
-                        EmployeeTask::create([
-                            'code' => $employee->code,
-                            'name' => $employee->name,
-                            'employee_id' => $employee->id,
-                            'task_weekly_plan_id' => $task->id
-                        ]);
-                    }
+                    EmployeeTask::create([
+                        'code' => $employee->code,
+                        'name' => $employee->name,
+                        'employee_id' => $employee->id,
+                        'task_weekly_plan_id' => $task->id
+                    ]);
                 }
-
             } else {
                 $task->use_dron = true;
             }
-            
+
             $task->start_date = $date;
             $task->save();
 
