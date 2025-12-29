@@ -56,8 +56,9 @@ class DashboardAgricolaController extends Controller
 
     public function GetSummaryHoursEmployees(Request $request)
     {
-        $week = $request->input('week') ?? Carbon::now()->weekOfYear;
-        $year = $request->input('year') ?? Carbon::now()->year;
+        $week = WeeklyPlan::orderBy('created_at', 'desc')->first()->week;
+        $year = WeeklyPlan::orderBy('created_at', 'desc')->first()->year;
+
         $employees = EmployeesResource::collection(PersonnelEmployee::all());
 
         $format_employees = $employees->map(function ($employee) use ($week, $year) {
@@ -97,8 +98,9 @@ class DashboardAgricolaController extends Controller
 
     public function GetTasksInProgress(Request $request)
     {
-        $week = $request->input('week') ?? Carbon::now()->weekOfYear;
-        $year = $request->input('year') ?? Carbon::now()->year;
+        $week = WeeklyPlan::orderBy('created_at', 'desc')->first()->week;
+        $year = WeeklyPlan::orderBy('created_at', 'desc')->first()->year;
+
         $payload = JWTAuth::getPayload();
         $role = $payload->get('role');
 
@@ -121,8 +123,8 @@ class DashboardAgricolaController extends Controller
 
     public function GetFinishedTasks(Request $request)
     {
-        $week = $request->input('week') ?? Carbon::now()->weekOfYear;
-        $year = $request->input('year') ?? Carbon::now()->year;
+        $week = WeeklyPlan::orderBy('created_at', 'desc')->first()->week;
+        $year = WeeklyPlan::orderBy('created_at', 'desc')->first()->year;
 
         $payload = JWTAuth::getPayload();
         $role = $payload->get('role');
@@ -146,8 +148,8 @@ class DashboardAgricolaController extends Controller
 
     public function GetTasksCropInProgress(Request $request)
     {
-        $week = $request->input('week') ?? Carbon::now()->weekOfYear;
-        $year = $request->input('year') ?? Carbon::now()->year;
+        $week = WeeklyPlan::orderBy('created_at', 'desc')->first()->week;
+        $year = WeeklyPlan::orderBy('created_at', 'desc')->first()->year;
 
         $payload = JWTAuth::getPayload();
         $role = $payload->get('role');
@@ -170,8 +172,8 @@ class DashboardAgricolaController extends Controller
 
     public function GetFinishedTasksCrop(Request $request)
     {
-        $week = $request->input('week') ?? Carbon::now()->weekOfYear;
-        $year = $request->input('year') ?? Carbon::now()->year;
+        $week = WeeklyPlan::orderBy('created_at', 'desc')->first()->week;
+        $year = WeeklyPlan::orderBy('created_at', 'desc')->first()->year;
 
         $payload = JWTAuth::getPayload();
         $role = $payload->get('role');
@@ -194,8 +196,8 @@ class DashboardAgricolaController extends Controller
 
     public function GetFinishedTasksByFinca(Request $request)
     {
-        $week = $request->input('week') ?? Carbon::now()->weekOfYear;
-        $year = $request->input('year') ?? Carbon::now()->year;
+        $week = WeeklyPlan::orderBy('created_at', 'desc')->first()->week;
+        $year = WeeklyPlan::orderBy('created_at', 'desc')->first()->year;
 
         $plans = WeeklyPlan::where('year', $year)->where('week', $week)->with('finca')->get();
         return PlanFincaFinishedTasksResource::collection($plans);
