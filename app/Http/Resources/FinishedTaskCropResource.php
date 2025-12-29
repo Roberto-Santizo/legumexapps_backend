@@ -18,7 +18,7 @@ class FinishedTasksWeeklyPlanResource extends JsonResource
             'id' => strval($this->id),
             'task' => $this->task->name,
             'finca' => $this->plan->finca->name,
-            'lote' => $this->lotePlantationControl->lote->name,
+            'lote' => $this->cdp->lote->name,
             'start_date' => '',
             'end_date' => '',
         ];

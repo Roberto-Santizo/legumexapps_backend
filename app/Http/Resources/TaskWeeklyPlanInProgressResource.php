@@ -21,7 +21,7 @@ class TaskWeeklyPlanInProgressResource extends JsonResource
             'id' => strval($this->id),
             'task' => $this->task->name,
             'finca' => $this->plan->finca->name,
-            'lote' => $this->lotePlantationControl->lote->name,
+            'lote' => $this->cdp->lote->name,
             'week' => $this->plan->week,
             'assigned_employees' => $assigned_employees,
             'total_employees' => $this->workers_quantity,
