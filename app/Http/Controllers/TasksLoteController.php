@@ -20,7 +20,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Error;
 use Tymon\JWTAuth\Facades\JWTAuth;
-use Illuminate\Support\Facades\Http;
 
 class TasksLoteController extends Controller
 {
@@ -100,35 +99,22 @@ class TasksLoteController extends Controller
     {
         $data = $request->validated();
 
-        $lote = Lote::find($data['data']['lote_id']);
-        $weekly_plan = WeeklyPlan::find($data['data']['weekly_plan_id']);
-        if (!$lote || !$weekly_plan) {
-            return response()->json([
-                'msg' => "Data not found"
-            ], 404);
-        }
-
-        if ($lote->finca_id !== $weekly_plan->finca->id) {
-            return response()->json([
-                'msg' => "Not valid data"
-            ], 500);
-        }
-
         try {
             $task_weekly_plan = TaskWeeklyPlan::create([
-                'weekly_plan_id' => $data['data']['weekly_plan_id'],
-                'lote_plantation_control_id' => $lote->cdp->id,
-                'tarea_id' => $data['data']['tarea_id'],
-                'workers_quantity' => $data['data']['workers_quantity'],
-                'budget' => $data['data']['budget'],
-                'hours' => $data['data']['hours'],
-                'slots' => $data['data']['workers_quantity'],
-                'extraordinary' => $data['data']['extraordinary'],
-                'operation_date' => $data['data']['operation_date']
+                'weekly_plan_id' => $data['weekly_plan_id'],
+                'lote_plantation_control_id' => 1,
+                'tarea_id' => $data['tarea_id'],
+                'workers_quantity' => $data['hours'] > 8 ? max(1, floor($data['hours'] / 8)) : 1,
+                'slots' => $data['slots'],
+                'budget' => $data['budget'],
+                'hours' => $data['hours'],
+                'extraordinary' => true,
+                'operation_date' => $data['operation_date'],
+                'plantation_control_id' => $data['cdp_id'],
             ]);
 
-            if (count($data['data']['insumos']) > 0) {
-                foreach ($data['data']['insumos'] as $insumo) {
+            if (isset($data['insumos']) && count($data['insumos']) > 0) {
+                foreach ($data['insumos'] as $insumo) {
                     TaskInsumos::create([
                         'insumo_id' => $insumo['insumo_id'],
                         'task_weekly_plan_id' => $task_weekly_plan->id,
@@ -137,10 +123,14 @@ class TasksLoteController extends Controller
                 }
             }
 
-            return response()->json('Tarea Creada Correctamente', 200);
+            return response()->json([
+                'statusCode' => 201,
+                'message' => 'Tarea Creada Correctamente'
+            ], 201);
         } catch (\Throwable $th) {
             return response()->json([
-                'errors' => $th->getMessage()
+                'statusCode' => 500,
+                'message' => $th->getMessage()
             ], 500);
         }
     }

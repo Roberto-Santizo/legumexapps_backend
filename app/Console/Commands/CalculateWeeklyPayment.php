@@ -88,11 +88,20 @@ class CalculateWeeklyPayment extends Command
     public function calculateTasksWithNoClosures($task)
     {
         try {
-            $theorical_hours = $task->hours / $task->employees->count();
-            $hours = $task->start_date->diffInHours($task->end_date);
-            $amount = $task->budget / $task->employees->count();
-
+            $real_employees = [];
             foreach ($task->employees as $employee) {
+                $flag = $this->getEmployeeRegistration($employee->code, $task->start_date->format('Y-m-d')) ? true : false;
+
+                if ($flag) {
+                    $real_employees[] = $employee;
+                }
+            }
+
+            $hours = $task->start_date->diffInHours($task->end_date);
+            $theorical_hours =  count($real_employees) >  0 ? $task->hours / count($real_employees) : 0;
+            $amount =  count($real_employees) > 0 ? $task->budget / count($real_employees) : 0;
+
+            foreach ($real_employees as $employee) {
                 EmployeePaymentWeeklySummary::create([
                     'code' => $employee->code,
                     'name' => $employee->name,

@@ -22,14 +22,32 @@ class CreateTaskWeeklyPlanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "data" =>  ['required'],
+            "tarea_id" =>  ['required', 'numeric', 'exists:tareas,id'],
+            "budget" =>  ['required', 'numeric'],
+            "hours" =>  ['required', 'numeric'],
+            "slots" =>  ['required', 'numeric'],
+            "cdp_id" => ['required', 'numeric', 'exists:plantation_controls,id'],
+            "weekly_plan_id" => ['required', 'numeric', 'exists:weekly_plans,id'],
+            "operation_date" => ['required'],
+            "insumos" => ['array','sometimes'],
+            "insumos.*.insumo_id" => ['required', 'numeric', 'exists:insumos,id'],
+            "insumos.*.quantity" => ['required', 'numeric'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            "data.required" => 'Toda la información es necesaria',
+            "tarea_id.required" => 'La tarea es requerida',
+            "tarea_id.exists" => 'La tarea no existe',
+            "budget.required" => 'El presupuesto es requerido',
+            "hours.required" => 'Las horas son requeridas',
+            "slots.required" => 'Los turnos son requeridos',
+            "cdp_id.required" => 'El CDP es requerido',
+            "cdp_id.exists" => 'El CDP no existe',
+            "weekly_plan_id.required" => 'El plan semanal es requerido',
+            "weekly_plan_id.exists" => 'El plan semanal no existe',
+            "operation_date.required" => 'La fecha de operación es requerida',
         ];
     }
 }
