@@ -27,7 +27,7 @@ class WeeklyProductionPlanDraftController extends Controller
     public function index(Request $request)
     {
         if ($request->query('paginated')) {
-            $drafts = DraftWeeklyProductionPlan::orderBy('week', 'DESC')->paginate(10);
+            $drafts = DraftWeeklyProductionPlan::orderBy('id', 'DESC')->paginate(10);
         } else {
             $drafts = DraftWeeklyProductionPlan::get();
         }

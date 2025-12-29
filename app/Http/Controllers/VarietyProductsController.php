@@ -16,7 +16,7 @@ class VarietyProductsController extends Controller
         if ($request->query('paginated')) {
             $varieties = VarietyProduct::paginate(10);
         } else {
-            $varieties = VarietyProduct::get();
+            $varieties = VarietyProduct::all();
         }
         return VarietyProductResource::collection($varieties);
     }
