@@ -32,6 +32,7 @@ class CreateTaskWeeklyPlanRequest extends FormRequest
             "insumos" => ['array','sometimes'],
             "insumos.*.insumo_id" => ['required', 'numeric', 'exists:insumos,id'],
             "insumos.*.quantity" => ['required', 'numeric'],
+            "finca_group_id" => ['required', 'numeric', 'exists:finca_groups,id']
         ];
     }
 
@@ -48,6 +49,8 @@ class CreateTaskWeeklyPlanRequest extends FormRequest
             "weekly_plan_id.required" => 'El plan semanal es requerido',
             "weekly_plan_id.exists" => 'El plan semanal no existe',
             "operation_date.required" => 'La fecha de operación es requerida',
+            "finca_group_id.required" => 'El grupo de finca es requerido',
+            "finca_group_id.exists" => 'El grupo de finca no existe',
         ];
     }
 }

@@ -165,17 +165,24 @@ class TasksCropController extends Controller
 
     public function TaskCropDetail(string $id)
     {
-        $task = TaskCropWeeklyPlan::find($id);
-        // $task = $assigment->TaskCropWeeklyPlan;
-        $plan = $task->plan;
-        return response()->json([
-            'finca' => $plan->finca->name,
-            'week' => $plan->week,
-            'lote' => $task->lotePlantationControl->lote->name,
-            'cdp' => $task->lotePlantationControl->cdp->name,
-            'assigments' => new TaskCropWeeklyPlanDetailsResource($task),
-            'employees' => EmployeeTaskCropSummaryResource::collection($task->employees)
-        ]);
+        try {
+            $task = TaskCropWeeklyPlan::find($id);
+            // $task = $assigment->TaskCropWeeklyPlan;
+            $plan = $task->plan;
+            return response()->json([
+                'finca' => $plan->finca->name,
+                'week' => $plan->week,
+                'lote' => $task->cdp->lote->name,
+                'cdp' => $task->cdp->name,
+                'assigments' => new TaskCropWeeklyPlanDetailsResource($task),
+                'employees' => EmployeeTaskCropSummaryResource::collection($task->employees)
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'statusCode' => '500',
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 
     public function EmployeesAssignment(string $id)

@@ -11,7 +11,6 @@ use App\Http\Resources\TaskWeeklyPlanResource;
 use App\Models\BinnacleTaskWeeklyPlan;
 use App\Models\EmployeeTask;
 use App\Models\FincaGroup;
-use App\Models\Lote;
 use App\Models\PartialClosure;
 use App\Models\TaskInsumos;
 use App\Models\TaskWeeklyPlan;
@@ -111,6 +110,7 @@ class TasksLoteController extends Controller
                 'extraordinary' => true,
                 'operation_date' => $data['operation_date'],
                 'plantation_control_id' => $data['cdp_id'],
+                'finca_group_id' => $data['finca_group_id'],
             ]);
 
             if (isset($data['insumos']) && count($data['insumos']) > 0) {
