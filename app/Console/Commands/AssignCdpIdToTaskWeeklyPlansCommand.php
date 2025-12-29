@@ -27,7 +27,7 @@ class AssignCdpIdToTaskWeeklyPlansCommand extends Command
      */
     public function handle()
     {
-        $tasks = TaskWeeklyPlan::all();
+        $tasks = TaskWeeklyPlan::where('plantation_control_id', null)->get();
         $cdps = PlantationControl::all();
 
         foreach ($tasks as $task) {
