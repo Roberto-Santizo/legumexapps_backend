@@ -23,7 +23,9 @@ class DashboardAgricolaController extends Controller
 {
     public function GetDronHours(Request $request)
     {
-        $week = $request->input('week') ?? Carbon::now()->weekOfYear;
+        $week = WeeklyPlan::orderBy('created_at', 'desc')->first()->week;
+        $year = WeeklyPlan::orderBy('created_at', 'desc')->first()->year;
+
         $year = $request->input('year') ?? Carbon::now()->year;
         $payload = JWTAuth::getPayload();
         $role = $payload->get('role');
