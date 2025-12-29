@@ -49,9 +49,7 @@ class WeeklyPlanController extends Controller
             $permission = $request->user()->getRoleNames()->first();
             $query->whereHas('finca', function ($query) use ($permission) {
                 $query->where('name', 'LIKE', '%' . $permission . '%');
-            })->where(function ($query) use ($week) {
-                $query->where('week', $week)->orWhere('week', $week - 1);
-            })->where('year', $year)->orderBy('created_at', 'DESC');
+            })->orderBy('created_at', 'DESC');
         } else {
             $query->orderBy('created_at', 'DESC');
         }
