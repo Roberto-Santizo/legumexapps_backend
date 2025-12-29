@@ -60,16 +60,40 @@ class EmployeeController extends Controller
 
             if (!$has_assignments) {
                 return $employee;
-            }else {
+            } else {
                 $exists = $assigment_employees->where('code', $employee['code'])->where('lote_id', $task->lotePlantationControl->lote_id)->first();
 
-                if($exists){
+                if ($exists) {
                     return $employee;
                 }
             }
         });
 
         return new EmployeeCollection($filter_response);
+    }
+
+    public function getEmployeesFinca(string $id)
+    {
+        $finca = Finca::find($id);
+        $date = Carbon::now()->format('Y-m-d');
+
+        if ($finca->id === 2) {
+            $url = env('BIOMETRICO_URL') . "/transactions/1008";
+            $url2 = env('BIOMETRICO_URL') . "/transactions/1009";
+
+            $chunck1 = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url, ['start_date' => $date, 'end_date' => $date]);
+            $chunck2 = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url2, ['start_date' => $date, 'end_date' => $date]);
+
+            $response = collect();
+            $response->push($chunck1->collect());
+            $response->push($chunck2->collect());
+            $response = $response->flatten(1);
+        } else {
+            $url = env('BIOMETRICO_URL') . "/transactions/{$finca->terminal_id}";
+            $response = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url, ['start_date' => $date, 'end_date' => $date])->collect();
+        }
+
+        return new EmployeeCollection($response->unique('code'));
     }
 
     public function getComodines()

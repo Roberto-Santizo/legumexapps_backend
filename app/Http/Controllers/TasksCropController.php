@@ -34,33 +34,22 @@ class TasksCropController extends Controller
     public function store(CreateTaskCropWeeklyPlanRequest $request)
     {
         $data = $request->validated();
-        $lote = Lote::find($data['lote_id']);
-        $weekly_plan = WeeklyPlan::find($data['weekly_plan_id']);
-        if (!$lote || !$weekly_plan) {
-            return response()->json([
-                'msg' => "Data not found"
-            ], 404);
-        }
-        if ($lote->finca_id !== $weekly_plan->finca->id) {
-            return response()->json([
-                'msg' => "Not valid data"
-            ], 500);
-        }
-
 
         try {
             TaskCropWeeklyPlan::create([
-                'weekly_plan_id' => $weekly_plan->id,
-                'lote_plantation_control_id' => $lote->cdp->id,
-                'task_crop_id' => $data['task_crop_id']
+                'weekly_plan_id' => $data['weekly_plan_id'],
+                'plantation_control_id' => $data['cdp_id'],
+                'tarea_id' => $data['tarea_id']
             ]);
 
             return response()->json([
-                'msg' => 'Task Crop Weekly Plan Created Successfully'
-            ]);
+                'statusCode' => 201,
+                'message' => 'Tarea de Cosecha Activada Correctamente'
+            ], 201);
         } catch (\Throwable $th) {
             return response()->json([
-                'msg' => $th->getMessage()
+                'statusCode' => 500,
+                'message' => $th->getMessage()
             ], 500);
         }
     }

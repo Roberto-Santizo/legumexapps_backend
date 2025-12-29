@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('jwt.auth')->group(function () {
     Route::get('/employees/{id}/{taskId}', [EmployeeController::class, 'index']);
+    Route::get('/employees/{id}', [EmployeeController::class, 'getEmployeesFinca']);
 
     Route::apiResource('/recipes', RecipeController::class);
     Route::apiResource('/crops', CropController::class);

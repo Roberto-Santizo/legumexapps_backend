@@ -18,7 +18,7 @@ class TasksNoOperationDateResource extends JsonResource
             'id' => strval($this->id),
             'task' => $this->task->name,
             'finca' => $this->plan->finca->name,
-            'lote' => $this->lotePlantationControl->lote->name,
+            'lote' => $this->cdp->lote->name,
             'bg_color' => 'indigo',
             'group' => $this->group ? $this->group->code : 'SIN GRUPO ASIGNADO'
         ];

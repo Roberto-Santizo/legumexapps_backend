@@ -22,9 +22,26 @@ class CreateTaskCropWeeklyPlanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'lote_id' => 'required',
-            'task_crop_id' => 'required',
-            'weekly_plan_id' => 'required'
+            'cdp_id' => ['required', 'numeric', 'exists:plantation_controls,id'],
+            'tarea_id' => ['required', 'numeric', 'exists:tareas,id'],
+            'weekly_plan_id' => ['required', 'numeric', 'exists:weekly_plans,id'],
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'cdp_id.required' => 'El CDP es requerido',
+            'cdp_id.numeric' => 'El campo cdp_id debe ser un número.',
+            'cdp_id.exists' => 'El CDP seleccionado no es válido.',
+
+            'tarea_id.required' => 'La tarea es requerida',
+            'tarea_id.numeric' => 'El campo tarea_id debe ser un número.',
+            'tarea_id.exists' => 'La tarea seleccionada no es válida.',
+
+            'weekly_plan_id.required' => 'El plan semanal es requerido.',
+            'weekly_plan_id.numeric' => 'El campo plan debe ser un número.',
+            'weekly_plan_id.exists' => 'El plan semanal seleccionado no es válido.',
         ];
     }
 }
