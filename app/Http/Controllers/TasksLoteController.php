@@ -423,15 +423,7 @@ class TasksLoteController extends Controller
         ]);
 
         try {
-            $week = Carbon::parse($data['date'])->weekOfYear;
-            $now_week = Carbon::now()->weekOfYear;
             $group = FincaGroup::find($data['group_id']);
-
-            if ($week < $now_week || $week > $now_week) {
-                return response()->json([
-                    'msg' => 'La fecha no se encuentra dentro de la semana de la tarea'
-                ], 500);
-            }
 
             if (!$group) {
                 return response()->json([
