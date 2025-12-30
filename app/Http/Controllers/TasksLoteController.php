@@ -141,12 +141,14 @@ class TasksLoteController extends Controller
 
         if (!$data) {
             return response()->json([
-                'message' => 'TaskWeeklyPlan not found'
+                'statusCode' => 404,
+                'message' => 'Tarea no encontrada'
             ], 404);
         }
 
         return response()->json([
-            'data' => new TaskWeeklyPlanResource($data)
+            'statusCode' => 200,
+            'response' => new TaskWeeklyPlanResource($data)
         ]);
     }
 
@@ -300,52 +302,36 @@ class TasksLoteController extends Controller
     public function update(EditTaskWeeklyPlanRequest $request, string $id)
     {
         $data = $request->validated();
-        $task = TaskWeeklyPlan::find($id);
-
-        $start_date = $task->start_date;
-        $end_date = $task->end_date;
-
-        if ($start_date && ($data['start_date'] ?? false)) {
-            $draft_start_date = $data['start_date'] . ' ' . $data['start_time'];
-            $start_date = Carbon::parse($draft_start_date);
-        }
-
-        if ($end_date && ($data['end_date'] ?? false)) {
-            $draft_end_date = $data['end_date'] . ' ' . $data['end_time'];
-            $end_date = Carbon::parse($draft_end_date);
-        }
-
 
         try {
-            $task->budget = $data['budget'];
-            $task->start_date = $start_date ?? null;
-            $task->end_date = $end_date ?? null;
-            $task->hours = $data['hours'];
-            $task->slots = $data['slots'];
-            $task->workers_quantity = $data['slots'];
+            $task = TaskWeeklyPlan::find($id);
 
-
-            if ($task->weekly_plan_id != $data['weekly_plan_id']) {
-                $dest = WeeklyPlan::find($data['weekly_plan_id']);
-
-                if ($dest->finca->id != $task->plan->finca->id) {
-                    throw new Error("La finca no coincide con el lote de la tarea");
-                }
-                BinnacleTaskWeeklyPlan::create([
-                    'task_weekly_plan_id' => $task->id,
-                    'from_plan' => $task->plan->id,
-                    'to_plan' => $dest->id
-                ]);
-                $task->weekly_plan_id = $data['weekly_plan_id'];
-                $task->operation_date = null;
+            if (!$task) {
+                return response()->json([
+                    'statusCode' => 404,
+                    'message' => "Tarea no encontrada"
+                ], 404);
             }
 
+            $task->finca_group_id = $data['finca_group_id'] ?? null;
+            $task->weekly_plan_id = $data['weekly_plan_id'];
+            $task->budget = $data['budget'];
+            $task->hours = $data['hours'];
+            $task->start_date = $data['start_date'] ?? null;
+            $task->end_date = $data['end_date'] ?? null;
+            $task->operation_date = Carbon::parse($data['operation_date']);
+
             $task->save();
-            return response()->json('Tarea Actualizada Correctamente', 200);
+
+            return response()->json([
+                'statusCode' => 200,
+                'message' => 'Tarea Actualizada Correctamente'
+            ], 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'msg' => $th->getMessage(),
-            ], 400);
+                'statusCode' => 500,
+                'message' => $th->getMessage()
+            ], 500);
         }
     }
 
@@ -411,10 +397,13 @@ class TasksLoteController extends Controller
             ], 404);
         }
 
-        return new EditTaskWeeklyPlanResource($task);
+        return response()->json([
+            'statusCode' => 200,
+            'response' => new EditTaskWeeklyPlanResource($task)
+        ], 200);
     }
 
-    public function ChangeOperationDate(Request $request)
+    public function UpdateTasks(Request $request)
     {
         $data = $request->validate([
             'date' => 'required',
@@ -450,6 +439,37 @@ class TasksLoteController extends Controller
             ], 500);
         }
     }
+
+    public function ChangeOperationDate(Request $request, string $id)
+    {
+        $data = $request->validate([
+            'date' => 'required',
+        ]);
+
+        try {
+            $task = TaskWeeklyPlan::find($id);
+            if (!$task) {
+                return response()->json([
+                    'statusCode' => 404,
+                    'message' => 'Tarea no encontrada'
+                ], 404);
+            }
+            $task->operation_date = $data['date'];
+            $task->save();
+
+            return response()->json([
+                'statusCode' => 200,
+                'message' => 'Fecha de Operación Actualizada Correctamente'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'statusCode' => 500,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+
 
     public function ChangeGroupAssignment(UpdateGroupRequest $request, string $id)
     {

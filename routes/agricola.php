@@ -47,13 +47,17 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/plans/tasks-for-calendar/{id}', [WeeklyPlanController::class, 'GetTasksForCalendar']);
     Route::get('/plans/tasks-planned-by-date/finca', [WeeklyPlanController::class, 'GetTasksPlannedByDate']);
 
+    Route::post('/tasks-lotes/update-tasks', [TasksLoteController::class, 'UpdateTasks']);
+    
     Route::apiResource('/tasks-lotes', TasksLoteController::class);
     Route::get('/tasks-lotes/edit/{id}', [TasksLoteController::class, 'GetTaskForEdit']);
     Route::get('/tasks-lotes/{id}/details', [TasksLoteController::class, 'TaskDetail']);
     Route::post('/tasks-lotes/register-insumos', [TasksLoteController::class, 'RegisterInsumos']);
     Route::post('/tasks-lotes/close-assignment/{id}', [TasksLoteController::class, 'CloseAssigment']);
     Route::patch('/tasks-lotes/close/{id}', [TasksLoteController::class, 'CloseTask']);
-    Route::patch('/tasks-lotes/change-operation-date/update', [TasksLoteController::class, 'ChangeOperationDate']);
+    
+    Route::patch('/tasks-lotes/change-operation-date/{id}', [TasksLoteController::class, 'ChangeOperationDate']);
+
     Route::patch('/tasks-lotes/group/update/{id}', [TasksLoteController::class, 'ChangeGroupAssignment']);
     Route::patch('/tasks-lotes/partial-close/close/{id}', [TasksLoteController::class, 'PartialClose']);
     Route::patch('/tasks-lotes/partial-close/open/{id}', [TasksLoteController::class, 'PartialCloseOpen']);

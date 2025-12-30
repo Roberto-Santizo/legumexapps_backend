@@ -66,7 +66,7 @@ class TaskWeeklyPlan extends Model
     {
         return $this->belongsTo(FincaGroup::class, 'finca_group_id', 'id');
     }
-    
+
     public function lotePlantationControl()
     {
         return $this->belongsTo(LotePlantationControl::class, 'lote_plantation_control_id', 'id');

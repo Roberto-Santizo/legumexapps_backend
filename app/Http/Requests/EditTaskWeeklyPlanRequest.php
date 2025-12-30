@@ -22,14 +22,13 @@ class EditTaskWeeklyPlanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "budget" => ['required','min:1'],
-            "end_date" => ['nullable'],
-            "end_time" => ['nullable'],
-            "hours" => ['required'],
-            "start_date"=> ['nullable'],
-            "start_time" => ['nullable'],
-            "weekly_plan_id" => ['required','string','exists:weekly_plans,id'],
-            "slots" => ['required']
+            "weekly_plan_id" => ['required', 'exists:weekly_plans,id'],
+            "finca_group_id" => ['required', 'exists:finca_groups,id'],
+            "budget" => ['required', 'numeric'],
+            "hours" => ['required', 'numeric'],
+            "start_date" => ['sometimes'],
+            "end_date" => ['sometimes'],
+            "operation_date" => ['required', 'string'],
         ];
     }
 }
