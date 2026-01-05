@@ -213,9 +213,11 @@ class TasksLoteController extends Controller
 
         try {
             $date = Carbon::now();
+            $employees = $task->group->employees()->where('weekly_plan_id', $task->weekly_plan_id)->get();
+
             if (!$request->query('dron')) {
 
-                foreach ($task->group->employees as $employee) {
+                foreach ($employees as $employee) {
                     EmployeeTask::create([
                         'code' => $employee->code,
                         'name' => $employee->name,
