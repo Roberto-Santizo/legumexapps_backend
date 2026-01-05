@@ -128,39 +128,43 @@ class WeeklyPlanController extends Controller
         }
 
         $tasks_crops = $plan->tasks_crops()->with('cdp')->get();
-        
+
         return new TasksCropByLoteCollection($tasks_crops);
     }
 
     public function GetTasksWithNoPlanificationDate(Request $request, string $id)
     {
-        $query = WeeklyPlan::query();
-        $query->where('id', $id);
+        try {
+            $weekly_plan = WeeklyPlan::find($id);
 
-        $weekly_plan = $query->get();
+            if (!$weekly_plan) {
+                return response()->json([
+                    'statusCode' => 404,
+                    'message' => 'El plan no existe'
+                ], 404);
+            }
 
-        if ($weekly_plan->isEmpty()) {
+            $query = TaskWeeklyPlan::query();
+            $query->where('weekly_plan_id', $weekly_plan->id);
+            $query->where('operation_date', null);
+
+            if ($request->query('lote')) {
+                $query->whereHas('cdp', function ($q) use ($request) {
+                    $q->where('lote_id', $request->query('lote'));
+                });
+            }
+
+            if ($request->query('task')) {
+                $query->where('tarea_id', $request->query('task'));
+            }
+
+            return TasksNoOperationDateResource::collection($query->get());
+        } catch (\Throwable $th) {
             return response()->json([
-                'msg' => 'El plan no existe'
-            ], 404);
+                'statusCode' => 500,
+                'message' => $th->getMessage()
+            ], 500);
         }
-
-        $all_tasks = $weekly_plan->flatMap(function ($plan) {
-            $tasks = $plan->tasks()->where('operation_date', null)->get();
-            return $tasks;
-        });
-
-        if ($request->query('finca')) {
-            $all_tasks = $all_tasks->filter(function ($task) use ($request) {
-                return $task->plan && $task->plan->finca->id == $request->query('finca');
-            });
-        }
-
-        if ($request->query('task')) {
-            $all_tasks = $all_tasks->where('tarea_id', $request->query('task'));
-        }
-
-        return TasksNoOperationDateResource::collection($all_tasks);
     }
 
     public function GetTasksForCalendar(string $id)
