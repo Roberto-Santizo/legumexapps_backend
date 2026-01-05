@@ -90,7 +90,7 @@ class CalculateWeeklyPayment extends Command
         try {
             $real_employees = [];
             foreach ($task->employees as $employee) {
-                $flag = $this->getEmployeeRegistration($employee->code, $task->start_date->format('Y-m-d')) ? true : false;
+                $flag = $this->getEmployeeRegistration($employee->code, $task->start_date->format('Y-m-d'));
 
                 if ($flag) {
                     $real_employees[] = $employee;
@@ -238,32 +238,22 @@ class CalculateWeeklyPayment extends Command
                 return null;
             }
 
-            $employee = $employees->first();
-
-            if (empty($employee['transactions'])) {
-                return null;
-            }
-
-            $records = collect($employee['transactions'])
+            $transactions = $employees
+                ->pluck('transactions')
+                ->flatten(1)
                 ->filter(function ($transaction) use ($date) {
-                    $punch_time = Carbon::parse($transaction['punch_time'])->format('Y-m-d');
-                    $date = Carbon::parse($date);
-                    return $punch_time === $date->format('Y-m-d');
+                    return Carbon::parse($transaction['punch_time'])
+                        ->toDateString() === $date;
                 })
                 ->sortBy('punch_time')
                 ->values();
 
-            $first = $records->first();
-            $last = $records->last();
 
-            if ($first && $last) {
-                return [
-                    'entrance' => Carbon::parse($first['punch_time'])->timezone('America/Guatemala')->format('d-m-Y h:i:s A'),
-                    'exit' => Carbon::parse($last['punch_time'])->timezone('America/Guatemala')->format('d-m-Y h:i:s A'),
-                ];
-            } else {
-                return null;
+            if ($transactions->isEmpty()) {
+                return false;
             }
+
+            return true;
         } catch (\Throwable $th) {
             throw new Exception("Error Processing Request 3");
         }
