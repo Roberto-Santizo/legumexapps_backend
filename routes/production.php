@@ -68,6 +68,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::patch('/tasks-production/{id}/end', [TaskProductionController::class, 'EndTaskProduction']);
     Route::patch('/tasks-production/{id}/unassign', [TaskProductionController::class, 'UnassignTaskProduction']);
     Route::patch('/tasks-production/{id}/delete-assignments', [TaskProductionController::class, 'DeleteTaskProductionAssigments']);
+    Route::delete('/tasks-production/delete/{id}', [TaskProductionController::class, 'DeleteAssignment']);
     Route::patch('/tasks-production/{id}/update-status', [TaskProductionController::class, 'UpdateTaskProductionStatus']);
 
     //MATERIA PRIMA

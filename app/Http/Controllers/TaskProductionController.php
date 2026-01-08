@@ -599,7 +599,7 @@ class TaskProductionController extends Controller
                         'msg' => 'No puede asignar tareas a el día en curso'
                     ], 500);
                 }
-                
+
                 if ($diff < 0) {
                     return response()->json([
                         'msg' => 'No puede asignar tareas a días anteriores'
@@ -1018,12 +1018,37 @@ class TaskProductionController extends Controller
         }
 
         try {
-            $task->employees()->delete();
+            $task->employees()->where('position', 'LIKE', '%LDC%')->delete();
 
             return response()->json('Asignaciones eliminadas', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function DeleteAssignment(Request $request, string $id)
+    {
+        $employee = TaskProductionEmployee::find($id);
+
+        if (!$employee) {
+            return response()->json([
+                'statusCode' => 404,
+                'message' => 'La asignación no existe'
+            ], 404);
+        }
+        try {
+            $employee->delete();
+
+            return response()->json([
+                'statusCode' => 200,
+                'message' => 'La asignación fue eliminada correctamente'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'statusCode' => 500,
+                'message' => $th->getMessage()
             ], 500);
         }
     }
@@ -1058,18 +1083,27 @@ class TaskProductionController extends Controller
 
         if (!$task) {
             return response()->json([
-                'msg' => 'Tarea no Encontrada'
+                'statusCode' => 404,
+                'message' => 'La tarea no fue encontrada'
             ], 404);
         }
 
         try {
             $task->status = $data['status'];
+            if ($data['status'] == 2) {
+                $task->start_date = null;
+                $task->end_date = null;
+            }
             $task->save();
 
-            return response()->json('Estado de Tarea Actualizado Correctamente', 200);
+            return response()->json([
+                'statusCode' => 200,
+                'message' => 'Estado actualizado correctamente'
+            ], 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'msg' => $th->getMessage()
+                'statusCode' => 500,
+                'message' => $th->getMessage()
             ], 500);
         }
     }
