@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Models\EmployeePaymentWeeklySummary;
-use App\Models\TaskWeeklyPlan;
 use App\Models\WeeklyPlan;
 use Carbon\Carbon;
 use Exception;
@@ -210,8 +209,19 @@ class CalculateWeeklyPayment extends Command
     public function calculateHarvestTask($assignment)
     {
         foreach ($assignment->employees as $employee) {
-            $percentage = $employee->lbs / $assignment->lbs_planta;
-            $total_hours = $assignment->plants / 150;
+            //Lo que pesa una cabeza
+            $average_lbs = $assignment->lbs_planta / $assignment->plants;
+
+            //Rendimiento dependiendo del peso
+            $average_per_hour = $average_lbs < 0.7 ? 1200 : ($average_lbs < 1 ? 1000 : 800);
+
+            //Total de horas disponibles
+            $total_hours = $assignment->plants / $average_per_hour;
+
+            //Porcentaje por empleado
+            $percentage = $employee->lbs / $assignment->lbs_finca;
+
+            //Total de horas y monto
             $hours = $percentage * $total_hours;
             $amount = $hours * 12.728;
 
