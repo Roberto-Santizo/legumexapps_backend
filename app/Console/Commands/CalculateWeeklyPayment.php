@@ -216,14 +216,14 @@ class CalculateWeeklyPayment extends Command
             $average_per_hour = $average_lbs < 0.7 ? 1200 : ($average_lbs < 1 ? 1000 : 800);
 
             //Total de horas disponibles
-            $total_hours = $assignment->plants / $average_per_hour;
+            $total_hours = $assignment->plants / ($average_per_hour / 8);
 
             //Porcentaje por empleado
             $percentage = $employee->lbs / $assignment->lbs_finca;
 
             //Total de horas y monto
             $hours = $percentage * $total_hours;
-            $amount = $hours * 12.728;
+            $amount = $hours * 13.237397260274;
 
             EmployeePaymentWeeklySummary::create([
                 'code' => $employee->code,
