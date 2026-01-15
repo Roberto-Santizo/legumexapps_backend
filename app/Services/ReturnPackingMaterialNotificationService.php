@@ -18,21 +18,29 @@ abstract class ReturnPackingMaterialNotificationService
 
         $userId = 'noreply@legumex.net';
 
-        $recipient = env('PACKING_MATERIAL_NOTIFICATION_EMAIL');
+        $emails = explode(',', env('PACKING_MATERIAL_NOTIFICATION_EMAIL'));
 
-        $message = new Message();
-        $message->setSubject('Devolución de material de empaque en línea ' . $task_production->line_sku->line->name . ' - ' . $task_production->line_sku->sku->code);
-        $message->setBody([
-            'content' => static::buildMessageBody($task_production),
-            'contentType' => 'HTML'
-        ]);
-        $message->setToRecipients([$recipient]);
+        $recipients = array_map(function ($email) {
+            $recipient = new Recipient();
+            $recipient->setEmailAddress(new EmailAddress(['address' => $email]));
+            return $recipient;
+        }, $emails);
+
+        $body = [
+            'message' => [
+                'subject' => 'Devolución material de empaque',
+                'body' => [
+                    'contentType' => 'HTML',
+                    'content' => static::buildMessageBody($task_production),
+                ],
+                'toRecipients' => $recipients,
+            ],
+            'saveToSentItems' => true,
+        ];
+
 
         $graph->createRequest("POST", "/users/$userId/sendMail")
-            ->attachBody([
-                'message' => $message,
-                'saveToSentItems' => "true"
-            ])
+            ->attachBody($body)
             ->execute();
     }
 
