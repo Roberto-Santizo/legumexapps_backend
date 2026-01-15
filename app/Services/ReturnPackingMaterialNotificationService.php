@@ -18,18 +18,7 @@ abstract class ReturnPackingMaterialNotificationService
 
         $userId = 'noreply@legumex.net';
 
-        $recipient1 = new Recipient();
-        $recipient1->setEmailAddress(new EmailAddress(['address' => 'soportetecnico.tejar@legumex.net']));
-
-        $recipient2 = new Recipient();
-        $recipient2->setEmailAddress(new EmailAddress(['address' => 'sara.xoyon@legumex.net']));
-
-        $recipient3 = new Recipient();
-        $recipient3->setEmailAddress(new EmailAddress(['address' => 'bodega.empaque@legumex.net']));
-
-        $recipient4 = new Recipient();
-        $recipient4->setEmailAddress(new EmailAddress(['address' => 'auxiliarbodegap@legumex.net']));
-
+        $recipient = env('PACKING_MATERIAL_NOTIFICATION_EMAIL');
 
         $message = new Message();
         $message->setSubject('Devolución de material de empaque en línea ' . $task_production->line_sku->line->name . ' - ' . $task_production->line_sku->sku->code);
@@ -37,7 +26,7 @@ abstract class ReturnPackingMaterialNotificationService
             'content' => static::buildMessageBody($task_production),
             'contentType' => 'HTML'
         ]);
-        $message->setToRecipients([$recipient1, $recipient2, $recipient3, $recipient4]);
+        $message->setToRecipients([$recipient]);
 
         $graph->createRequest("POST", "/users/$userId/sendMail")
             ->attachBody([
