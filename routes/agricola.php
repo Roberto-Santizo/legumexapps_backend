@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CDPController;
 use App\Http\Controllers\CropController;
+use App\Http\Controllers\CropPartController;
 use App\Http\Controllers\DashboardAgricolaController;
 use App\Http\Controllers\DraftTaskWeeklyPlanController;
 use App\Http\Controllers\SeedingPlanController;
@@ -108,4 +109,7 @@ Route::middleware('jwt.auth')->group(function () {
 
     //INSUMOS RECIPE
     Route::apiResource('/task-insumo-recipes', TaskInsumoRecipeController::class);
+
+    //CROP PARTS
+    Route::apiResource('/crop-parts', CropPartController::class);
 });
