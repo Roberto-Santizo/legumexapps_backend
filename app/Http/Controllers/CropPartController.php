@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\CropPartCollection;
-use App\Models\CropPart;
+use App\Http\Requests\CreateCropPartRequest;
+use App\Services\CropPartService;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class CropPartController extends Controller
 {
@@ -14,47 +15,41 @@ class CropPartController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = CropPart::query();
+            $service = new CropPartService();
+            $response = $service->getCropParts($request);
 
-            if ($request->query('crop')) {
-                $query->where('crop_id', $request->query('crop'));
-            }
-
-            if ($request->query('page')) {
-                return new  CropPartCollection($query->paginate(10));
-            } else {
-                return new  CropPartCollection($query->get());
-            }
-        } catch (\Throwable $th) {
             return response()->json([
-                'statusCode' => 500,
+                'statusCode' => 200,
+                'response' => $response
+            ], 200);
+        } catch (HttpException $th) {
+            return response()->json([
+                'statusCode' => $th->getStatusCode(),
                 'message' => $th->getMessage()
-            ], 500);
+            ],  $th->getStatusCode());
         }
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CreateCropPartRequest $request)
     {
-        $data = $request->validate([
-            'name' => ['required'],
-            'crop_id' => ['required', 'exists:crops,id']
-        ]);
+        $data = $request->validated();
 
         try {
-            CropPart::create($data);
+            $service = new CropPartService();
+            $service->createCropPart($data);
 
             return response()->json([
                 'statusCode' => 201,
                 'message' => 'Parte Creada Correctamente'
             ], 201);
-        } catch (\Throwable $th) {
+        } catch (HttpException $th) {
             return response()->json([
-                'statusCode' => 500,
+                'statusCode' => $th->getStatusCode(),
                 'message' => $th->getMessage()
-            ], 500);
+            ], $th->getStatusCode());
         }
     }
 
@@ -63,15 +58,42 @@ class CropPartController extends Controller
      */
     public function show(string $id)
     {
-        //
+        try {
+            $service = new CropPartService();
+
+            return response()->json([
+                'statusCode' => 200,
+                'response' => $service->getCropPartById($id)
+            ], 200);
+        } catch (HttpException $th) {
+            return response()->json([
+                'statusCode' => $th->getStatusCode(),
+                'message' => $th->getMessage()
+            ],  $th->getStatusCode());
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(CreateCropPartRequest $request, string $id)
     {
-        //
+        try {
+            $data = $request->validated();
+            $service = new CropPartService();
+
+            $service->updateCropPart($data, $id);
+
+            return response()->json([
+                'statusCode' => 200,
+                'message' => 'Parte Actualizada Correctamente'
+            ], 200);
+        } catch (HttpException $th) {
+            return response()->json([
+                'statusCode' => $th->getStatusCode(),
+                'message' => $th->getMessage()
+            ],  $th->getStatusCode());
+        }
     }
 
     /**
