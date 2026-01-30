@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CDPController;
 use App\Http\Controllers\CropController;
+use App\Http\Controllers\CropDiseaseController;
 use App\Http\Controllers\CropPartController;
 use App\Http\Controllers\DashboardAgricolaController;
 use App\Http\Controllers\DraftTaskWeeklyPlanController;
@@ -112,4 +113,5 @@ Route::middleware('jwt.auth')->group(function () {
 
     //CROP PARTS
     Route::apiResource('/crop-parts', CropPartController::class);
+    Route::apiResource('/crop-disease', CropDiseaseController::class);
 });
