@@ -3,16 +3,18 @@
 namespace App\Services;
 
 use App\Models\CropDisease;
+use App\Repositories\AgricolaImageRepository;
 use App\Repositories\CropDiseaseRepository;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class CropDiseaseService
 {
-    private $service;
+    private $service, $imageService;
 
     public function __construct()
     {
         $this->service = new CropDiseaseRepository();
+        $this->imageService = new AgricolaImageRepository();
     }
 
     public function createCropDisease($data)
@@ -48,5 +50,27 @@ class CropDiseaseService
         $cropDisease = $this->getCropDiseaseById($id);
 
         return $this->service->updateCropDisease($cropDisease, $data);
+    }
+
+    public function addImageCropDisease(string $diseaseId, string $path)
+    {
+        $cropDisease = $this->getCropDiseaseById($diseaseId);
+        $image = $this->imageService->createAgricolaImage(['image' => $path, 'slug' => $path]);
+
+        return $this->service->addImageToCropDisease(['agricola_image_id' => $image->id, 'crop_disease_id' => $cropDisease->id]);
+    }
+
+    public function getCropDiseaseImages(string $diseaseId)
+    {
+        $cropDisease = $this->getCropDiseaseById($diseaseId);
+        
+        return $this->service->getCropDiseaseImages($cropDisease);
+    }
+
+    public function getCropDiseaseSymptoms(string $diseaseId)
+    {
+        $cropDisease = $this->getCropDiseaseById($diseaseId);
+        
+        return $this->service->getCropDiseaseSymptoms($cropDisease);
     }
 }

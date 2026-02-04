@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\CropDisease;
+use App\Models\CropDiseaseImage;
 
 class CropDiseaseRepository
 {
@@ -29,5 +30,20 @@ class CropDiseaseRepository
     public function updateCropDisease(CropDisease $cropDisease, $data)
     {
         return $cropDisease->update($data);
+    }
+
+    public function addImageToCropDisease($data)
+    {
+        return CropDiseaseImage::create($data);
+    }
+
+    public function getCropDiseaseImages(CropDisease $cropDisease)
+    {
+        return $cropDisease->images;
+    }
+
+    public function getCropDiseaseSymptoms(CropDisease $cropDisease)
+    {
+        return $cropDisease->symptoms;
     }
 }

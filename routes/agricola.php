@@ -3,6 +3,7 @@
 use App\Http\Controllers\CDPController;
 use App\Http\Controllers\CropController;
 use App\Http\Controllers\CropDiseaseController;
+use App\Http\Controllers\CropDiseaseSymptomController;
 use App\Http\Controllers\CropPartController;
 use App\Http\Controllers\DashboardAgricolaController;
 use App\Http\Controllers\DraftTaskWeeklyPlanController;
@@ -50,14 +51,14 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/plans/tasks-planned-by-date/finca', [WeeklyPlanController::class, 'GetTasksPlannedByDate']);
 
     Route::post('/tasks-lotes/update-tasks', [TasksLoteController::class, 'UpdateTasks']);
-    
+
     Route::apiResource('/tasks-lotes', TasksLoteController::class);
     Route::get('/tasks-lotes/edit/{id}', [TasksLoteController::class, 'GetTaskForEdit']);
     Route::get('/tasks-lotes/{id}/details', [TasksLoteController::class, 'TaskDetail']);
     Route::post('/tasks-lotes/register-insumos', [TasksLoteController::class, 'RegisterInsumos']);
     Route::post('/tasks-lotes/close-assignment/{id}', [TasksLoteController::class, 'CloseAssigment']);
     Route::patch('/tasks-lotes/close/{id}', [TasksLoteController::class, 'CloseTask']);
-    
+
     Route::patch('/tasks-lotes/change-operation-date/{id}', [TasksLoteController::class, 'ChangeOperationDate']);
 
     Route::patch('/tasks-lotes/group/update/{id}', [TasksLoteController::class, 'ChangeGroupAssignment']);
@@ -114,4 +115,10 @@ Route::middleware('jwt.auth')->group(function () {
     //CROP PARTS
     Route::apiResource('/crop-parts', CropPartController::class);
     Route::apiResource('/crop-disease', CropDiseaseController::class);
+    Route::get('/crop-disease/images/{id}', [CropDiseaseController::class, 'getCropDiseaseImages']);
+    Route::get('/crop-disease/symptoms/{id}', [CropDiseaseController::class, 'getCropDiseaseSymptoms']);
+    Route::post('/crop-disease/addImage/{id}', [CropDiseaseController::class, 'addImage']);
+
+
+    Route::apiResource('/crop-disease-symptom', CropDiseaseSymptomController::class);
 });

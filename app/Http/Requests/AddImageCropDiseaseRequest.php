@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateOrUpdateCropDiseaseRequest extends FormRequest
+class AddImageCropDiseaseRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,20 +22,15 @@ class CreateOrUpdateCropDiseaseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required'],
-            'crop_id' => ['required', 'exists:crops,id'],
-            'week' => ['required', 'numeric']
+            'image' => ['required', 'string']
         ];
     }
 
     public function messages(): array
     {
         return [
-            'name.required' => 'El nombre es requerido',
-            'crop_id.required' => 'El cultivo es requerido',
-            'crop_id.exists' => 'El cultivo no existe',
-            'week.required' => 'La semama es requerida',
-            'week.numeric' => 'La semana debe de ser un dato númerico'
+            'image.required' => 'La imágen es requerida',
+            'image.string' => 'La imágen debe de ser un dato de tipo string',
         ];
     }
 }

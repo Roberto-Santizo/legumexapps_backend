@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AddImageCropDiseaseRequest;
 use App\Http\Requests\CreateOrUpdateCropDiseaseRequest;
+use App\Http\Resources\CropDiseaseImageCollection;
+use App\Http\Resources\CropDiseaseResource;
+use App\Http\Resources\CropDiseaseSymptomCollection;
 use App\Services\CropDiseaseService;
+use App\Services\UploadImageService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -64,7 +69,7 @@ class CropDiseaseController extends Controller
 
             return response()->json([
                 'statusCode' => 200,
-                'response' => $cropDisease
+                'response' => new CropDiseaseResource($cropDisease)
             ], 200);
         } catch (HttpException $th) {
             return response()->json([
@@ -88,6 +93,65 @@ class CropDiseaseController extends Controller
             return response()->json([
                 'statusCode' => 200,
                 'message' => 'Enfermedad actualizada correctamente'
+            ], 200);
+        } catch (HttpException $th) {
+            return response()->json([
+                'statusCode' => $th->getStatusCode(),
+                'message' => $th->getMessage()
+            ], $th->getStatusCode());
+        }
+    }
+
+    public function addImage(AddImageCropDiseaseRequest $request, string $id)
+    {
+        try {
+            $data = $request->validated();
+            $uploadImageService = new UploadImageService();
+            $cropDiseaseService = new CropDiseaseService();
+
+            $filename = $uploadImageService->uploadImage($data['image'], 'cropDisease');
+
+            $cropDiseaseService->addImageCropDisease($id, $filename);
+
+            return response()->json([
+                'statusCode' => 200,
+                'message' => 'Imagen agregada correctamente'
+            ], 200);
+        } catch (HttpException $th) {
+            return response()->json([
+                'statusCode' => $th->getStatusCode(),
+                'message' => $th->getMessage()
+            ], $th->getStatusCode());
+        }
+    }
+
+    public function getCropDiseaseImages(Request $request, string $id)
+    {
+        try {
+            $cropDiseaseService = new CropDiseaseService();
+            $images = $cropDiseaseService->getCropDiseaseImages($id);
+
+            return response()->json([
+                'statusCode' => 200,
+                'response' => new CropDiseaseImageCollection($images)
+            ], 200);
+        } catch (HttpException $th) {
+            return response()->json([
+                'statusCode' => $th->getStatusCode(),
+                'message' => $th->getMessage()
+            ], $th->getStatusCode());
+        }
+    }
+
+    public function getCropDiseaseSymptoms(Request $request, string $id)
+    {
+        try {
+            $cropDiseaseService = new CropDiseaseService();
+            $symptoms = $cropDiseaseService->getCropDiseaseSymptoms($id);
+
+            return response()->json([
+                'statusCode' => 200,
+                'response' => new CropDiseaseSymptomCollection($symptoms),
             ], 200);
         } catch (HttpException $th) {
             return response()->json([

@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('crop_diseases', function (Blueprint $table) {
+        Schema::create('crop_disease_syptoms', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->integer('week');
-            $table->foreignId('crop_id')->constrained();
+            $table->string('symptom');
+            $table->foreignId('crop_disease_id')->constrained();
+            $table->foreignId('crop_part_id')->constrained();
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('crop_diseases');
+        Schema::dropIfExists('crop_disease_syptoms');
     }
 };
