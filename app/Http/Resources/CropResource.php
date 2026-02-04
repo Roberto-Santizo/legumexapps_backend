@@ -15,7 +15,7 @@ class CropResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => strval($this->id),
+            'id' => $this->id,
             'name' => $this->name,
             'code' => $this->code,
         ];

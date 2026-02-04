@@ -23,7 +23,7 @@ class CropPartService
             $query->where('crop_id', $request->query('crop'));
         }
 
-        return $request->query('page') ? $this->service->getPaginatedCropParts($query) : $this->service->getCropParts($query);
+        return $this->service->getCropParts($query);
     }
 
     public function getCropPartById(string $id)

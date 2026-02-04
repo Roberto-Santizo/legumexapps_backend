@@ -17,7 +17,7 @@ class CropController extends Controller
 
         return response()->json([
             "statusCode" => 200,
-            "data" => $crops
+            "response" => $crops
         ], 200);
     }
 
