@@ -6,9 +6,9 @@ use App\Models\CropDiseaseSyptom;
 
 class CropDiseaseSymptomRepository
 {
-    public function getCropDiseaseSymptoms()
+    public function getCropDiseaseSymptoms($query)
     {
-        return CropDiseaseSyptom::all();
+        return $query->get();
     }
 
     public function createCropDiseaseSymptom($data)

@@ -37,6 +37,19 @@ class CropDiseaseRepository
         return CropDiseaseImage::create($data);
     }
 
+    public function getCropDiaseaseImageById($id)
+    {
+        return CropDiseaseImage::find($id);
+    }
+
+    public function deleteCropDiaseaseImage(CropDiseaseImage $image)
+    {
+        $image->delete();
+        $image->image->delete();
+
+        return;
+    }
+
     public function getCropDiseaseImages(CropDisease $cropDisease)
     {
         return $cropDisease->images;

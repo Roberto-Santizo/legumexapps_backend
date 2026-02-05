@@ -13,7 +13,7 @@ class UploadImageService
         $base64Image = base64_decode($base64Image);
         $uniqueId = uniqid();
         $filename = "{$path}/{$uniqueId}.png";
-        Storage::disk('s3')->put($filename, $base64Image);
+        Storage::disk('s3')->put($filename, $base64Image, 'public');
 
         return $filename;
     }

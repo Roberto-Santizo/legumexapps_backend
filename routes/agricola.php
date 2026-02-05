@@ -116,6 +116,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::apiResource('/crop-parts', CropPartController::class);
     Route::apiResource('/crop-disease', CropDiseaseController::class);
     Route::get('/crop-disease/images/{id}', [CropDiseaseController::class, 'getCropDiseaseImages']);
+    Route::delete('/crop-disease/images/{id}', [CropDiseaseController::class, 'deleteCropDiseaseImage']);
     Route::get('/crop-disease/symptoms/{id}', [CropDiseaseController::class, 'getCropDiseaseSymptoms']);
     Route::post('/crop-disease/addImage/{id}', [CropDiseaseController::class, 'addImage']);
 

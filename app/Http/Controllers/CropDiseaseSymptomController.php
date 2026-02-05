@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateOrUpdateCropDiseaseSymptomRequest;
 use App\Services\CropDiseaseSymptomService;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class CropDiseaseSymptomController extends Controller
@@ -11,11 +12,11 @@ class CropDiseaseSymptomController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             $service = new CropDiseaseSymptomService();
-            $data = $service->getCropDiseaseSymptoms();
+            $data = $service->getCropDiseaseSymptoms($request);
 
             return response()->json([
                 'statusCode' => 200,

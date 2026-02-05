@@ -25,13 +25,12 @@ class CropDiseaseService
     public function getCropDiseases($request)
     {
         $query = CropDisease::query();
-        $paginatedFlag = $request->query('page');
 
         if ($request->query('crop')) {
             $query->where('crop_id', $request->query('crop'));
         }
 
-        return $paginatedFlag ? $this->service->getPaginatedCropDiseases($query) : $this->service->getCropDiseases($query);
+        return $this->service->getCropDiseases($query);
     }
 
     public function getCropDiseaseById(string $id)
@@ -63,14 +62,32 @@ class CropDiseaseService
     public function getCropDiseaseImages(string $diseaseId)
     {
         $cropDisease = $this->getCropDiseaseById($diseaseId);
-        
+
         return $this->service->getCropDiseaseImages($cropDisease);
     }
 
     public function getCropDiseaseSymptoms(string $diseaseId)
     {
         $cropDisease = $this->getCropDiseaseById($diseaseId);
-        
+
         return $this->service->getCropDiseaseSymptoms($cropDisease);
+    }
+
+    public function getCropDiseaseImageById($id)
+    {
+        $image = $this->service->getCropDiaseaseImageById($id);
+
+        if (!$image) {
+            throw new HttpException(404, 'Imagen no encontrada');
+        }
+
+        return $image;
+    }
+
+    public function deleteCropDiseaseImage($id)
+    {
+        $image = $this->getCropDiseaseImageById($id);
+        $this->service->deleteCropDiaseaseImage($image);
+        return;
     }
 }

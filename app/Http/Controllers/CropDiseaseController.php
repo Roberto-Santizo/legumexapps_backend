@@ -143,6 +143,24 @@ class CropDiseaseController extends Controller
         }
     }
 
+    public function deleteCropDiseaseImage(Request $request, string $id)
+    {
+        try {
+            $cropDiseaseService = new CropDiseaseService();
+            $cropDiseaseService->deleteCropDiseaseImage($id);
+
+            return response()->json([
+                'statusCode' => 200,
+                'message' => 'Imagen eliminada correctamente'
+            ], 200);
+        } catch (HttpException $th) {
+            return response()->json([
+                'statusCode' => $th->getStatusCode(),
+                'message' => $th->getMessage()
+            ], $th->getStatusCode());
+        }
+    }
+
     public function getCropDiseaseSymptoms(Request $request, string $id)
     {
         try {

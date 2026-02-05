@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\CropDiseaseSyptom;
 use App\Repositories\CropDiseaseSymptomRepository;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -14,10 +15,15 @@ class CropDiseaseSymptomService
         $this->service = new CropDiseaseSymptomRepository();
     }
 
-    public function getCropDiseaseSymptoms()
+    public function getCropDiseaseSymptoms($req)
     {
+        $query = CropDiseaseSyptom::query();
 
-        return $this->service->getCropDiseaseSymptoms();
+        if ($req->query('cropDisease')) {
+            $query->where('crop_disease_id', $req->query('cropDisease'));
+        }
+
+        return $this->service->getCropDiseaseSymptoms($query);
     }
 
     public function createCropDiseaseSymptom($data)
