@@ -120,6 +120,5 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/crop-disease/symptoms/{id}', [CropDiseaseController::class, 'getCropDiseaseSymptoms']);
     Route::post('/crop-disease/addImage/{id}', [CropDiseaseController::class, 'addImage']);
 
-
     Route::apiResource('/crop-disease-symptom', CropDiseaseSymptomController::class);
 });
