@@ -36,7 +36,7 @@ class WeeklyAssignmentEmployeesImport implements ToCollection, WithHeadingRow
                     throw new HttpException(404, "Finca no encontrada para el codigo: " . $row['finca']);
                 }
 
-                $plan = $this->plans->where('finca_id', $finca->id)->where('week', $row['semana'])->first();
+                $plan = $this->plans->where('finca_id', $finca->id)->where('week', $row['semana'])->where('year', $row['year'])->first();
 
                 if (!$plan) {
                     throw new HttpException(404, "Plan Semanal no encontrado para la finca: " . $row['finca'] . " y semana: " . $row['semana']);
