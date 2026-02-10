@@ -23,8 +23,6 @@ class WeeklyPlanController extends Controller
      */
     public function index(Request $request)
     {
-        $week = Carbon::now()->weekOfYear;
-        $year = Carbon::now()->year;
 
         $payload = JWTAuth::getPayload();
         $role = $payload->get('role');

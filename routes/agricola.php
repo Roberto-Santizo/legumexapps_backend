@@ -42,6 +42,7 @@ Route::middleware('jwt.auth')->group(function () {
 
     Route::apiResource('/lotes', LoteController::class);
     Route::post('/lotes-all/update', [LoteController::class, 'UpdateLotes']);
+    Route::post('/lotes/checklist/{id}', [LoteController::class, 'createChecklist']);
 
     Route::apiResource('/plans', WeeklyPlanController::class);
     Route::get('/plans/summary-tasks/{id}', [WeeklyPlanController::class, 'SummaryTasksLote']);

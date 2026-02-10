@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateLoteChecklistRequest;
 use App\Http\Requests\CreateLoteRequest;
 use App\Http\Resources\LoteCollection;
 use App\Http\Resources\LotePlantationControlResource;
 use App\Imports\UpdateLotesImport;
 use App\Models\Lote;
-use App\Models\LotePlantationControl;
+use App\Services\LoteService;
 use Exception;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class LoteController extends Controller
 {
@@ -37,6 +40,8 @@ class LoteController extends Controller
             });
         }
 
+        $query->with('cdp');
+        
         if ($request->query('paginated')) {
             return new LoteCollection($query->paginate(10));
         } else {
@@ -69,7 +74,6 @@ class LoteController extends Controller
         }
     }
 
-
     /**
      * Display the specified resource.
      */
@@ -95,6 +99,29 @@ class LoteController extends Controller
             return response()->json([
                 'errors' => 'Hubo un error al actualizar los lotes'
             ], 500);
+        }
+    }
+
+    public function createChecklist(CreateLoteChecklistRequest $request, string $id)
+    {
+        try {
+            $data = $request->validated()['data'];
+            $service = new LoteService();
+            $JwtPayload = JWTAuth::getPayload();
+            $userId = $JwtPayload->get('id');
+
+            $service->createLoteChecklist($userId, $id, $data);
+
+            return response()->json([
+                'statusCode' => 201,
+                'message' => 'Checklist creado correctamente'
+            ], 201);
+
+        } catch (HttpException $th) {
+            return response()->json([
+                'statusCode' => $th->getStatusCode(),
+                'message' => $th->getMessage()
+            ], $th->getStatusCode());
         }
     }
 }

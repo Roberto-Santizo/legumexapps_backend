@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('lote_checklists', function (Blueprint $table) {
             $table->id();
             $table->foreignId('plantation_control_id')->constrained();
+            $table->foreignId('user_id')->constrained();
             $table->timestamps();
         });
     }

@@ -14,11 +14,11 @@ class CropDiseaseSyptom extends Model
 
     public function disease()
     {
-        return $this->belongsTo(CropDisease::class);
+        return $this->belongsTo(CropDisease::class, 'crop_disease_id', 'id');
     }
 
     public function cropPart()
     {
-        return $this->belongsTo(CropPart::class);
+        return $this->belongsTo(CropPart::class, 'crop_part_id', 'id');
     }
 }

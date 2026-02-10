@@ -14,6 +14,10 @@ return new class extends Migration
         Schema::create('lote_checklist_conditions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('lote_checklist_id')->constrained();
+            $table->foreignId('crop_disease_syptom_id')->constrained();
+            $table->boolean('exists');
+            $table->enum('level', ['LOW', 'MEDIUM', 'HIGH']);
+            $table->string('observations')->nullable(true);
             $table->timestamps();
         });
     }

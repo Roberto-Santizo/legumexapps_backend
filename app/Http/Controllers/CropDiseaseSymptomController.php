@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateOrUpdateCropDiseaseSymptomRequest;
+use App\Http\Resources\CropSymptomResource;
 use App\Services\CropDiseaseSymptomService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -20,7 +21,7 @@ class CropDiseaseSymptomController extends Controller
 
             return response()->json([
                 'statusCode' => 200,
-                'response' => $data
+                'response' => new CropSymptomResource($data)
             ], 200);
         } catch (HttpException $th) {
             return response()->json([
