@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Providers\EmailProvider;
 use App\Repositories\LoteRepository;
 use Carbon\Carbon;
 
@@ -31,10 +32,16 @@ class LoteService
     {
         $cdp = $this->cdpService->getPlantationControlByLoteId($loteId);
         $checklist = $this->getLoteChecklistByLoteIdAndDate($cdp->id, Carbon::now(), $userId);
+        $emailProvider = new EmailProvider();
+        $emailService = new EmailService($emailProvider);
 
         foreach ($data as $condition) {
             $condition['lote_checklist_id'] = $checklist->id;
-            $this->service->addLoteChecklistCondition($condition);
+            $condition = $this->service->addLoteChecklistCondition($condition);
+
+            if ($condition['exists']) {
+                $emailService->sendLoteValidationEmail($cdp, $condition);
+            }
         }
     }
 }

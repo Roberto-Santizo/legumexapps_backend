@@ -41,10 +41,11 @@ class LoteController extends Controller
         }
 
         $query->with('cdp');
-        
+
         if ($request->query('paginated')) {
             return new LoteCollection($query->paginate(10));
         } else {
+            // dd($query->get());
             return new LoteCollection($query->get());
         }
     }
@@ -111,12 +112,11 @@ class LoteController extends Controller
             $userId = $JwtPayload->get('id');
 
             $service->createLoteChecklist($userId, $id, $data);
-
+            
             return response()->json([
                 'statusCode' => 201,
                 'message' => 'Checklist creado correctamente'
             ], 201);
-
         } catch (HttpException $th) {
             return response()->json([
                 'statusCode' => $th->getStatusCode(),

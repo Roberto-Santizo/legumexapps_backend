@@ -8,6 +8,6 @@ class PlantationControlRepository
 {
     public function getPlantationControlByLoteId($loteId)
     {
-        return PlantationControl::where('lote_id', $loteId)->first();
+        return PlantationControl::where('lote_id', $loteId)->get()->last();
     }
 }
