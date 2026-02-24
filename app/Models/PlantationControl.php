@@ -30,4 +30,9 @@ class PlantationControl extends Model
     {
         return $this->hasMany(TaskWeeklyPlanDraft::class);
     }
+
+    public function crop()
+    {
+        return $this->belongsTo(Crop::class);
+    }
 }
