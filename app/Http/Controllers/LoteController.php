@@ -24,6 +24,15 @@ class LoteController extends Controller
     {
         $query = Lote::query();
 
+        $payload = JWTAuth::getPayload();
+        $role = $payload->get('role');
+
+        if ($role != 'admin' && $role != 'adminagricola') {
+            $query->whereHas('finca', function ($q) use ($role) {
+                $q->where('name', 'LIKE', '%' . $role . '%');
+            });
+        }
+
         if ($request->query('name')) {
             $query->where('name', 'like', '%' . $request->query('name') . '%');
         }
@@ -112,7 +121,7 @@ class LoteController extends Controller
             $userId = $JwtPayload->get('id');
 
             $service->createLoteChecklist($userId, $id, $data);
-            
+
             return response()->json([
                 'statusCode' => 201,
                 'message' => 'Checklist creado correctamente'

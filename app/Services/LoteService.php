@@ -19,11 +19,7 @@ class LoteService
 
     public function getLoteChecklistByLoteIdAndDate($cdpId, $date, $userId)
     {
-        $checklist = $this->service->getLoteChecklistByLoteIdAndDate($cdpId, $date);
-
-        if (!$checklist) {
-            $checklist = $this->service->createLoteChecklist(['user_id' => $userId, 'plantation_control_id' => $cdpId, 'created_at' => $date]);
-        }
+        $checklist = $this->service->createLoteChecklist(['user_id' => $userId, 'plantation_control_id' => $cdpId, 'created_at' => $date]);
 
         return $checklist;
     }

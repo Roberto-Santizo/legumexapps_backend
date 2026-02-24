@@ -16,24 +16,34 @@ class LoteResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-
         $cdp = $this->cdp->last();
 
+        $checklists = collect();
+
         if ($cdp) {
-            $checklist = LoteChecklist::where('plantation_control_id', $cdp->id)->whereDate('created_at', Carbon::today())->first();
-        } else {
-            $checklist = null;
+            $checklists = LoteChecklist::with('user')
+                ->where('plantation_control_id', $cdp->id)
+                ->whereDate('created_at', Carbon::today())
+                ->get();
         }
-        $flag = $checklist ? true : false;
+
+        $nombres = $checklists
+            ->pluck('user.name')
+            ->filter()
+            ->unique()
+            ->implode(', ');
+
+        $lastChecklist = $checklists->last();
 
         return [
-            'id' => strval($this->id),
+            'id' => (string) $this->id,
             'name' => $this->name,
             'finca' => $this->finca->name,
-            'date' => $checklist ? $checklist->created_at->locale('es')->diffForHumans() : '',
+            'validation_by' => $nombres,
+            'date' => $lastChecklist ? $lastChecklist->created_at->locale('es')->diffForHumans() : '',
             'size' => 0,
             'total_plants' => 0,
-            'flag' => $flag
+            'flag' => $checklists->isNotEmpty(),
         ];
     }
 }
