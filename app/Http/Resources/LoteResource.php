@@ -23,7 +23,6 @@ class LoteResource extends JsonResource
         if ($cdp) {
             $checklists = LoteChecklist::with('user')
                 ->where('plantation_control_id', $cdp->id)
-                ->whereDate('created_at', Carbon::today())
                 ->get();
         }
 
