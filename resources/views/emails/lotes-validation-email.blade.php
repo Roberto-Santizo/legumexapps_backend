@@ -45,6 +45,10 @@
                             </p>
 
                             <p style="margin:5px 0;">
+                                <strong>Enfermedad:</strong> {{ $condition->symptom->disease->name }}
+                            </p>
+
+                            <p style="margin:5px 0;">
                                 <strong>Síntoma Detectado:</strong> {{ $condition->symptom->symptom }}
                             </p>
 
