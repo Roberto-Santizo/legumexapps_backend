@@ -27,7 +27,7 @@ class LoteController extends Controller
         $payload = JWTAuth::getPayload();
         $role = $payload->get('role');
 
-        if ($role != 'admin' && $role != 'adminagricola') {
+        if ($role != 'admin' && $role != 'adminagricola' && $role != 'agricola') {
             $query->whereHas('finca', function ($q) use ($role) {
                 $q->where('name', 'LIKE', '%' . $role . '%');
             });
