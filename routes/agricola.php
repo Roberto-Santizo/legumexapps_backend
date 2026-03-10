@@ -36,6 +36,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::apiResource('/tareas', TareaController::class);
     Route::post('/tareas/upload', [TareaController::class, 'UploadTasks']);
 
+    Route::get('/cdps/tasks-details/{id}', [CDPController::class,'showCdpTaskDetails']);
     Route::apiResource('/cdps', CDPController::class);
 
     Route::apiResource('/tasks-crop', TaskCropController::class);

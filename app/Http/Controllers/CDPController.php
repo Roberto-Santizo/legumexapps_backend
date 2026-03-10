@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateCDPRequest;
 use App\Http\Requests\UpdateCdpDatesRequest;
 use App\Http\Resources\PlantationControlCollection;
+use App\Http\Resources\TaskCDPDetailResource;
 use App\Models\AnnualSalary;
 use App\Models\DraftWeeklyPlan;
 use App\Models\PlantationControl;
@@ -66,10 +67,35 @@ class CDPController extends Controller
                 'id' => "{$cdp->id}",
                 'name' => $cdp->name,
                 "lote" => $cdp->lote->name,
-                'start_date' => $cdp->start_date->format('Y-m-d'),
-                'end_date' => $cdp->end_date->format('Y-m-d')
+                'start_date' => $cdp->start_date ? $cdp->start_date->format('Y-m-d') : null,
+                'end_date' => $cdp->end_date ? $cdp->end_date->format('Y-m-d') : null
             ]
         ], 200);
+    }
+
+     public function showCdpTaskDetails(string $id)
+    {
+        $cdp = PlantationControl::find($id);
+
+        if (!$cdp) {
+            return response()->json([
+                'msg' => 'No se encontró el CDP'
+            ], 404);
+        }
+
+        $data_lote = [
+            'lote' => $cdp->lote->name,
+            'cdp' => $cdp->name,
+            'start_date_cdp' => $cdp->start_date,
+            'end_date_cdp' => $cdp->end_date ?? null,
+        ];
+
+        $data = TaskCDPDetailResource::collection($cdp->tasks)->groupBy(fn($task) => $task->plan->week);
+
+        return response()->json([
+            'data_lote' => $data_lote,
+            'data' => $data
+        ]);
     }
 
     /**

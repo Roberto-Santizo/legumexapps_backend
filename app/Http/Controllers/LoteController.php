@@ -91,7 +91,7 @@ class LoteController extends Controller
     {
         $lote = Lote::find($id);
         return response()->json([
-            'data' => LotePlantationControlResource::collection($lote->lote_cdps)
+            'data' => LotePlantationControlResource::collection($lote->cdp)
         ]);
     }
 
