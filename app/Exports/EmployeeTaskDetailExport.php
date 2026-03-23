@@ -45,6 +45,10 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                 ? $taskData->cdp->lote->name
                 : $taskData->TaskCropWeeklyPlan->cdp->lote->name;
 
+            $cdp = $assignment->task_weekly_plan_id
+                ? $taskData->cdp->name
+                : $taskData->TaskCropWeeklyPlan->cdp->name;
+
             $taskName = $assignment->task_weekly_plan_id
                 ? $taskData->task->name
                 : $taskData->TaskCropWeeklyPlan->task->name;
@@ -54,6 +58,7 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
                 'CODIGO' => $assignment->code,
                 'EMPLEADO' => $assignment->name,
                 'LOTE' => $lote,
+                'CDP' => $cdp,
                 'TAREA REALIZADA' => $taskName,
                 'PLAN' => $weekly_plan->week,
                 'MONTO GANADO' => $assignment->amount,
@@ -93,13 +98,13 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
         return [
             'entrance' => $firstRecord
                 ? Carbon::parse($firstRecord['punch_time'])
-                    ->timezone('America/Guatemala')
-                    ->format('d-m-Y h:i:s A')
+                ->timezone('America/Guatemala')
+                ->format('d-m-Y h:i:s A')
                 : '',
             'exit' => $lastRecord
                 ? Carbon::parse($lastRecord['punch_time'])
-            ->timezone('America/Guatemala')
-            ->format('d-m-Y h:i:s A')
+                ->timezone('America/Guatemala')
+                ->format('d-m-Y h:i:s A')
                 : '',
         ];
     }
@@ -107,7 +112,7 @@ class EmployeeTaskDetailExport implements FromCollection, WithHeadings, WithTitl
 
     public function headings(): array
     {
-        return ['CODIGO', 'EMPLEADO', 'LOTE', 'TAREA REALIZADA', 'PLAN', 'MONTO GANADO', 'HORAS REALES', 'HORAS TEORICAS', 'HORAS BIOMETRICO', 'ENTRADA BIOMETRICO', 'SALIDA BIOMETRICO', 'DIA'];
+        return ['CODIGO', 'EMPLEADO', 'LOTE', 'CDP', 'TAREA REALIZADA', 'PLAN', 'MONTO GANADO', 'HORAS REALES', 'HORAS TEORICAS', 'HORAS BIOMETRICO', 'ENTRADA BIOMETRICO', 'SALIDA BIOMETRICO', 'DIA'];
     }
     public function styles(Worksheet $sheet)
     {
