@@ -8,5 +8,5 @@ use App\Models\PlantationControl;
 abstract class EmailProvider
 {
     abstract public static function getAccessToken();
-    abstract public function sendLotesValidationEmail(PlantationControl $cdp, LoteChecklistCondition $condition);
+    abstract public function sendLotesValidationEmail(PlantationControl $cdp, array $conditions);
 }

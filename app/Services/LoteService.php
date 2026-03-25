@@ -31,13 +31,21 @@ class LoteService
         $emailProvider = new EmailProvider();
         $emailService = new EmailService($emailProvider);
 
+        $shouldSendEmail = false;
+        $conditionsWithIssues = [];
+
         foreach ($data as $condition) {
             $condition['lote_checklist_id'] = $checklist->id;
             $condition = $this->service->addLoteChecklistCondition($condition);
 
             if ($condition['exists']) {
-                $emailService->sendLoteValidationEmail($cdp, $condition);
+                $shouldSendEmail = true;
+                $conditionsWithIssues[] = $condition;
             }
+        }
+
+        if ($shouldSendEmail) {
+            $emailService->sendLoteValidationEmail($cdp, $conditionsWithIssues);
         }
     }
 }

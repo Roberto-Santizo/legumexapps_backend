@@ -15,8 +15,8 @@ class EmailService
         $this->service = $emailprovider;
     }
 
-    public function sendLoteValidationEmail(PlantationControl $cdp, LoteChecklistCondition $condition)
+    public function sendLoteValidationEmail(PlantationControl $cdp, array $conditions)
     {
-        $this->service->sendLotesValidationEmail($cdp, $condition);
+        $this->service->sendLotesValidationEmail($cdp, $conditions);
     }
 }

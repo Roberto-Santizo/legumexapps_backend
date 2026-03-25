@@ -43,26 +43,23 @@
                             <p style="margin:5px 0;">
                                 <strong>Cultivo:</strong> {{  $cdp->crop->name  }}
                             </p>
-
+                            
                             <p style="margin:5px 0;">
-                                <strong>Enfermedad:</strong> {{ $condition->symptom->disease->name }}
+                                <strong>Fecha:</strong> {{ \Illuminate\Support\Carbon::now()->format('d-m-Y')  }}
                             </p>
 
-                            <p style="margin:5px 0;">
-                                <strong>Síntoma Detectado:</strong> {{ $condition->symptom->symptom }}
-                            </p>
+                            @foreach($conditions as $condition)
+                                <hr style="margin:20px 0;">
 
-                            <p style="margin:5px 0;">
-                                <strong>Nivel:</strong> {{  $condition->level  }}
-                            </p>
+                                <p><strong>Enfermedad:</strong> {{ $condition->symptom->disease->name }}</p>
+                                <p><strong>Síntoma Detectado:</strong> {{ $condition->symptom->symptom }}</p>
+                                <p><strong>Nivel:</strong> {{ $condition->level }}</p>
+                                <p><strong>Observaciones:</strong> {{ $condition->observations }}</p>
+                                <p style="margin:5px 0;">
+                                    <strong>Realizado por: </strong> {{ $condition->checklist->user->name }}
+                                </p>
+                            @endforeach
 
-                            <p style="margin:5px 0;">
-                                <strong>Observaciones:</strong> {{ $condition->observations }}
-                            </p>
-
-                            <p style="margin:5px 0;">
-                                <strong>Realizado por: </strong> {{ $condition->checklist->user->name }}
-                            </p>
                         </td>
                     </tr>
 

@@ -31,7 +31,7 @@ class EmailProvider extends AbstractsEmailProvider
         return $token['access_token'];
     }
 
-    public function sendLotesValidationEmail(PlantationControl $cdp, LoteChecklistCondition $condition)
+    public function sendLotesValidationEmail(PlantationControl $cdp, array $conditions)
     {
         $accessToken = static::getAccessToken();
         $graph = new Graph();
@@ -52,7 +52,7 @@ class EmailProvider extends AbstractsEmailProvider
                 'subject' => 'Notificación Validación de Lote',
                 'body' => [
                     'contentType' => 'HTML',
-                    'content' => MessageBuilder::lotesValidationBuild($cdp, $condition),
+                    'content' => MessageBuilder::lotesValidationBuild($cdp, $conditions),
                 ],
                 'toRecipients' => $recipients,
             ],
