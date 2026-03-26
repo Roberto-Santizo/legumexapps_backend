@@ -41,7 +41,7 @@ class WeeklyProductionExport implements FromCollection, WithHeadings, WithTitle,
                 'TOTAL TARIMAS' => $pallets,
                 'DESTINO' => $task->destination,
                 'CLIENTE' => $task->line_sku->sku->client_name,
-                'FECHA OPERACIÓN' => $task->operation_date ? $task->operation_date->format('d-m-Y') : 'SIN PROGRAMACIÓN',
+                'FECHA OPERACIÓN' => $task->operation_date ? $task->operation_date->format('d/m/Y') : 'SIN PROGRAMACIÓN',
                 'REALIZADO' => $finished ? 'REALIZADO' : 'NO REALIZADO'
             ]);
         }
