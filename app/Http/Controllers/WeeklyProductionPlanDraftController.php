@@ -249,17 +249,17 @@ class WeeklyProductionPlanDraftController extends Controller
                 $query->where('line_id', $request->query('line'));
             }
 
-            $tasks = $query->with('sku.products.item')->get();
+            $tasks = $query->with('sku.items.item')->get();
 
             $resumen = [];
 
             foreach ($tasks as $task) {
-                foreach ($task->sku->products as $recipeItem) {
-                    $itemName = $recipeItem->item->product_name;
+                foreach ($task->sku->items as $recipeItem) {
+                    $itemName = $recipeItem->item->name;
                     $itemCode = $recipeItem->item->code;
 
 
-                    $requiredQty = $task->total_lbs * $recipeItem->percentage;
+                    $requiredQty = $task->total_lbs / $recipeItem->lbs_per_item;
 
                     if (!isset($resumen[$itemCode])) {
                         $resumen[$itemCode] = [
