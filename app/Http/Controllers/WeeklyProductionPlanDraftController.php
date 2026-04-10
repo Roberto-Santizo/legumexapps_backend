@@ -244,7 +244,6 @@ class WeeklyProductionPlanDraftController extends Controller
         try {
             $query = TaskProductionDraft::query();
             $query->where('draft_weekly_production_plan_id', $draft->id);
-            $query->whereNotNull('line_id');
 
             if ($request->query('line')) {
                 $query->where('line_id', $request->query('line'));
@@ -263,14 +262,14 @@ class WeeklyProductionPlanDraftController extends Controller
                     $requiredQty = $task->total_lbs * $recipeItem->percentage;
 
                     if (!isset($resumen[$itemCode])) {
-                        $resumen[$itemCode] = 0;
+                        $resumen[$itemCode] = [
+                            'name' => $itemName,
+                            'code' => $itemCode,
+                            'quantity' => 0,
+                        ];
                     }
 
-                    $resumen[$itemCode] = [
-                        'name' => $itemName,
-                        'code' => $itemCode,
-                        'quantity' => $requiredQty,
-                    ];
+                    $resumen[$itemCode]['quantity'] += $requiredQty;
                 }
             }
 
