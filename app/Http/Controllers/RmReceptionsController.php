@@ -402,7 +402,7 @@ class RmReceptionsController extends Controller
             'total_baskets' => 'required',
             'cdp_id' => 'required',
             'plate_id' => 'required',
-            'grn' => ['required', 'sometimes']
+            'grn' => ['sometimes']
         ]);
 
         try {
