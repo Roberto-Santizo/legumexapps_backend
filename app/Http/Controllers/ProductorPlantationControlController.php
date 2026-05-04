@@ -45,9 +45,7 @@ class ProductorPlantationControlController extends Controller
                 'status' => 1
             ]);
 
-            return response()->json([
-                'msg' => 'Created Successfully'
-            ], 200);
+            return response()->json('CDP creado correctamente', 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage()

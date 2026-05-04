@@ -76,7 +76,7 @@ class RmReceptionsController extends Controller
             $query->whereDoesntHave('transport_doc_data');
         }
 
-        $query->orderBy('id','DESC');
+        $query->orderBy('id', 'DESC');
 
         if ($request->query('paginated')) {
             return RmReceptionsResource::collection($query->paginate(10));
@@ -389,6 +389,61 @@ class RmReceptionsController extends Controller
         } catch (\Throwable $th) {
             return response()->json([
                 'errors' => 'Hubo un error al rechazar la boleta'
+            ], 500);
+        }
+    }
+
+
+    public function updateDocData(Request $request, string $id)
+    {
+        $data = $request->validate([
+            'weight' => 'required',
+            'quality_percentage' => 'required',
+            'total_baskets' => 'required',
+            'cdp_id' => 'required',
+            'plate_id' => 'required',
+            'grn' => ['required', 'sometimes']
+        ]);
+
+        try {
+            $doc = RmReception::with('field_data', 'prod_data', 'field_data.basket')->find($id);
+            $cdp = ProductorPlantationControl::find($data['cdp_id'], ['id']);
+            $plate = Plate::find($data['plate_id'], ['id']);
+
+            if (!$doc) {
+                return response()->json([
+                    'msg' => 'Documento no encontrado'
+                ], 404);
+            }
+
+            if (!$cdp) {
+                return response()->json([
+                    'msg' => 'CDP no encontrado'
+                ], 404);
+            }
+
+            if (!$plate) {
+                return response()->json([
+                    'msg' => 'La placa no se encontró'
+                ], 404);
+            }
+
+
+            $doc->field_data->total_baskets = $data['total_baskets'];
+            $doc->field_data->quality_percentage = $data['quality_percentage'];
+            $doc->field_data->weight_baskets = $data['total_baskets'] * $doc->field_data->basket->weight;
+            $doc->field_data->weight = $data['weight'];
+            $doc->field_data->cdp_id = $cdp->id;
+            $doc->field_data->plate_id = $plate->id;
+            $doc->grn = $data['grn'] ?? null;
+
+            $doc->field_data->save();
+            $doc->save();
+
+            return response()->json('Boleta Actualizada Correctamente', 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'errors' => $th->getMessage()
             ], 500);
         }
     }

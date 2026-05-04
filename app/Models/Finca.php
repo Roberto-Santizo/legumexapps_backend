@@ -6,7 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Finca extends Model
 {
-     public function cdps()
+
+    protected $fillable = [
+        'name',
+        'code',
+        'terminal_id'
+    ];
+
+    public function cdps()
     {
         return $this->hasMany(ProductorPlantationControl::class);
     }

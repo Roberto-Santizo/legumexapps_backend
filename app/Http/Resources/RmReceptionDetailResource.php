@@ -15,9 +15,6 @@ class RmReceptionDetailResource extends JsonResource
     public function toArray(Request $request): array
     {
         $net_weight = $this->field_data->weight -  $this->field_data->weight_baskets;
-        // $driver_signature = base64_encode(file_get_contents(storage_path("app/public/{$this->field_data->driver_signature}")));
-        // $inspector_signature = base64_encode(file_get_contents(storage_path("app/public/{$this->field_data->inspector_signature}")));
-        // $producer_signature = base64_encode(file_get_contents(storage_path("app/public/{$this->field_data->prod_signature}")));
 
         return [
             'id' => strval($this->id),
@@ -26,6 +23,7 @@ class RmReceptionDetailResource extends JsonResource
             'producer_code' => $this->field_data->producer->code,
             'product_id' => strval($this->field_data->product->id),
             'plate' => $this->field_data->plate->name,
+            'plate_id' => $this->field_data->plate->id,
             'product' => $this->field_data->product->name,
             'variety' => $this->field_data->product->variety->name,
             'coordinator' => $this->field_data->producer->name,
@@ -33,6 +31,7 @@ class RmReceptionDetailResource extends JsonResource
             'pilot_name' => $this->field_data->pilot_name ?? $this->user->name,
             'doc_date' => $this->doc_date->format('d-m-Y'),
             'cdp' => $this->field_data->cdp->name,
+            'cdp_id' => $this->field_data->cdp->id,
             'transport' => $this->field_data->carrier->code,
             'baskets' => $this->field_data->total_baskets,
             'weight_basket' => $this->field_data->basket->weight,

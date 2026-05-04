@@ -38,6 +38,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::post('/boleta-rmp/prod/{id}', [RmReceptionsController::class, 'updateProd']);
     Route::post('/boleta-rmp/calidad/{id}', [RmReceptionsController::class, 'updateCalidad']);
     Route::post('/boleta-rmp/generate-grn/{id}', [RmReceptionsController::class, 'GenerateGRN']);
+    Route::patch('/boleta-rmp-info-doc/updateDocData/{id}', [RmReceptionsController::class, 'updateDocData']);
     Route::patch('/boleta-rmp/{id}/reject', [RmReceptionsController::class, 'RejectBoleta']);
 
     Route::apiResource('/transport-inspection', TransportInspectionsController::class);
