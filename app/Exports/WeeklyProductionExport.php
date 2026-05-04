@@ -29,7 +29,7 @@ class WeeklyProductionExport implements FromCollection, WithHeadings, WithTitle,
         foreach ($tasks as $task) {
             $boxes = $task->line_sku->sku->presentation ? $task->total_lbs / $task->line_sku->sku->presentation : '';
             $pallets = $task->line_sku->sku->boxes_pallet ? ($boxes / $task->line_sku->sku->boxes_pallet) : '';
-            $hours = $task->line_sku->lbs_performance ? $task->total_lbs/$task->line_sku->lbs_performance : 0;
+            $hours = $task->line_sku->lbs_performance ? $task->total_lbs / $task->line_sku->lbs_performance : 0;
             $finished = $task->end_date ? true : false;
             $rows->push([
                 'SKU' => $task->line_sku->sku->code,
@@ -51,13 +51,13 @@ class WeeklyProductionExport implements FromCollection, WithHeadings, WithTitle,
     }
     public function headings(): array
     {
-        return ['SKU', 'PRODUCTO', 'LINEA','HORAS','TOTAL LIBRAS', 'TOTAL CAJAS', 'TOTAL TARIMAS', 'DESTINO', 'CLIENTE', 'FECHA OPERACIÓN','REALIZADO'];
+        return ['SKU', 'PRODUCTO', 'LINEA', 'HORAS', 'TOTAL LIBRAS', 'TOTAL CAJAS', 'TOTAL CAJAS PRODUCIDAS', 'TOTAL TARIMAS', 'DESTINO', 'CLIENTE', 'FECHA OPERACIÓN', 'REALIZADO'];
     }
 
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('A1:K1')->applyFromArray([
+        $sheet->getStyle('A1:L1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['argb' => 'FFFFFF'],
