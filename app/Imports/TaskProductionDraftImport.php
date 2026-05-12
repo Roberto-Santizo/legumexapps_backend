@@ -26,8 +26,6 @@ class TaskProductionDraftImport implements ToCollection, WithHeadingRow
     public function collection(Collection $rows)
     {
         $skus = StockKeepingUnit::all()->keyBy('code');
-        $lines = Line::all()->keyBy('code');
-        $performances = LineStockKeepingUnits::all();
 
         foreach ($rows as $row) {
             if (empty($row['sku'])) {

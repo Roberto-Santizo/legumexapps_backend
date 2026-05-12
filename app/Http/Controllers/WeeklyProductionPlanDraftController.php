@@ -10,7 +10,6 @@ use App\Imports\TaskProductionDraftImport;
 use App\Imports\UpdateDraftWeeklyProductionPlanTasksImport;
 use App\Models\DraftWeeklyProductionPlan;
 use App\Models\LineStockKeepingUnits;
-use App\Models\RawMaterialSkuRecipe;
 use App\Models\TaskProductionDraft;
 use App\Models\TaskProductionPlan;
 use App\Models\WeeklyProductionPlan;
@@ -41,13 +40,12 @@ class WeeklyProductionPlanDraftController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'week' => 'required'
+            'week' => 'required',
+            'year' => 'required'
         ]);
 
         try {
-            $year = Carbon::now()->year;
-
-            $plan = WeeklyProductionPlan::where('year', $year)->where('week', $data['week'])->first();
+            $plan = WeeklyProductionPlan::where('year', $data['year'])->where('week', $data['week'])->first();
 
             if ($plan) {
                 return response()->json([
@@ -57,7 +55,7 @@ class WeeklyProductionPlanDraftController extends Controller
 
             $draft = DraftWeeklyProductionPlan::create([
                 'week' => $data['week'],
-                'year' => Carbon::now()->year,
+                'year' => $data['year'],
             ]);
 
             return response()->json($draft->id);
