@@ -3,17 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\LineDetailsByDayResource;
-use App\Http\Resources\LineHoursPerWeekResource;
 use App\Http\Resources\LinesResource;
 use App\Http\Resources\LinesSelectResource;
 use App\Imports\UpdatePositionsImport;
-use App\Models\BiometricTransaction;
 use App\Models\BitacoraLines;
 use App\Models\Line;
-use App\Models\WeeklyPlan;
 use App\Models\WeeklyProductionPlan;
-use Carbon\Carbon;
-use Exception;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -38,11 +33,11 @@ class LinesController extends Controller
         $lines = Line::select('id', 'code', 'shift', 'name')
             ->whereHas('skus', function ($query) use ($id) {
                 $query->where('sku_id', $id);
+                $query->where('status', 1);
             })
             ->with(['skus' => function ($query) use ($id) {
                 $query->where('sku_id', $id);
-            }])
-            ->get();
+            }])->get();
 
         return LinesSelectResource::collection($lines);
     }

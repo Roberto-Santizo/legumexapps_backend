@@ -24,7 +24,8 @@ class LineStockKeepingUnitsResource extends JsonResource
             'payment_method' => $this->payment_method,
             'shift' => $shift,
             'performance' => $this->lbs_performance ? $this->lbs_performance : null,
-            'accepted_percentage' => $this->accepted_percentage
+            'accepted_percentage' => $this->accepted_percentage,
+            'status' => $this->status
         ];
     }
 }

@@ -15,9 +15,23 @@ class LineStockKeepingUnitsController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $lines_skus = LineStockKeepingUnits::paginate(10);
+        $query = LinestockKeepingUnits::query();
+
+        if ($request->query('line')) {
+            $query->whereHas('line', function ($q) use ($request) {
+                $q->where('name', 'LIKE', '%' . $request->query('line') . '%');
+            });
+        }
+
+        if ($request->query('sku')) {
+            $query->whereHas('sku', function ($q) use ($request) {
+                $q->where('code', 'LIKE', '%' . $request->query('sku') . '%');
+            });
+        }
+
+        $lines_skus = $query->paginate(10);
 
         return LineStockKeepingUnitsResource::collection($lines_skus);
     }
@@ -44,7 +58,8 @@ class LineStockKeepingUnitsController extends Controller
         $data = $request->validate([
             'performance' => 'sometimes',
             'accepted_percentage' => 'required',
-            'payment_method' => 'required'
+            'payment_method' => 'required',
+            'status' => 'required'
         ]);
 
         $line_sku = LineStockKeepingUnits::find($id);
@@ -59,7 +74,7 @@ class LineStockKeepingUnitsController extends Controller
             $line_sku->lbs_performance = $data['performance'];
             $line_sku->accepted_percentage = $data['accepted_percentage'];
             $line_sku->payment_method = $data['payment_method'];
-
+            $line_sku->status = $data['status'];
             $line_sku->save();
 
             return response()->json('SKU Actualizado Correctamente', 200);
