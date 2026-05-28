@@ -143,66 +143,6 @@ class WeeklyProductionPlanDraftController extends Controller
         }
     }
 
-    public function GetPackingMaterialNecessity(Request $request, string $id)
-    {
-
-        $draft = DraftWeeklyProductionPlan::find($id);
-
-        if (!$draft) {
-            return response()->json([
-                'msg' => 'Draft No Encontrado'
-            ], 404);
-        }
-
-        try {
-            $query = TaskProductionDraft::query();
-            $query->where('draft_weekly_production_plan_id', $draft->id);
-            $query->whereNotNull('line_id');
-
-            if ($request->query('line')) {
-                $query->where('line_id', $request->query('line'));
-            }
-
-            $tasks = $query->with('sku.items.item')->get();
-
-            $resumen = [];
-
-            foreach ($tasks as $task) {
-                foreach ($task->sku->items as $recipeItem) {
-                    $itemName = $recipeItem->item->name;
-                    $itemCode = $recipeItem->item->code;
-                    $requiredQty = $task->total_lbs / $recipeItem->lbs_per_item;
-
-                    if (!isset($resumen[$itemCode])) {
-                        $resumen[$itemCode] = 0;
-                    }
-
-                    $resumen[$itemCode] = [
-                        'name' => $itemName,
-                        'code' => $itemCode,
-                        'quantity' => $requiredQty,
-                    ];
-                }
-            }
-
-            $resultado = [];
-
-            foreach ($resumen as $key => $item) {
-                $resultado[] = [
-                    'code' => $key,
-                    'name' => $item['name'],
-                    'quantity' => $item['quantity'],
-                    'inventory' => 0
-                ];
-            }
-            return response()->json($resultado);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'msg' => $th->getMessage()
-            ], 500);
-        }
-    }
-
     public function UploadTasks(Request $request, string $id)
     {
         $request->validate([
@@ -229,8 +169,9 @@ class WeeklyProductionPlanDraftController extends Controller
         }
     }
 
-    public function GetRawMaterialNecessity(Request $request, string $id)
+    public function GetPackingMaterialNecessity(Request $request, string $id)
     {
+
         $draft = DraftWeeklyProductionPlan::find($id);
 
         if (!$draft) {
@@ -258,6 +199,68 @@ class WeeklyProductionPlanDraftController extends Controller
 
 
                     $requiredQty = $task->total_lbs / $recipeItem->lbs_per_item;
+
+                    if (!isset($resumen[$itemCode])) {
+                        $resumen[$itemCode] = [
+                            'name' => $itemName,
+                            'code' => $itemCode,
+                            'quantity' => 0,
+                        ];
+                    }
+
+                    $resumen[$itemCode]['quantity'] += $requiredQty;
+                }
+            }
+
+            $resultado = [];
+
+            foreach ($resumen as $key => $item) {
+                $resultado[] = [
+                    'code' => $key,
+                    'name' => $item['name'],
+                    'quantity' => $item['quantity'],
+                    'inventory' => 0
+                ];
+            }
+            return response()->json($resultado);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function GetRawMaterialNecessity(Request $request, string $id)
+    {
+        $draft = DraftWeeklyProductionPlan::find($id);
+
+        if (!$draft) {
+            return response()->json([
+                'msg' => 'Draft No Encontrado'
+            ], 404);
+        }
+
+        try {
+            $query = TaskProductionDraft::query();
+            $query->where('draft_weekly_production_plan_id', $draft->id);
+
+            if ($request->query('line')) {
+                $query->where('line_id', $request->query('line'));
+            }
+
+            $tasks = $query->with('sku.products.item')->get();
+
+            $resumen = [];
+
+
+            foreach ($tasks as $task) {
+                foreach ($task->sku->products as $recipeItem) {
+
+                    $itemName = $recipeItem->item->product_name;
+                    $itemCode = $recipeItem->item->code;
+
+                    $requiredQty = $task->total_lbs * $recipeItem->percentage;
 
                     if (!isset($resumen[$itemCode])) {
                         $resumen[$itemCode] = [
