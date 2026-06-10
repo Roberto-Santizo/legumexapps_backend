@@ -51,14 +51,20 @@ class TaskProductionController extends Controller
      */
     public function show(string $id)
     {
-        $task_production_plan = TaskProductionPlan::find($id);
-        if (!$task_production_plan) {
-            return response()->json([
-                'msg' => 'Task Production Plan Not Found'
-            ], 404);
-        }
+        try {
+            $task_production_plan = TaskProductionPlan::find($id);
+            if (!$task_production_plan) {
+                return response()->json([
+                    'msg' => 'Task Production Plan Not Found'
+                ], 404);
+            }
 
-        return new TaskProductionPlanDetailsResource($task_production_plan);
+            return new TaskProductionPlanDetailsResource($task_production_plan);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage()
+            ], 500);
+        }
     }
 
     public function store(Request $request)
