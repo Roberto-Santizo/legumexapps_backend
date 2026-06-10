@@ -105,41 +105,45 @@ class WeeklyProductionPlanController extends Controller
 
     public function GetTasksByLineId(string $weekly_plan_id, string $line_id)
     {
-        $weekly_plan = WeeklyProductionPlan::find($weekly_plan_id);
+        try {
+            $weekly_plan = WeeklyProductionPlan::find($weekly_plan_id);
 
-        if (!$weekly_plan) {
-            return response()->json(['msg' => 'Plan Semanal Not Found'], 404);
+            if (!$weekly_plan) {
+                return response()->json(['msg' => 'Plan Semanal Not Found'], 404);
+            }
+
+            $today = Carbon::today();
+            $yesterday = Carbon::yesterday();
+            $payload = JWTAuth::getPayload();
+            $role = $payload->get('role');
+
+
+            $tasks = $weekly_plan->tasks()
+                ->with([
+                    'timeouts',
+                    'employees',
+                    'line_sku.line',
+                    'line_sku.sku'
+                ])
+                ->where('line_id', $line_id)
+                ->whereNot('status', 0)
+                ->where(function ($query) use ($today, $yesterday, $role) {
+                    if ($role !== 'admin') {
+                        $query->whereDate('operation_date', $today)->orWhere(function ($q) use ($yesterday) {
+                            $q->whereDate('operation_date', $yesterday)
+                                ->whereHas('line', function ($q2) {
+                                    $q2->where('shift', 0);
+                                });
+                        });
+                    }
+                })
+                ->orderBy('operation_date', 'DESC')
+                ->get();
+
+            return TaskProductionPlanByLineResource::collection($tasks);
+        } catch (\Throwable $th) {
+            return response()->json(['msg' => $th->getMessage()], 500);
         }
-
-        $today = Carbon::today();
-        $yesterday = Carbon::yesterday();
-        $payload = JWTAuth::getPayload();
-        $role = $payload->get('role');
-
-
-        $tasks = $weekly_plan->tasks()
-            ->with([
-                'timeouts',
-                'employees',
-                'line_sku.line',
-                'line_sku.sku'
-            ])
-            ->where('line_id', $line_id)
-            ->whereNot('status', 0)
-            ->where(function ($query) use ($today, $yesterday, $role) {
-                if ($role !== 'admin') {
-                    $query->whereDate('operation_date', $today)->orWhere(function ($q) use ($yesterday) {
-                        $q->whereDate('operation_date', $yesterday)
-                            ->whereHas('line', function ($q2) {
-                                $q2->where('shift', 0);
-                            });
-                    });
-                }
-            })
-            ->orderBy('operation_date', 'DESC')
-            ->get();
-
-        return TaskProductionPlanByLineResource::collection($tasks);
     }
 
 
