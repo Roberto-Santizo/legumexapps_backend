@@ -25,7 +25,8 @@ class TaskProductionPlan extends Model
         'is_justified',
         'destination',
         'total_lbs',
-        'total_boxes_produced'
+        'total_boxes_produced',
+        'observations'
     ];
 
     public function line()

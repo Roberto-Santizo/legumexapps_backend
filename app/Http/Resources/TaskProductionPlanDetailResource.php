@@ -53,6 +53,7 @@ class TaskProductionPlanDetailResource extends JsonResource
             'total_lbs' => $this->total_lbs,
             'percentage' => round($percentage, 2),
             'total_tarimas' => $this->performances->sum('tarimas_produced'),
+            'observations' => $this->observations ?? '',
             'timeouts' => TaskProductionTimeoutResource::collection($this->timeouts),
             'performances' => TaskProductionPerformaceResource::collection($this->performances),
             'employees' => EmployeeTaskProductionDetailResource::collection($this->employees)

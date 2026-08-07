@@ -50,6 +50,7 @@ class TaskProductionPlanDetailsResource extends JsonResource
             'start_date' => $this->start_date,
             'sku' => new SKUResource($this->line_sku->sku),
             'total_lbs' => $this->total_lbs,
+            'observations' => $this->observations ?? '',
             'employees' => $validated_employees,
             'exists_previuos_config' => $lastTask !== null,
         ];

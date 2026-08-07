@@ -53,6 +53,7 @@ class TaskProductionPlanByLineResource extends JsonResource
             'paused' => $paused,
             'is_minimum_requrire' => (bool) $this->is_minimum_require,
             'is_justified' => (bool) $this->is_justified,
+            'observations' => $this->observations ?? '',
             'status' => $this->status
         ];
     }

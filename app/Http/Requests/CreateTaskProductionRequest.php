@@ -28,6 +28,7 @@ class CreateTaskProductionRequest extends FormRequest
             'data.*.sku_id' => ['required'],
             'data.*.total_lbs' => ['required'],
             'data.*.destination' => ['required'],
+            'data.*.observations' => ['sometimes', 'nullable', 'string'],
         ];
     }
 }

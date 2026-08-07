@@ -43,7 +43,8 @@ class WeeklyProductionExport implements FromCollection, WithHeadings, WithTitle,
                 'DESTINO' => $task->destination,
                 'CLIENTE' => $task->line_sku->sku->client_name,
                 'FECHA OPERACIÓN' => $task->operation_date ? $task->operation_date->format('d/m/Y') : 'SIN PROGRAMACIÓN',
-                'REALIZADO' => $finished ? 'REALIZADO' : 'NO REALIZADO'
+                'REALIZADO' => $finished ? 'REALIZADO' : 'NO REALIZADO',
+                'OBSERVACIONES'=> $task->observations
             ]);
         }
 
@@ -51,13 +52,13 @@ class WeeklyProductionExport implements FromCollection, WithHeadings, WithTitle,
     }
     public function headings(): array
     {
-        return ['SKU', 'PRODUCTO', 'LINEA', 'HORAS', 'TOTAL LIBRAS', 'TOTAL CAJAS', 'TOTAL CAJAS PRODUCIDAS', 'TOTAL TARIMAS', 'DESTINO', 'CLIENTE', 'FECHA OPERACIÓN', 'REALIZADO'];
+        return ['SKU', 'PRODUCTO', 'LINEA', 'HORAS', 'TOTAL LIBRAS', 'TOTAL CAJAS', 'TOTAL CAJAS PRODUCIDAS', 'TOTAL TARIMAS', 'DESTINO', 'CLIENTE', 'FECHA OPERACIÓN', 'REALIZADO', 'OBSERVACIONES'];
     }
 
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('A1:L1')->applyFromArray([
+        $sheet->getStyle('A1:M1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['argb' => 'FFFFFF'],

@@ -70,6 +70,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::patch('/tasks-production/{id}/delete-assignments', [TaskProductionController::class, 'DeleteTaskProductionAssigments']);
     Route::delete('/tasks-production/delete/{id}', [TaskProductionController::class, 'DeleteAssignment']);
     Route::patch('/tasks-production/{id}/update-status', [TaskProductionController::class, 'UpdateTaskProductionStatus']);
+    Route::patch('/tasks-production/{id}/observations', [TaskProductionController::class, 'UpdateTaskProductionObservations']);
 
     //MATERIA PRIMA
     Route::apiResource('/raw-material-items', RawMaterialItemController::class);

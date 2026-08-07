@@ -62,6 +62,7 @@ class FinishedTaskProductionResource extends JsonResource
             'is_minimum_require' => $this->is_minimum_require ? true : false,
             'summary' => $summary,
             'note' => $note,
+            'observations' => $this->observations ?? '',
             'timeouts' => TaskProductionTimeoutResource::collection($this->timeouts),
             'employees' => EmployeeTaskProductionDetailResource::collection($this->employees),
             'history_operation_date' => TaskOperationDateBitacoraResource::collection($this->operationDateChanges),

@@ -20,6 +20,7 @@ class TaskProductionEditDetailsResource extends JsonResource
             'line_id' => strval($this->line_id),
             'total_lbs' => $this->total_lbs,
             'destination' => $this->destination,
+            'observations' => $this->observations ?? '',
             'operation_date' => $this->operation_date ? $this->operation_date->format('Y-m-d') : ''
         ];
     }

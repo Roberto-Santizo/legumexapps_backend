@@ -657,7 +657,8 @@ class TaskProductionController extends Controller
                     'line_sku_id' => $line_sku->id,
                     'status' =>  1,
                     'destination' => $task['destination'],
-                    'total_lbs' => $task['total_lbs']
+                    'total_lbs' => $task['total_lbs'],
+                    'observations' => $task['observations'] ?? null
                 ]);
 
                 if ($task_line) {
@@ -1105,6 +1106,37 @@ class TaskProductionController extends Controller
             return response()->json([
                 'statusCode' => 200,
                 'message' => 'Estado actualizado correctamente'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'statusCode' => 500,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function UpdateTaskProductionObservations(Request $request, string $id)
+    {
+        $data = $request->validate([
+            'observations' => 'nullable|string|max:255'
+        ]);
+
+        $task = TaskProductionPlan::find($id);
+
+        if (!$task) {
+            return response()->json([
+                'statusCode' => 404,
+                'message' => 'La tarea no fue encontrada'
+            ], 404);
+        }
+
+        try {
+            $task->observations = $data['observations'] ?? null;
+            $task->save();
+
+            return response()->json([
+                'statusCode' => 200,
+                'message' => 'Observación actualizada correctamente'
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([
