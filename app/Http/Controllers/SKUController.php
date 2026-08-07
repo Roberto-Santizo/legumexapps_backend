@@ -26,7 +26,7 @@ class SKUController extends Controller
 
         $payload = JWTAuth::getPayload();
         $user = User::find($payload->get('id'));
-        $role = User::find($payload->get('role'));
+        $role = $payload->get('role');
 
         $permissions = $user->getPermissionNames()->toArray();
 
@@ -38,7 +38,7 @@ class SKUController extends Controller
             $query->where('code', 'LIKE', '%' . $request->query('code') . '%');
         }
         
-        if (($role != 'admin' && $role != 'logistics' && $role != 'costosuser')) {
+        if (($role == 'adminprod')) {
             $query->where(function ($q) use ($permissions) {
                 if (in_array('create pcs tasks', $permissions)) {
                     $q->orWhere('code', 'LIKE', '%PCS%');
