@@ -51,6 +51,10 @@ class SKUController extends Controller
                 if (in_array('create ptf tasks', $permissions)) {
                     $q->orWhere('code', 'LIKE', '%PTF%');
                 }
+
+                if (in_array('create ptc tasks', $permissions)) {
+                    $q->orWhere('code', 'LIKE', '%PTC%');
+                }
             });
         }
 
