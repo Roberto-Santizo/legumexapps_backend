@@ -35,7 +35,7 @@ class CreateAssignmentsProductionImport implements ToCollection, WithHeadingRow
 
                 $tasks = TaskProductionPlan::where('line_id', $line->id)
                     ->where('weekly_production_plan_id', $this->weekly_plan->id)
-                    ->whereDoesntHave('employees')
+                    // ->whereDoesntHave('employees')
                     ->get();
 
 
