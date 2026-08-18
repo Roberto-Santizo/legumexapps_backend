@@ -17,8 +17,8 @@ class TaskProductionPlanByLineResource extends JsonResource
     public function toArray(Request $request): array
     {
         $date = Carbon::now()->format('Y-m-d');
-        $url = env('BIOMETRICO_URL') . "/personal?date={$date}";
-        static $presentPositions = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url)->collect()->pluck('code')->toArray();
+        // $url = env('BIOMETRICO_URL') . "/personal?date={$date}";
+        // static $presentPositions = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url)->collect()->pluck('code')->toArray();
 
         $total_hours = 0;
         $paused = false;
@@ -31,9 +31,9 @@ class TaskProductionPlanByLineResource extends JsonResource
             $total_hours = $this->start_date->diffInHours($this->end_date);
         }
 
-        $total_in_employees = $this->employees->filter(function ($employee) use ($presentPositions) {
-            return in_array($employee->code, $presentPositions);
-        });
+        // $total_in_employees = $this->employees->filter(function ($employee) use ($presentPositions) {
+        //     return in_array($employee->code, $presentPositions);
+        // });
 
         return [
             'id' => strval($this->id),
@@ -47,8 +47,8 @@ class TaskProductionPlanByLineResource extends JsonResource
             'end_date' => $this->end_date ? $this->end_date->format('d-m-Y h:i:s A') : '',
             'hours' => $this->total_hours,
             'total_hours' => $total_hours,
-            'total_in_employees' => $total_in_employees->count(),
-            'total_employees' => $this->employees->count(),
+            'total_in_employees' => 0,
+            'total_employees' => 0,
             'priority' => $this->priority,
             'paused' => $paused,
             'is_minimum_requrire' => (bool) $this->is_minimum_require,
