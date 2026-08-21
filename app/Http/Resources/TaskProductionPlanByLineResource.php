@@ -48,7 +48,7 @@ class TaskProductionPlanByLineResource extends JsonResource
             'hours' => $this->total_hours,
             'total_hours' => $total_hours,
             'total_in_employees' => count($total_in_employees),
-            'total_employees' => 0,
+            'total_employees' => $this->employees->count(),
             'priority' => $this->priority,
             'paused' => $paused,
             'is_minimum_requrire' => (bool) $this->is_minimum_require,
