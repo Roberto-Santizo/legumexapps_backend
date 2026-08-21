@@ -63,6 +63,14 @@ class SKUController extends Controller
                 if (in_array('create sec tasks', $permissions)) {
                     $q->orWhere('code', 'LIKE', '%SEC%');
                 }
+                
+                if (in_array('create sef tasks', $permissions)) {
+                    $q->orWhere('code', 'LIKE', '%SEF%');
+                }
+                
+                if (in_array('create pci tasks', $permissions)) {
+                    $q->orWhere('code', 'LIKE', '%PCI%');
+                }
             });
         }
 
