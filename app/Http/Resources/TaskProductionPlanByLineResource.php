@@ -47,7 +47,7 @@ class TaskProductionPlanByLineResource extends JsonResource
             'end_date' => $this->end_date ? $this->end_date->format('d-m-Y h:i:s A') : '',
             'hours' => $this->total_hours,
             'total_hours' => $total_hours,
-            'total_in_employees' => $total_in_employees,
+            'total_in_employees' => count($total_in_employees),
             'total_employees' => 0,
             'priority' => $this->priority,
             'paused' => $paused,
