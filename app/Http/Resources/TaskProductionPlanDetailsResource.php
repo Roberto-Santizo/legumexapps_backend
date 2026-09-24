@@ -23,7 +23,8 @@ class TaskProductionPlanDetailsResource extends JsonResource
         $date = Carbon::now()->format('Y-m-d');
         $url = env('BIOMETRICO_URL') . "/personal?date={$date}";
 
-        $presentCodes = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url)->collect()->pluck('code')->toArray();
+        // $presentCodes = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url)->collect()->pluck('code')->toArray();
+        $presentCodes = [];
 
         $validated_employees = $employees->map(function ($employee) use ($presentCodes) {
             $flag = in_array($employee->code, $presentCodes);

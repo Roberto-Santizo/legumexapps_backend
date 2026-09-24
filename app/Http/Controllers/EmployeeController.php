@@ -99,14 +99,15 @@ class EmployeeController extends Controller
     public function getComodines()
     {
         $date = Carbon::now()->format('Y-m-d');
-        $url = env('BIOMETRICO_URL') . "/comodines?date={$date}";
-        $response = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url);
+        // $url = env('BIOMETRICO_URL') . "/comodines?date={$date}";
+        // $response = Http::withHeaders(['Authorization' => env('BIOMETRICO_APP_KEY')])->get($url);
 
-        $data = $response->collect()->map(function ($employee, $index) {
-            $employee['temp_id'] = $index;
-            $index += 10;
-            return $employee;
-        });
+        // $data = $response->collect()->map(function ($employee, $index) {
+        //     $employee['temp_id'] = $index;
+        //     $index += 10;
+        //     return $employee;
+        // });
+        $data = [];
 
         return BiometricEmployeeResource::collection($data);
     }
