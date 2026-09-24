@@ -54,7 +54,7 @@ class WeeklyProductionExport implements FromCollection, WithHeadings, WithTitle,
     }
     public function headings(): array
     {
-        return ['SKU', 'PRODUCTO', 'LINEA', 'HORAS', 'TOTAL LIBRAS', 'TOTAL CAJAS', 'TOTAL CAJAS PRODUCIDAS', 'TOTAL TARIMAS', 'DESTINO', 'CLIENTE', 'FECHA OPERACIÓN', 'REALIZADO', 'OBSERVACIONES'];
+        return ['SKU', 'PRODUCTO', 'LINEA', 'HORAS', 'TOTAL LIBRAS', 'TOTAL LIBRAS PRODUCIDAS', 'TOTAL LIBRAS BASCULA' , 'TOTAL CAJAS', 'TOTAL CAJAS PRODUCIDAS', 'TOTAL TARIMAS', 'DESTINO', 'CLIENTE', 'FECHA OPERACIÓN', 'REALIZADO', 'OBSERVACIONES'];
     }
 
 
