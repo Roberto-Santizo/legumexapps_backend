@@ -1,0 +1,36 @@
+name: Deploy to Vapor
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: vapor-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Install Vapor CLI
+        run: composer global require laravel/vapor-cli --no-interaction --no-progress
+
+      - name: Deploy to production
+        run: vapor deploy production --commit="${GITHUB_SHA}" --message="${COMMIT_MESSAGE}"
+        env:
+          VAPOR_API_TOKEN: ${{ secrets.VAPOR_API_TOKEN }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}

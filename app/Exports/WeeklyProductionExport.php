@@ -37,6 +37,8 @@ class WeeklyProductionExport implements FromCollection, WithHeadings, WithTitle,
                 'LINEA' => $task->line_sku->line->name,
                 'HORAS' => $hours,
                 'TOTAL LIBRAS' => $task->total_lbs,
+                'TOTAL LIBRAS PRODUCIDAS' => $task->total_lbs_produced ?? 0,
+                'TOTAL LIBRAS BASCULA' => $task->total_lbs_bascula ?? 0,
                 'TOTAL CAJAS' => $boxes,
                 'TOTAL CAJAS PRODUCIDAS' => $task->total_boxes_produced,
                 'TOTAL TARIMAS' => $pallets,
@@ -58,7 +60,7 @@ class WeeklyProductionExport implements FromCollection, WithHeadings, WithTitle,
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('A1:M1')->applyFromArray([
+        $sheet->getStyle('A1:O1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['argb' => 'FFFFFF'],
